@@ -14,45 +14,50 @@ namespace Real_AI
         #region Variables
 
         string connString;
-        bool scrolling;
 
         int InputsTop = 1;
-        VScrollBar InputsBar;
+        int InputIDs_Index;
+        List<int> InputIDs = new List<int>();
         SQLiteDataAdapter Adapter_Inputs;
         BindingSource Binding_Inputs;
         DataTable Inputs;
         bool Inputs_Loaded;
 
         int WordsTop = 1;
-        VScrollBar WordsBar;
+        int WordIDs_Index;
+        List<int> WordIDs = new List<int>();
         SQLiteDataAdapter Adapter_Words;
         BindingSource Binding_Words;
         DataTable Words;
         bool Words_Loaded;
 
         int OutputsTop = 1;
-        VScrollBar OutputsBar;
+        int OutputIDs_Index;
+        List<int> OutputIDs = new List<int>();
         SQLiteDataAdapter Adapter_Outputs;
         BindingSource Binding_Outputs;
         DataTable Outputs;
         bool Outputs_Loaded;
 
         int TopicsTop = 1;
-        VScrollBar TopicsBar;
+        int TopicIDs_Index;
+        List<int> TopicIDs = new List<int>();
         SQLiteDataAdapter Adapter_Topics;
         BindingSource Binding_Topics;
         DataTable Topics;
         bool Topics_Loaded;
 
         int PreWordsTop = 1;
-        VScrollBar PreWordsBar;
+        int PreWordIDs_Index;
+        List<int> PreWordIDs = new List<int>();
         SQLiteDataAdapter Adapter_PreWords;
         BindingSource Binding_PreWords;
         DataTable PreWords;
         bool PreWords_Loaded;
 
         int ProWordsTop = 1;
-        VScrollBar ProWordsBar;
+        int ProWordIDs_Index;
+        List<int> ProWordIDs = new List<int>();
         SQLiteDataAdapter Adapter_ProWords;
         BindingSource Binding_ProWords;
         DataTable ProWords;
@@ -86,92 +91,38 @@ namespace Real_AI
                 Load_Inputs(connString);
                 Inputs_Loaded = true;
                 InputsView.FirstDisplayedScrollingRowIndex = 0;
-                InputsView.MouseWheel += new MouseEventHandler(DisableMouseWheel);
-                foreach (Control control in InputsView.Controls)
-                {
-                    var bar = (ScrollBar)control;
-                    if (bar.AccessibleName == "Vertical Scroll Bar")
-                    {
-                        InputsBar = (VScrollBar)control;
-                        InputsBar.Scroll += InputsBar_Scroll;
-                        break;
-                    }
-                }
+                InputsView.MouseWheel += new MouseEventHandler(InputsBar_Scroll);
+                Load_InputIDs();
 
                 Words_Loaded = false;
                 Load_Words(connString);
                 Words_Loaded = true;
-                WordsView.MouseWheel += new MouseEventHandler(DisableMouseWheel);
-                foreach (Control control in WordsView.Controls)
-                {
-                    var bar = (ScrollBar)control;
-                    if (bar.AccessibleName == "Vertical Scroll Bar")
-                    {
-                        WordsBar = (VScrollBar)control;
-                        WordsBar.Scroll += WordsBar_Scroll;
-                        break;
-                    }
-                }
+                WordsView.MouseWheel += new MouseEventHandler(WordsBar_Scroll);
+                Load_WordIDs();
 
                 Outputs_Loaded = false;
                 Load_Outputs(connString);
                 Outputs_Loaded = true;
-                OutputsView.MouseWheel += new MouseEventHandler(DisableMouseWheel);
-                foreach (Control control in OutputsView.Controls)
-                {
-                    var bar = (ScrollBar)control;
-                    if (bar.AccessibleName == "Vertical Scroll Bar")
-                    {
-                        OutputsBar = (VScrollBar)control;
-                        OutputsBar.Scroll += OutputsBar_Scroll;
-                        break;
-                    }
-                }
+                OutputsView.MouseWheel += new MouseEventHandler(OutputsBar_Scroll);
+                Load_OutputIDs();
 
                 Topics_Loaded = false;
                 Load_Topics(connString);
                 Topics_Loaded = true;
-                TopicsView.MouseWheel += new MouseEventHandler(DisableMouseWheel);
-                foreach (Control control in TopicsView.Controls)
-                {
-                    var bar = (ScrollBar)control;
-                    if (bar.AccessibleName == "Vertical Scroll Bar")
-                    {
-                        TopicsBar = (VScrollBar)control;
-                        TopicsBar.Scroll += TopicsBar_Scroll;
-                        break;
-                    }
-                }
+                TopicsView.MouseWheel += new MouseEventHandler(TopicsBar_Scroll);
+                Load_TopicIDs();
 
                 PreWords_Loaded = false;
                 Load_PreWords(connString);
                 PreWords_Loaded = true;
-                PreWordsView.MouseWheel += new MouseEventHandler(DisableMouseWheel);
-                foreach (Control control in PreWordsView.Controls)
-                {
-                    var bar = (ScrollBar)control;
-                    if (bar.AccessibleName == "Vertical Scroll Bar")
-                    {
-                        PreWordsBar = (VScrollBar)control;
-                        PreWordsBar.Scroll += PreWordsBar_Scroll;
-                        break;
-                    }
-                }
+                PreWordsView.MouseWheel += new MouseEventHandler(PreWordsBar_Scroll);
+                Load_PreWordIDs();
 
                 ProWords_Loaded = false;
                 Load_ProWords(connString);
                 ProWords_Loaded = true;
-                ProWordsView.MouseWheel += new MouseEventHandler(DisableMouseWheel);
-                foreach (Control control in ProWordsView.Controls)
-                {
-                    var bar = (ScrollBar)control;
-                    if (bar.AccessibleName == "Vertical Scroll Bar")
-                    {
-                        ProWordsBar = (VScrollBar)control;
-                        ProWordsBar.Scroll += ProWordsBar_Scroll;
-                        break;
-                    }
-                }
+                ProWordsView.MouseWheel += new MouseEventHandler(ProWordsBar_Scroll);
+                Load_ProWordIDs();
             }
         }
 
@@ -183,35 +134,12 @@ namespace Real_AI
 
         private void BrainEditor_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (InputsBar != null)
-            {
-                InputsBar.Scroll -= InputsBar_Scroll;
-            }
-            
-            if (WordsBar != null)
-            {
-                WordsBar.Scroll -= WordsBar_Scroll;
-            }
-            
-            if (OutputsBar != null)
-            {
-                OutputsBar.Scroll -= OutputsBar_Scroll;
-            }
-            
-            if (TopicsBar != null)
-            {
-                TopicsBar.Scroll -= TopicsBar_Scroll;
-            }
-            
-            if (PreWordsBar != null)
-            {
-                PreWordsBar.Scroll -= PreWordsBar_Scroll;
-            }
-            
-            if (ProWordsBar != null)
-            {
-                ProWordsBar.Scroll -= ProWordsBar_Scroll;
-            }
+            InputsView.MouseWheel -= InputsBar_Scroll;
+            WordsView.MouseWheel -= WordsBar_Scroll;
+            OutputsView.MouseWheel -= OutputsBar_Scroll;
+            TopicsView.MouseWheel -= TopicsBar_Scroll;
+            PreWordsView.MouseWheel -= PreWordsBar_Scroll;
+            ProWordsView.MouseWheel -= ProWordsBar_Scroll;
 
             MainForm.ResumeTimers();
         }
@@ -422,6 +350,21 @@ namespace Real_AI
             }
         }
 
+        private void Load_InputIDs()
+        {
+            DataTable ID_Data = new DataTable();
+            Adapter_Inputs = new SQLiteDataAdapter($"SELECT DISTINCT ID FROM Inputs ORDER BY ID", connString);
+            Adapter_Inputs.Fill(ID_Data);
+            foreach (DataRow row in ID_Data.Rows)
+            {
+                int id = int.Parse(row[0].ToString());
+                if (!InputIDs.Contains(id))
+                {
+                    InputIDs.Add(id);
+                }
+            }
+        }
+
         private void Delete_Inputs(object sender, DataGridViewRowCancelEventArgs e)
         {
             if (Inputs.Rows.Count > 0 &&
@@ -516,43 +459,35 @@ namespace Real_AI
             }
         }
 
-        private void InputsBar_Scroll(object sender, ScrollEventArgs e)
+        private void InputsBar_Scroll(object sender, MouseEventArgs e)
         {
-            if (!scrolling &&
-                string.IsNullOrEmpty(SearchBox_Inputs.Text))
+            try
             {
-                scrolling = true;
+                HandledMouseEventArgs mouseEventArgs = (HandledMouseEventArgs)e;
+                mouseEventArgs.Handled = true;
 
-                if (e.OldValue < e.NewValue ||
-                   (e.OldValue == e.NewValue && e.NewValue != 0))
+                int index = InputsView.FirstDisplayedScrollingRowIndex;
+
+                if (mouseEventArgs.Delta > 0 &&
+                    InputIDs_Index > 0)
                 {
-                    InputsTop++;
-                    InputsView.FirstDisplayedScrollingRowIndex = InputsTop - 1;
+                    InputIDs_Index--;
+                    InputsTop = InputIDs[InputIDs_Index];
+                    InputsView.FirstDisplayedScrollingRowIndex = Math.Max(0, index - 1);
                     Load_Inputs(connString);
-                    scrolling = false;
                 }
-                else if (e.OldValue > e.NewValue ||
-                        (e.OldValue == e.NewValue && e.NewValue == 0))
+                else if (mouseEventArgs.Delta < 0 &&
+                         InputsView.Rows.Count > 2)
                 {
-                    InputsTop--;
-                    if (InputsTop < 1)
-                    {
-                        InputsTop = 1;
-                        scrolling = false;
-                    }
-                    else
-                    {
-                        InputsView.FirstDisplayedScrollingRowIndex = InputsTop - 1;
-                        Load_Inputs(connString);
-                        scrolling = false;
-                    }
-                }
-                else
-                {
-                    InputsView.FirstDisplayedScrollingRowIndex = InputsTop - 1;
+                    InputIDs_Index++;
+                    InputsTop = InputIDs[InputIDs_Index];
+                    InputsView.FirstDisplayedScrollingRowIndex = index + 1;
                     Load_Inputs(connString);
-                    scrolling = false;
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
             }
         }
 
@@ -629,6 +564,21 @@ namespace Real_AI
                 {
                     col.ReadOnly = true;
                     break;
+                }
+            }
+        }
+
+        private void Load_WordIDs()
+        {
+            DataTable ID_Data = new DataTable();
+            Adapter_Words = new SQLiteDataAdapter($"SELECT DISTINCT ID FROM Words ORDER BY ID", connString);
+            Adapter_Words.Fill(ID_Data);
+            foreach (DataRow row in ID_Data.Rows)
+            {
+                int id = int.Parse(row[0].ToString());
+                if (!WordIDs.Contains(id))
+                {
+                    WordIDs.Add(id);
                 }
             }
         }
@@ -727,43 +677,35 @@ namespace Real_AI
             }
         }
 
-        private void WordsBar_Scroll(object sender, ScrollEventArgs e)
+        private void WordsBar_Scroll(object sender, MouseEventArgs e)
         {
-            if (!scrolling &&
-                string.IsNullOrEmpty(SearchBox_Words.Text))
+            try
             {
-                scrolling = true;
+                HandledMouseEventArgs mouseEventArgs = (HandledMouseEventArgs)e;
+                mouseEventArgs.Handled = true;
 
-                if (e.OldValue < e.NewValue ||
-                   (e.OldValue == e.NewValue && e.NewValue != 0))
+                int index = WordsView.FirstDisplayedScrollingRowIndex;
+
+                if (mouseEventArgs.Delta > 0 &&
+                    WordIDs_Index > 0)
                 {
-                    WordsTop++;
-                    WordsView.FirstDisplayedScrollingRowIndex = WordsTop - 1;
+                    WordIDs_Index--;
+                    WordsTop = WordIDs[WordIDs_Index];
+                    WordsView.FirstDisplayedScrollingRowIndex = Math.Max(0, index - 1);
                     Load_Words(connString);
-                    scrolling = false;
                 }
-                else if (e.OldValue > e.NewValue ||
-                        (e.OldValue == e.NewValue && e.NewValue == 0))
+                else if (mouseEventArgs.Delta < 0 &&
+                         WordsView.Rows.Count > 2)
                 {
-                    WordsTop--;
-                    if (WordsTop < 1)
-                    {
-                        WordsTop = 1;
-                        scrolling = false;
-                    }
-                    else
-                    {
-                        WordsView.FirstDisplayedScrollingRowIndex = WordsTop - 1;
-                        Load_Words(connString);
-                        scrolling = false;
-                    }
-                }
-                else
-                {
-                    WordsView.FirstDisplayedScrollingRowIndex = WordsTop - 1;
+                    WordIDs_Index++;
+                    WordsTop = WordIDs[WordIDs_Index];
+                    WordsView.FirstDisplayedScrollingRowIndex = index + 1;
                     Load_Words(connString);
-                    scrolling = false;
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
             }
         }
 
@@ -840,6 +782,21 @@ namespace Real_AI
                 {
                     col.ReadOnly = true;
                     break;
+                }
+            }
+        }
+
+        private void Load_OutputIDs()
+        {
+            DataTable ID_Data = new DataTable();
+            Adapter_Outputs = new SQLiteDataAdapter($"SELECT DISTINCT ID FROM Outputs ORDER BY ID", connString);
+            Adapter_Outputs.Fill(ID_Data);
+            foreach (DataRow row in ID_Data.Rows)
+            {
+                int id = int.Parse(row[0].ToString());
+                if (!OutputIDs.Contains(id))
+                {
+                    OutputIDs.Add(id);
                 }
             }
         }
@@ -949,43 +906,35 @@ namespace Real_AI
             }
         }
 
-        private void OutputsBar_Scroll(object sender, ScrollEventArgs e)
+        private void OutputsBar_Scroll(object sender, MouseEventArgs e)
         {
-            if (!scrolling &&
-                string.IsNullOrEmpty(SearchBox_Outputs.Text))
+            try
             {
-                scrolling = true;
+                HandledMouseEventArgs mouseEventArgs = (HandledMouseEventArgs)e;
+                mouseEventArgs.Handled = true;
 
-                if (e.OldValue < e.NewValue ||
-                   (e.OldValue == e.NewValue && e.NewValue != 0))
+                int index = OutputsView.FirstDisplayedScrollingRowIndex;
+
+                if (mouseEventArgs.Delta > 0 &&
+                    OutputIDs_Index > 0)
                 {
-                    OutputsTop++;
-                    OutputsView.FirstDisplayedScrollingRowIndex = OutputsTop - 1;
+                    OutputIDs_Index--;
+                    OutputsTop = OutputIDs[OutputIDs_Index];
+                    OutputsView.FirstDisplayedScrollingRowIndex = Math.Max(0, index - 1);
                     Load_Outputs(connString);
-                    scrolling = false;
                 }
-                else if (e.OldValue > e.NewValue ||
-                        (e.OldValue == e.NewValue && e.NewValue == 0))
+                else if (mouseEventArgs.Delta < 0 &&
+                         OutputsView.Rows.Count > 2)
                 {
-                    OutputsTop--;
-                    if (OutputsTop < 1)
-                    {
-                        OutputsTop = 1;
-                        scrolling = false;
-                    }
-                    else
-                    {
-                        OutputsView.FirstDisplayedScrollingRowIndex = OutputsTop - 1;
-                        Load_Outputs(connString);
-                        scrolling = false;
-                    }
-                }
-                else
-                {
-                    OutputsView.FirstDisplayedScrollingRowIndex = OutputsTop - 1;
+                    OutputIDs_Index++;
+                    OutputsTop = OutputIDs[OutputIDs_Index];
+                    OutputsView.FirstDisplayedScrollingRowIndex = index + 1;
                     Load_Outputs(connString);
-                    scrolling = false;
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
             }
         }
 
@@ -1010,25 +959,32 @@ namespace Real_AI
 
         private void Load_Topics(string connString)
         {
-            Topics = new DataTable();
-
-            Adapter_Topics = new SQLiteDataAdapter($"SELECT * FROM Topics WHERE ID >= {TopicsTop} AND ID <= {TopicsTop + 100}", connString);
-            Adapter_Topics.Fill(Topics);
-
-            Binding_Topics = new BindingSource();
-            Binding_Topics.DataSource = Topics;
-
-            TopicsView.DataSource = Binding_Topics;
-            TopicsView.CellValueChanged += Update_Topics;
-            TopicsView.UserDeletingRow += Delete_Topics;
-
-            foreach (DataGridViewColumn col in TopicsView.Columns)
+            try
             {
-                if (col.Name == "ID")
+                Topics = new DataTable();
+
+                Adapter_Topics = new SQLiteDataAdapter($"SELECT * FROM Topics WHERE ID >= {TopicsTop} AND ID <= {TopicsTop + 100}", connString);
+                Adapter_Topics.Fill(Topics);
+
+                Binding_Topics = new BindingSource();
+                Binding_Topics.DataSource = Topics;
+
+                TopicsView.DataSource = Binding_Topics;
+                TopicsView.CellValueChanged += Update_Topics;
+                TopicsView.UserDeletingRow += Delete_Topics;
+
+                foreach (DataGridViewColumn col in TopicsView.Columns)
                 {
-                    col.ReadOnly = true;
-                    break;
+                    if (col.Name == "ID")
+                    {
+                        col.ReadOnly = true;
+                        break;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
             }
         }
 
@@ -1062,6 +1018,21 @@ namespace Real_AI
                 {
                     col.ReadOnly = true;
                     break;
+                }
+            }
+        }
+
+        private void Load_TopicIDs()
+        {
+            DataTable ID_Data = new DataTable();
+            Adapter_Topics = new SQLiteDataAdapter($"SELECT DISTINCT ID FROM Topics ORDER BY ID", connString);
+            Adapter_Topics.Fill(ID_Data);
+            foreach (DataRow row in ID_Data.Rows)
+            {
+                int id = int.Parse(row[0].ToString());
+                if (!TopicIDs.Contains(id))
+                {
+                    TopicIDs.Add(id);
                 }
             }
         }
@@ -1171,43 +1142,35 @@ namespace Real_AI
             }
         }
 
-        private void TopicsBar_Scroll(object sender, ScrollEventArgs e)
+        private void TopicsBar_Scroll(object sender, MouseEventArgs e)
         {
-            if (!scrolling &&
-                string.IsNullOrEmpty(SearchBox_Topics.Text))
+            try
             {
-                scrolling = true;
+                HandledMouseEventArgs mouseEventArgs = (HandledMouseEventArgs)e;
+                mouseEventArgs.Handled = true;
 
-                if (e.OldValue < e.NewValue ||
-                   (e.OldValue == e.NewValue && e.NewValue != 0))
+                int index = TopicsView.FirstDisplayedScrollingRowIndex;
+
+                if (mouseEventArgs.Delta > 0 &&
+                    TopicIDs_Index > 0)
                 {
-                    TopicsTop++;
-                    TopicsView.FirstDisplayedScrollingRowIndex = TopicsTop - 1;
+                    TopicIDs_Index--;
+                    TopicsTop = TopicIDs[TopicIDs_Index];
+                    TopicsView.FirstDisplayedScrollingRowIndex = Math.Max(0, index - 1);
                     Load_Topics(connString);
-                    scrolling = false;
                 }
-                else if (e.OldValue > e.NewValue ||
-                        (e.OldValue == e.NewValue && e.NewValue == 0))
+                else if (mouseEventArgs.Delta < 0 &&
+                         TopicsView.Rows.Count > 2)
                 {
-                    TopicsTop--;
-                    if (TopicsTop < 1)
-                    {
-                        TopicsTop = 1;
-                        scrolling = false;
-                    }
-                    else
-                    {
-                        TopicsView.FirstDisplayedScrollingRowIndex = TopicsTop - 1;
-                        Load_Topics(connString);
-                        scrolling = false;
-                    }
-                }
-                else
-                {
-                    TopicsView.FirstDisplayedScrollingRowIndex = TopicsTop - 1;
+                    TopicIDs_Index++;
+                    TopicsTop = TopicIDs[TopicIDs_Index];
+                    TopicsView.FirstDisplayedScrollingRowIndex = index + 1;
                     Load_Topics(connString);
-                    scrolling = false;
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
             }
         }
 
@@ -1284,6 +1247,21 @@ namespace Real_AI
                 {
                     col.ReadOnly = true;
                     break;
+                }
+            }
+        }
+
+        private void Load_PreWordIDs()
+        {
+            DataTable ID_Data = new DataTable();
+            Adapter_PreWords = new SQLiteDataAdapter($"SELECT DISTINCT ID FROM PreWords ORDER BY ID", connString);
+            Adapter_PreWords.Fill(ID_Data);
+            foreach (DataRow row in ID_Data.Rows)
+            {
+                int id = int.Parse(row[0].ToString());
+                if (!PreWordIDs.Contains(id))
+                {
+                    PreWordIDs.Add(id);
                 }
             }
         }
@@ -1424,43 +1402,35 @@ namespace Real_AI
             }
         }
 
-        private void PreWordsBar_Scroll(object sender, ScrollEventArgs e)
+        private void PreWordsBar_Scroll(object sender, MouseEventArgs e)
         {
-            if (!scrolling &&
-                string.IsNullOrEmpty(SearchBox_PreWords.Text))
+            try
             {
-                scrolling = true;
+                HandledMouseEventArgs mouseEventArgs = (HandledMouseEventArgs)e;
+                mouseEventArgs.Handled = true;
 
-                if (e.OldValue < e.NewValue ||
-                   (e.OldValue == e.NewValue && e.NewValue != 0))
+                int index = PreWordsView.FirstDisplayedScrollingRowIndex;
+
+                if (mouseEventArgs.Delta > 0 &&
+                    PreWordIDs_Index > 0)
                 {
-                    PreWordsTop++;
-                    PreWordsView.FirstDisplayedScrollingRowIndex = PreWordsTop - 1;
+                    PreWordIDs_Index--;
+                    PreWordsTop = PreWordIDs[PreWordIDs_Index];
+                    PreWordsView.FirstDisplayedScrollingRowIndex = Math.Max(0, index - 1);
                     Load_PreWords(connString);
-                    scrolling = false;
                 }
-                else if (e.OldValue > e.NewValue ||
-                        (e.OldValue == e.NewValue && e.NewValue == 0))
+                else if (mouseEventArgs.Delta < 0 &&
+                         PreWordsView.Rows.Count > 2)
                 {
-                    PreWordsTop--;
-                    if (PreWordsTop < 1)
-                    {
-                        PreWordsTop = 1;
-                        scrolling = false;
-                    }
-                    else
-                    {
-                        PreWordsView.FirstDisplayedScrollingRowIndex = PreWordsTop - 1;
-                        Load_PreWords(connString);
-                        scrolling = false;
-                    }
-                }
-                else
-                {
-                    PreWordsView.FirstDisplayedScrollingRowIndex = PreWordsTop - 1;
+                    PreWordIDs_Index++;
+                    PreWordsTop = PreWordIDs[PreWordIDs_Index];
+                    PreWordsView.FirstDisplayedScrollingRowIndex = index + 1;
                     Load_PreWords(connString);
-                    scrolling = false;
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
             }
         }
 
@@ -1537,6 +1507,21 @@ namespace Real_AI
                 {
                     col.ReadOnly = true;
                     break;
+                }
+            }
+        }
+
+        private void Load_ProWordIDs()
+        {
+            DataTable ID_Data = new DataTable();
+            Adapter_ProWords = new SQLiteDataAdapter($"SELECT DISTINCT ID FROM ProWords ORDER BY ID", connString);
+            Adapter_ProWords.Fill(ID_Data);
+            foreach (DataRow row in ID_Data.Rows)
+            {
+                int id = int.Parse(row[0].ToString());
+                if (!ProWordIDs.Contains(id))
+                {
+                    ProWordIDs.Add(id);
                 }
             }
         }
@@ -1677,43 +1662,35 @@ namespace Real_AI
             }
         }
 
-        private void ProWordsBar_Scroll(object sender, ScrollEventArgs e)
+        private void ProWordsBar_Scroll(object sender, MouseEventArgs e)
         {
-            if (!scrolling &&
-                string.IsNullOrEmpty(SearchBox_ProWords.Text))
+            try
             {
-                scrolling = true;
+                HandledMouseEventArgs mouseEventArgs = (HandledMouseEventArgs)e;
+                mouseEventArgs.Handled = true;
 
-                if (e.OldValue < e.NewValue ||
-                   (e.OldValue == e.NewValue && e.NewValue != 0))
+                int index = ProWordsView.FirstDisplayedScrollingRowIndex;
+
+                if (mouseEventArgs.Delta > 0 &&
+                    ProWordIDs_Index > 0)
                 {
-                    ProWordsTop++;
-                    ProWordsView.FirstDisplayedScrollingRowIndex = ProWordsTop - 1;
+                    ProWordIDs_Index--;
+                    ProWordsTop = ProWordIDs[ProWordIDs_Index];
+                    ProWordsView.FirstDisplayedScrollingRowIndex = Math.Max(0, index - 1);
                     Load_ProWords(connString);
-                    scrolling = false;
                 }
-                else if (e.OldValue > e.NewValue ||
-                        (e.OldValue == e.NewValue && e.NewValue == 0))
+                else if (mouseEventArgs.Delta < 0 &&
+                         ProWordsView.Rows.Count > 2)
                 {
-                    ProWordsTop--;
-                    if (ProWordsTop < 1)
-                    {
-                        ProWordsTop = 1;
-                        scrolling = false;
-                    }
-                    else
-                    {
-                        ProWordsView.FirstDisplayedScrollingRowIndex = ProWordsTop - 1;
-                        Load_ProWords(connString);
-                        scrolling = false;
-                    }
-                }
-                else
-                {
-                    ProWordsView.FirstDisplayedScrollingRowIndex = ProWordsTop - 1;
+                    ProWordIDs_Index++;
+                    ProWordsTop = ProWordIDs[ProWordIDs_Index];
+                    ProWordsView.FirstDisplayedScrollingRowIndex = index + 1;
                     Load_ProWords(connString);
-                    scrolling = false;
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
             }
         }
 

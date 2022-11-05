@@ -311,9 +311,31 @@ namespace Real_AI
                 History.Add("[new session]");
                 AppUtil.SaveHistory(History);
 
-                InputBox.Text = "";
+                if (InputBox.InvokeRequired)
+                {
+                    InputBox.Invoke((MethodInvoker)delegate
+                    {
+                        InputBox.Text = "";
+                    });
+                }
+                else
+                {
+                    InputBox.Text = "";
+                }
 
-                progressMain.Value = 100;
+                if (progressMain.InvokeRequired)
+                {
+                    progressMain.Invoke((MethodInvoker)delegate
+                    {
+                        progressMain.CustomText = "New Session Started";
+                        progressMain.Value = 100;
+                    });
+                }
+                else
+                {
+                    progressMain.CustomText = "New Session Started";
+                    progressMain.Value = 100;
+                }
 
                 Display();
                 return true;
@@ -432,6 +454,20 @@ namespace Real_AI
             if (encourage &&
                 !string.IsNullOrEmpty(message))
             {
+                if (ProgressBar_Detail.InvokeRequired)
+                {
+                    ProgressBar_Detail.Invoke((MethodInvoker)delegate
+                    {
+                        ProgressBar_Detail.Value = 0;
+                        ProgressBar_Main.Value = 0;
+                    });
+                }
+                else
+                {
+                    ProgressBar_Detail.Value = 0;
+                    ProgressBar_Main.Value = 0;
+                }
+
                 if (Brain.Encourage(message))
                 {
                     History.Add("[encouraged]");
@@ -521,6 +557,20 @@ namespace Real_AI
             if (discourage &&
                 !string.IsNullOrEmpty(message))
             {
+                if (ProgressBar_Detail.InvokeRequired)
+                {
+                    ProgressBar_Detail.Invoke((MethodInvoker)delegate
+                    {
+                        ProgressBar_Detail.Value = 0;
+                        ProgressBar_Main.Value = 0;
+                    });
+                }
+                else
+                {
+                    ProgressBar_Detail.Value = 0;
+                    ProgressBar_Main.Value = 0;
+                }
+
                 if (Brain.Discourage(message))
                 {
                     History.Add("[discouraged]");
@@ -531,15 +581,17 @@ namespace Real_AI
                     {
                         progressMain.Invoke((MethodInvoker)delegate
                         {
-                            progressMain.CustomText = "Discouraged.";
+                            progressMain.CustomText = "Discouraged";
                             progressMain.Value = 100;
                         });
                     }
                     else
                     {
-                        progressMain.CustomText = "Discouraged.";
+                        progressMain.CustomText = "Discouraged";
                         progressMain.Value = 100;
                     }
+
+                    StartNewSession();
                 }
             }
 
@@ -1425,9 +1477,6 @@ namespace Real_AI
         {
             if (!string.IsNullOrEmpty(BrainFile))
             {
-                ProgressBar_Detail.Value = 0;
-                ProgressBar_Main.Value = 0;
-
                 EncourageButton.Enabled = false;
 
                 lbl_ElapsedTime.Text = "";
@@ -1455,10 +1504,7 @@ namespace Real_AI
         {
             if (!string.IsNullOrEmpty(BrainFile))
             {
-                ProgressBar_Detail.Value = 0;
-                ProgressBar_Main.Value = 0;
-
-                EncourageButton.Enabled = false;
+                DiscourageButton.Enabled = false;
 
                 lbl_ElapsedTime.Text = "";
                 StartTime_Elapsed = DateTime.Now;
