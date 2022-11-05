@@ -1,0 +1,17 @@
+F:\Development\Real AI\Real AI\bin\Debug\Real AI.exe.config
+F:\Development\Real AI\Real AI\bin\Debug\Real AI.exe
+F:\Development\Real AI\Real AI\bin\Debug\Real AI.pdb
+F:\Development\Real AI\Real AI\obj\Debug\Real AI.csproj.AssemblyReference.cache
+F:\Development\Real AI\Real AI\obj\Debug\Real AI.csproj.SuggestedBindingRedirects.cache
+F:\Development\Real AI\Real AI\obj\Debug\Real_AI.BrainEditor.resources
+F:\Development\Real AI\Real AI\obj\Debug\Real_AI.Connect.resources
+F:\Development\Real AI\Real AI\obj\Debug\Real_AI.MainForm.resources
+F:\Development\Real AI\Real AI\obj\Debug\Real_AI.Merge.resources
+F:\Development\Real AI\Real AI\obj\Debug\Real_AI.Options.resources
+F:\Development\Real AI\Real AI\obj\Debug\Real_AI.ReadFile.resources
+F:\Development\Real AI\Real AI\obj\Debug\Real_AI.Spelling.resources
+F:\Development\Real AI\Real AI\obj\Debug\Real_AI.Thinking.resources
+F:\Development\Real AI\Real AI\obj\Debug\Real AI.csproj.GenerateResource.cache
+F:\Development\Real AI\Real AI\obj\Debug\Real AI.csproj.CoreCompileInputs.cache
+F:\Development\Real AI\Real AI\obj\Debug\Real AI.exe
+F:\Development\Real AI\Real AI\obj\Debug\Real AI.pdb
