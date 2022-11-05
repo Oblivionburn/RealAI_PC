@@ -194,14 +194,164 @@ namespace Real_AI
                 commands.AddRange(AddPreWords(WordArray));
                 commands.AddRange(AddProWords(WordArray));
                 SqlUtil.BulkQuery(commands, true);
-                commands.Clear();
             }
+        }
+
+        public static bool Encourage(string message)
+        {
+            if (!string.IsNullOrEmpty(message))
+            {
+                string[] word_array = GapSpecials(message, MainForm.progressMain, MainForm.progressDetail, null, true).Trim(' ').Split(' ');
+                if (word_array.Length > 1)
+                {
+                    if (MainForm.progressMain.InvokeRequired)
+                    {
+                        MainForm.progressMain.Invoke((MethodInvoker)delegate
+                        {
+                            MainForm.progressMain.CustomText = "Encouraging...";
+                        });
+                    }
+                    else
+                    {
+                        MainForm.progressMain.CustomText = "Encouraging...";
+                    }
+
+                    List<string> words = new List<string>();
+                    List<string> pre_words = new List<string>();
+                    List<string> pro_words = new List<string>();
+                    List<int> distances = new List<int>();
+                    List<SQLiteCommand> commands = new List<SQLiteCommand>();
+
+                    for (int i = 1; i < word_array.Length; i++)
+                    {
+                        int count = 1;
+                        for (int j = i - 1; j >= 0; j--)
+                        {
+                            if (!string.IsNullOrEmpty(word_array[i]) &&
+                                !string.IsNullOrEmpty(word_array[j]))
+                            {
+                                words.Add(word_array[i]);
+                                pre_words.Add(word_array[j]);
+                                distances.Add(count);
+                                count++;
+                            }
+                        }
+                    }
+
+                    commands.AddRange(SqlUtil.Increase_PreWordPriorities(words.ToArray(), pre_words.ToArray(), distances.ToArray()));
+
+                    words = new List<string>();
+                    distances = new List<int>();
+
+                    for (int i = 0; i < word_array.Length - 1; i++)
+                    {
+                        var count = 1;
+                        for (int j = i + 1; j <= word_array.Length - 1; j++)
+                        {
+                            if (!string.IsNullOrEmpty(word_array[i]) &&
+                                !string.IsNullOrEmpty(word_array[j]))
+                            {
+                                words.Add(word_array[i]);
+                                pro_words.Add(word_array[j]);
+                                distances.Add(count);
+                                count++;
+                            }
+                        }
+                    }
+
+                    commands.AddRange(SqlUtil.Increase_ProWordPriorities(words.ToArray(), pro_words.ToArray(), distances.ToArray()));
+
+                    commands.AddRange(SqlUtil.Increase_OutputPriorities(message));
+                    commands.AddRange(SqlUtil.Increase_InputPriorities(message));
+                    commands.AddRange(SqlUtil.Increase_WordPriorities(word_array));
+
+                    return SqlUtil.BulkQuery(commands, true);
+                }
+            }
+
+            return false;
+        }
+
+        public static bool Discourage(string message)
+        {
+            if (!string.IsNullOrEmpty(message))
+            {
+                string[] word_array = GapSpecials(message, MainForm.progressMain, MainForm.progressDetail, null, true).Trim(' ').Split(' ');
+                if (word_array.Length > 1)
+                {
+                    if (MainForm.progressMain.InvokeRequired)
+                    {
+                        MainForm.progressMain.Invoke((MethodInvoker)delegate
+                        {
+                            MainForm.progressMain.CustomText = "Discouraging...";
+                        });
+                    }
+                    else
+                    {
+                        MainForm.progressMain.CustomText = "Discouraging...";
+                    }
+
+                    List<string> words = new List<string>();
+                    List<string> pre_words = new List<string>();
+                    List<string> pro_words = new List<string>();
+                    List<int> distances = new List<int>();
+                    List<SQLiteCommand> commands = new List<SQLiteCommand>();
+
+                    for (int i = 1; i < word_array.Length; i++)
+                    {
+                        int count = 1;
+                        for (int j = i - 1; j >= 0; j--)
+                        {
+                            if (!string.IsNullOrEmpty(word_array[i]) &&
+                                !string.IsNullOrEmpty(word_array[j]))
+                            {
+                                words.Add(word_array[i]);
+                                pre_words.Add(word_array[j]);
+                                distances.Add(count);
+                                count++;
+                            }
+                        }
+                    }
+
+                    commands.AddRange(SqlUtil.Decrease_PreWordPriorities(words.ToArray(), pre_words.ToArray(), distances.ToArray()));
+
+                    words = new List<string>();
+                    distances = new List<int>();
+
+                    for (int i = 0; i < word_array.Length - 1; i++)
+                    {
+                        var count = 1;
+                        for (int j = i + 1; j <= word_array.Length - 1; j++)
+                        {
+                            if (!string.IsNullOrEmpty(word_array[i]) &&
+                                !string.IsNullOrEmpty(word_array[j]))
+                            {
+                                words.Add(word_array[i]);
+                                pro_words.Add(word_array[j]);
+                                distances.Add(count);
+                                count++;
+                            }
+                        }
+                    }
+
+                    commands.AddRange(SqlUtil.Decrease_ProWordPriorities(words.ToArray(), pro_words.ToArray(), distances.ToArray()));
+
+                    commands.AddRange(SqlUtil.Decrease_TopicPriorities(message, word_array));
+                    commands.AddRange(SqlUtil.Decrease_OutputPriorities(message));
+                    commands.AddRange(SqlUtil.Decrease_InputPriorities(message));
+                    commands.AddRange(SqlUtil.Decrease_WordPriorities(word_array));
+
+                    return SqlUtil.BulkQuery(commands, true);
+                }
+            }
+
+            return false;
         }
 
         public static List<SQLiteCommand> AddInputs(string input)
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
-            commands.AddRange(SqlUtil.Increase_InputPriority(input));
+            commands.AddRange(SqlUtil.Increase_InputPriorities(input));
             commands.AddRange(SqlUtil.Add_NewInput(input));
             return commands;
         }

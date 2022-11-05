@@ -56,6 +56,8 @@
             this.lbl_RemainingTime = new System.Windows.Forms.Label();
             this.ProgressBar_Main = new Real_AI.TextProgressBar();
             this.ProgressBar_Detail = new Real_AI.TextProgressBar();
+            this.EncourageButton = new System.Windows.Forms.Button();
+            this.DiscourageButton = new System.Windows.Forms.Button();
             this.menu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -117,14 +119,14 @@
             // NewBrain
             // 
             this.NewBrain.Name = "NewBrain";
-            this.NewBrain.Size = new System.Drawing.Size(180, 22);
+            this.NewBrain.Size = new System.Drawing.Size(100, 22);
             this.NewBrain.Text = "New";
             this.NewBrain.Click += new System.EventHandler(this.NewBrain_Click);
             // 
             // LoadBrain
             // 
             this.LoadBrain.Name = "LoadBrain";
-            this.LoadBrain.Size = new System.Drawing.Size(180, 22);
+            this.LoadBrain.Size = new System.Drawing.Size(100, 22);
             this.LoadBrain.Text = "Load";
             this.LoadBrain.Click += new System.EventHandler(this.LoadBrain_Click);
             // 
@@ -140,14 +142,14 @@
             // EditBrain
             // 
             this.EditBrain.Name = "EditBrain";
-            this.EditBrain.Size = new System.Drawing.Size(180, 22);
+            this.EditBrain.Size = new System.Drawing.Size(116, 22);
             this.EditBrain.Text = "Brain";
             this.EditBrain.Click += new System.EventHandler(this.EditBrain_Click);
             // 
             // EditOptions
             // 
             this.EditOptions.Name = "EditOptions";
-            this.EditOptions.Size = new System.Drawing.Size(180, 22);
+            this.EditOptions.Size = new System.Drawing.Size(116, 22);
             this.EditOptions.Text = "Options";
             this.EditOptions.Click += new System.EventHandler(this.EditOptions_Click);
             // 
@@ -162,7 +164,7 @@
             // ViewThinking
             // 
             this.ViewThinking.Name = "ViewThinking";
-            this.ViewThinking.Size = new System.Drawing.Size(180, 22);
+            this.ViewThinking.Size = new System.Drawing.Size(120, 22);
             this.ViewThinking.Text = "Thinking";
             this.ViewThinking.Click += new System.EventHandler(this.ViewThinking_Click);
             // 
@@ -180,28 +182,28 @@
             // WipeMemory
             // 
             this.WipeMemory.Name = "WipeMemory";
-            this.WipeMemory.Size = new System.Drawing.Size(180, 22);
+            this.WipeMemory.Size = new System.Drawing.Size(149, 22);
             this.WipeMemory.Text = "Wipe Memory";
             this.WipeMemory.Click += new System.EventHandler(this.WipeMemory_Click);
             // 
             // MergeBrains
             // 
             this.MergeBrains.Name = "MergeBrains";
-            this.MergeBrains.Size = new System.Drawing.Size(180, 22);
+            this.MergeBrains.Size = new System.Drawing.Size(149, 22);
             this.MergeBrains.Text = "Merge Brains";
             this.MergeBrains.Click += new System.EventHandler(this.MergeBrains_Click);
             // 
             // FixSpelling
             // 
             this.FixSpelling.Name = "FixSpelling";
-            this.FixSpelling.Size = new System.Drawing.Size(180, 22);
+            this.FixSpelling.Size = new System.Drawing.Size(149, 22);
             this.FixSpelling.Text = "Fix Spelling";
             this.FixSpelling.Click += new System.EventHandler(this.FixSpelling_Click);
             // 
             // ReadFile
             // 
             this.ReadFile.Name = "ReadFile";
-            this.ReadFile.Size = new System.Drawing.Size(180, 22);
+            this.ReadFile.Size = new System.Drawing.Size(149, 22);
             this.ReadFile.Text = "Read File";
             this.ReadFile.Click += new System.EventHandler(this.ReadFile_Click);
             // 
@@ -222,9 +224,9 @@
             this.InputBox.BackColor = System.Drawing.SystemColors.Window;
             this.InputBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.InputBox.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.InputBox.Location = new System.Drawing.Point(12, 344);
+            this.InputBox.Location = new System.Drawing.Point(12, 315);
             this.InputBox.Name = "InputBox";
-            this.InputBox.Size = new System.Drawing.Size(247, 23);
+            this.InputBox.Size = new System.Drawing.Size(254, 23);
             this.InputBox.TabIndex = 0;
             this.InputBox.TextChanged += new System.EventHandler(this.InputBox_TextChanged);
             // 
@@ -234,7 +236,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lbl_Input.AutoSize = true;
             this.lbl_Input.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.lbl_Input.Location = new System.Drawing.Point(12, 328);
+            this.lbl_Input.Location = new System.Drawing.Point(12, 299);
             this.lbl_Input.Name = "lbl_Input";
             this.lbl_Input.Size = new System.Drawing.Size(31, 13);
             this.lbl_Input.TabIndex = 5;
@@ -247,9 +249,9 @@
             this.EnterButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.EnterButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.EnterButton.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.EnterButton.Location = new System.Drawing.Point(265, 344);
+            this.EnterButton.Location = new System.Drawing.Point(272, 315);
             this.EnterButton.Name = "EnterButton";
-            this.EnterButton.Size = new System.Drawing.Size(75, 23);
+            this.EnterButton.Size = new System.Drawing.Size(68, 23);
             this.EnterButton.TabIndex = 6;
             this.EnterButton.Text = "Enter";
             this.EnterButton.UseVisualStyleBackColor = true;
@@ -264,7 +266,7 @@
             this.OutputBox.Location = new System.Drawing.Point(12, 45);
             this.OutputBox.Name = "OutputBox";
             this.OutputBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.OutputBox.Size = new System.Drawing.Size(329, 280);
+            this.OutputBox.Size = new System.Drawing.Size(329, 240);
             this.OutputBox.TabIndex = 10;
             this.OutputBox.Text = "";
             // 
@@ -320,6 +322,36 @@
             this.ProgressBar_Detail.TextFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
             this.ProgressBar_Detail.VisualMode = Real_AI.ProgressBarDisplayMode.CurrProgress;
             // 
+            // EncourageButton
+            // 
+            this.EncourageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.EncourageButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.EncourageButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.EncourageButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.EncourageButton.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.EncourageButton.Location = new System.Drawing.Point(12, 344);
+            this.EncourageButton.Name = "EncourageButton";
+            this.EncourageButton.Size = new System.Drawing.Size(140, 23);
+            this.EncourageButton.TabIndex = 13;
+            this.EncourageButton.Text = "Encourage";
+            this.EncourageButton.UseVisualStyleBackColor = true;
+            this.EncourageButton.Click += new System.EventHandler(this.EncourageButton_Click);
+            // 
+            // DiscourageButton
+            // 
+            this.DiscourageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.DiscourageButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.DiscourageButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.DiscourageButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DiscourageButton.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.DiscourageButton.Location = new System.Drawing.Point(192, 344);
+            this.DiscourageButton.Name = "DiscourageButton";
+            this.DiscourageButton.Size = new System.Drawing.Size(148, 23);
+            this.DiscourageButton.TabIndex = 14;
+            this.DiscourageButton.Text = "Discourage";
+            this.DiscourageButton.UseVisualStyleBackColor = true;
+            this.DiscourageButton.Click += new System.EventHandler(this.DiscourageButton_Click);
+            // 
             // MainForm
             // 
             this.AcceptButton = this.EnterButton;
@@ -327,6 +359,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(353, 464);
+            this.Controls.Add(this.DiscourageButton);
+            this.Controls.Add(this.EncourageButton);
             this.Controls.Add(this.lbl_RemainingTime);
             this.Controls.Add(this.lbl_ElapsedTime);
             this.Controls.Add(this.OutputBox);
@@ -379,6 +413,8 @@
         private System.Windows.Forms.ToolStripMenuItem ReadFile;
         private System.Windows.Forms.Label lbl_ElapsedTime;
         private System.Windows.Forms.Label lbl_RemainingTime;
+        public System.Windows.Forms.Button EncourageButton;
+        public System.Windows.Forms.Button DiscourageButton;
     }
 }
 

@@ -54,6 +54,8 @@ namespace Real_AI
         public static TextBox input;
         public static RichTextBox output;
         public static Button enter;
+        public static Button encourage;
+        public static Button discourage;
 
         public static MenuStrip mainMenu;
         public static ToolStripMenuItem menu_NewSession;
@@ -121,6 +123,8 @@ namespace Real_AI
             input = InputBox;
             output = OutputBox;
             enter = EnterButton;
+            encourage = EncourageButton;
+            discourage = DiscourageButton;
             label_Output = lbl_Output;
             label_Input = lbl_Input;
             label_ElapsedTime = lbl_ElapsedTime;
@@ -285,19 +289,13 @@ namespace Real_AI
         {
             bool reset = false;
 
-            string new_session = "[new session]";
-
             History = AppUtil.GetHistory();
             if (History.Count > 0)
             {
-                if (History[History.Count - 1] != new_session)
+                if (History[History.Count - 1] != "[new session]")
                 {
                     reset = true;
                 }
-            }
-            else
-            {
-                reset = true;
             }
 
             if (reset)
@@ -310,17 +308,18 @@ namespace Real_AI
                 Brain.WordArray_Thinking = null;
                 Thoughts.Clear();
 
-                History.Add(new_session);
+                History.Add("[new session]");
                 AppUtil.SaveHistory(History);
 
                 InputBox.Text = "";
 
                 progressMain.Value = 100;
+
+                Display();
+                return true;
             }
 
-            Display();
-
-            return reset;
+            return false;
         }
 
         private void AddToHistory(string message)
@@ -396,6 +395,184 @@ namespace Real_AI
             if (tts)
             {
                 synthesizer.SpeakAsync(response);
+            }
+
+            if (Crash)
+            {
+                File.WriteAllLines(LogPath, Log);
+                Application.Exit();
+            }
+        }
+
+        private void Encourage()
+        {
+            bool encourage = false;
+            string message = "";
+
+            History = AppUtil.GetHistory();
+            if (History.Count > 0)
+            {
+                if (History[History.Count - 1] != "[encouraged]")
+                {
+                    encourage = true;
+                }
+
+                if (!string.IsNullOrEmpty(Brain.LastResponse) &&
+                    History[History.Count - 1].Contains(Brain.LastResponse))
+                {
+                    message = Brain.LastResponse;
+                }
+                else if (!string.IsNullOrEmpty(Brain.LastThought) && 
+                         History[History.Count - 1].Contains(Brain.LastThought))
+                {
+                    message = Brain.LastThought;
+                }
+            }
+
+            if (encourage &&
+                !string.IsNullOrEmpty(message))
+            {
+                if (Brain.Encourage(message))
+                {
+                    History.Add("[encouraged]");
+                    AppUtil.SaveHistory(History);
+                    Display();
+
+                    if (progressMain.InvokeRequired)
+                    {
+                        progressMain.Invoke((MethodInvoker)delegate
+                        {
+                            progressMain.CustomText = "Encouraged";
+                            progressMain.Value = 100;
+                        });
+                    }
+                    else
+                    {
+                        progressMain.CustomText = "Encouraged";
+                        progressMain.Value = 100;
+                    }
+                }
+            }
+
+            ElapsedTokenSource.Cancel();
+            ElapsedTokenSource.Dispose();
+            ElapsedTask = null;
+
+            RemainingTokenSource.Cancel();
+            RemainingTokenSource.Dispose();
+            RemainingTask = null;
+
+            if (lbl_RemainingTime.InvokeRequired)
+            {
+                lbl_RemainingTime.Invoke((MethodInvoker)delegate
+                {
+                    lbl_RemainingTime.Text = "";
+                });
+            }
+            else
+            {
+                lbl_RemainingTime.Text = "";
+            }
+
+            if (EncourageButton.InvokeRequired)
+            {
+                EncourageButton.Invoke((MethodInvoker)delegate
+                {
+                    EncourageButton.Enabled = true;
+                });
+            }
+            else
+            {
+                EncourageButton.Enabled = true;
+            }
+
+            if (Crash)
+            {
+                File.WriteAllLines(LogPath, Log);
+                Application.Exit();
+            }
+        }
+
+        private void Discourage()
+        {
+            bool discourage = false;
+            string message = "";
+
+            History = AppUtil.GetHistory();
+            if (History.Count > 0)
+            {
+                if (History[History.Count - 1] != "[new session]")
+                {
+                    discourage = true;
+                }
+
+                if (!string.IsNullOrEmpty(Brain.LastResponse) &&
+                    History[History.Count - 1].Contains(Brain.LastResponse))
+                {
+                    message = Brain.LastResponse;
+                }
+                else if (!string.IsNullOrEmpty(Brain.LastThought) &&
+                         History[History.Count - 1].Contains(Brain.LastThought))
+                {
+                    message = Brain.LastThought;
+                }
+            }
+
+            if (discourage &&
+                !string.IsNullOrEmpty(message))
+            {
+                if (Brain.Discourage(message))
+                {
+                    History.Add("[discouraged]");
+                    AppUtil.SaveHistory(History);
+                    Display();
+
+                    if (progressMain.InvokeRequired)
+                    {
+                        progressMain.Invoke((MethodInvoker)delegate
+                        {
+                            progressMain.CustomText = "Discouraged.";
+                            progressMain.Value = 100;
+                        });
+                    }
+                    else
+                    {
+                        progressMain.CustomText = "Discouraged.";
+                        progressMain.Value = 100;
+                    }
+                }
+            }
+
+            ElapsedTokenSource.Cancel();
+            ElapsedTokenSource.Dispose();
+            ElapsedTask = null;
+
+            RemainingTokenSource.Cancel();
+            RemainingTokenSource.Dispose();
+            RemainingTask = null;
+
+            if (lbl_RemainingTime.InvokeRequired)
+            {
+                lbl_RemainingTime.Invoke((MethodInvoker)delegate
+                {
+                    lbl_RemainingTime.Text = "";
+                });
+            }
+            else
+            {
+                lbl_RemainingTime.Text = "";
+            }
+
+            if (DiscourageButton.InvokeRequired)
+            {
+                DiscourageButton.Invoke((MethodInvoker)delegate
+                {
+                    DiscourageButton.Enabled = true;
+                });
+            }
+            else
+            {
+                DiscourageButton.Enabled = true;
             }
 
             if (Crash)
@@ -513,6 +690,10 @@ namespace Real_AI
             input.ForeColor = AppUtil.text_control;
             enter.BackColor = AppUtil.background_control;
             enter.ForeColor = AppUtil.text_control;
+            encourage.BackColor = AppUtil.background_control;
+            encourage.ForeColor = AppUtil.text_control;
+            discourage.BackColor = AppUtil.background_control;
+            discourage.ForeColor = AppUtil.text_control;
             progressMain.BackColor = AppUtil.background_progress;
             progressMain.ForeColor = AppUtil.text_progress;
             progressMain.ProgressColor = AppUtil.background_progress;
@@ -1054,9 +1235,10 @@ namespace Real_AI
             {
                 if (StartNewSession())
                 {
-                    progressMain.CustomText = "New session started";
-                    ResumeTimers();
+                    progressMain.CustomText = "New Session Started";
                 }
+
+                ResumeTimers();
             }
             else
             {
@@ -1077,6 +1259,18 @@ namespace Real_AI
                 DialogResult result = MessageBox.Show("Are you sure you wish to delete all the data in the \"" + Path.GetFileNameWithoutExtension(BrainFile) + "\" brain?", "Memory Wipe", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (result == DialogResult.Yes)
                 {
+                    output.Text = "";
+                    input.Text = "";
+                    thinking.Text = "";
+
+                    Brain.LastResponse = "";
+                    Brain.LastThought = "";
+                    Brain.CleanInput = "";
+                    Brain.Topics = null;
+                    Brain.WordArray = null;
+                    Brain.WordArray_Thinking = null;
+                    Thoughts.Clear();
+
                     SqlUtil.BulkQuery(SqlUtil.Wipe(), true);
                     AppUtil.SaveHistory(new List<string>());
                     StartNewSession();
@@ -1218,6 +1412,66 @@ namespace Real_AI
                 RemainingTask = Task.Factory.StartNew(() => Remaining(), RemainingTokenSource.Token);
 
                 Thread thread = new Thread(Respond);
+                thread.Start();
+                threads.Add(thread);
+            }
+            else
+            {
+                MessageBox.Show("No brain connected.");
+            }
+        }
+
+        private void EncourageButton_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(BrainFile))
+            {
+                ProgressBar_Detail.Value = 0;
+                ProgressBar_Main.Value = 0;
+
+                EncourageButton.Enabled = false;
+
+                lbl_ElapsedTime.Text = "";
+                StartTime_Elapsed = DateTime.Now;
+                ElapsedTokenSource = new CancellationTokenSource();
+                ElapsedTask = Task.Factory.StartNew(() => Elapsed(), ElapsedTokenSource.Token);
+
+                intervals.Clear();
+                lbl_RemainingTime.Text = "";
+                StartTime_Remaining = DateTime.Now;
+                RemainingTokenSource = new CancellationTokenSource();
+                RemainingTask = Task.Factory.StartNew(() => Remaining(), RemainingTokenSource.Token);
+
+                Thread thread = new Thread(Encourage);
+                thread.Start();
+                threads.Add(thread);
+            }
+            else
+            {
+                MessageBox.Show("No brain connected.");
+            }
+        }
+
+        private void DiscourageButton_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(BrainFile))
+            {
+                ProgressBar_Detail.Value = 0;
+                ProgressBar_Main.Value = 0;
+
+                EncourageButton.Enabled = false;
+
+                lbl_ElapsedTime.Text = "";
+                StartTime_Elapsed = DateTime.Now;
+                ElapsedTokenSource = new CancellationTokenSource();
+                ElapsedTask = Task.Factory.StartNew(() => Elapsed(), ElapsedTokenSource.Token);
+
+                intervals.Clear();
+                lbl_RemainingTime.Text = "";
+                StartTime_Remaining = DateTime.Now;
+                RemainingTokenSource = new CancellationTokenSource();
+                RemainingTask = Task.Factory.StartNew(() => Remaining(), RemainingTokenSource.Token);
+
+                Thread thread = new Thread(Discourage);
                 thread.Start();
                 threads.Add(thread);
             }

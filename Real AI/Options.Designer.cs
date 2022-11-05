@@ -143,15 +143,15 @@
             this.lbl_AttentionSpan.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbl_AttentionSpan.Location = new System.Drawing.Point(6, 105);
             this.lbl_AttentionSpan.Name = "lbl_AttentionSpan";
-            this.lbl_AttentionSpan.Size = new System.Drawing.Size(105, 17);
+            this.lbl_AttentionSpan.Size = new System.Drawing.Size(187, 17);
             this.lbl_AttentionSpan.TabIndex = 6;
-            this.lbl_AttentionSpan.Text = "Attention Span:";
+            this.lbl_AttentionSpan.Text = "Attention Span (in seconds):";
             // 
             // AttentionSpan
             // 
             this.AttentionSpan.AutoSize = true;
             this.AttentionSpan.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.AttentionSpan.Location = new System.Drawing.Point(117, 105);
+            this.AttentionSpan.Location = new System.Drawing.Point(199, 105);
             this.AttentionSpan.Name = "AttentionSpan";
             this.AttentionSpan.Size = new System.Drawing.Size(16, 17);
             this.AttentionSpan.TabIndex = 7;

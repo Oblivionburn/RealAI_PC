@@ -273,7 +273,7 @@ namespace Real_AI.Util
             }
         }
 
-        public static void BulkQuery(List<SQLiteCommand> commands, bool update_progress)
+        public static bool BulkQuery(List<SQLiteCommand> commands, bool update_progress)
         {
             int count = 0;
             int total = commands.Count;
@@ -319,6 +319,8 @@ namespace Real_AI.Util
                         transaction.Commit();
                     }
                 }
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -326,6 +328,7 @@ namespace Real_AI.Util
                 log.Add(ex.Message);
                 log.Add(ex.StackTrace);
                 AppUtil.CrashLog(log);
+                return false;
             }
         }
 
@@ -578,7 +581,7 @@ namespace Real_AI.Util
             return commands;
         }
 
-        public static List<SQLiteCommand> Increase_InputPriority(string input)
+        public static List<SQLiteCommand> Increase_InputPriorities(string input)
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
@@ -594,6 +597,28 @@ namespace Real_AI.Util
                 commands.Add(cmd);
             }
             
+            return commands;
+        }
+
+        public static List<SQLiteCommand> Decrease_InputPriorities(string input)
+        {
+            List<SQLiteCommand> commands = new List<SQLiteCommand>();
+
+            if (!string.IsNullOrEmpty(input))
+            {
+                SQLiteParameter parm = new SQLiteParameter("@input", input);
+                parm.DbType = DbType.String;
+
+                string sql = "UPDATE Inputs SET Priority = Priority - 1 WHERE Input = @input";
+                SQLiteCommand cmd = new SQLiteCommand(sql);
+                cmd.Parameters.Add(parm);
+                commands.Add(cmd);
+
+                string delete_sql = "DELETE FROM Inputs WHERE Priority < 1";
+                SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
+                commands.Add(delete_cmd);
+            }
+
             return commands;
         }
 
@@ -790,6 +815,28 @@ namespace Real_AI.Util
                 SQLiteCommand cmd = new SQLiteCommand(sql);
                 cmd.Parameters.Add(parm);
                 commands.Add(cmd);
+            }
+
+            return commands;
+        }
+
+        public static List<SQLiteCommand> Decrease_WordPriorities(string[] words)
+        {
+            List<SQLiteCommand> commands = new List<SQLiteCommand>();
+
+            foreach (string word in words)
+            {
+                SQLiteParameter parm = new SQLiteParameter("@word", word);
+                parm.DbType = DbType.String;
+
+                string sql = "UPDATE Words SET Priority = Priority - 1 WHERE Word = @word";
+                SQLiteCommand cmd = new SQLiteCommand(sql);
+                cmd.Parameters.Add(parm);
+                commands.Add(cmd);
+
+                string delete_sql = "DELETE FROM Words WHERE Priority < 1";
+                SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
+                commands.Add(delete_cmd);
             }
 
             return commands;
@@ -992,6 +1039,40 @@ namespace Real_AI.Util
             return commands;
         }
 
+        public static List<SQLiteCommand> Decrease_PreWordPriorities(string[] words, string[] prewords, int[] distances)
+        {
+            List<SQLiteCommand> commands = new List<SQLiteCommand>();
+            for (int i = 0; i < words.Length; i++)
+            {
+                SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
+                word_parm.DbType = DbType.String;
+
+                SQLiteParameter pre_word_parm = new SQLiteParameter("@pre_word", prewords[i]);
+                pre_word_parm.DbType = DbType.String;
+
+                SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
+                distance_parm.DbType = DbType.Int32;
+
+                string sql = @"
+                UPDATE PreWords
+                SET Priority = Priority - 1
+                WHERE Word = @word AND PreWord = @pre_word AND Distance = @distance
+                ";
+
+                SQLiteCommand cmd = new SQLiteCommand(sql);
+                cmd.Parameters.Add(word_parm);
+                cmd.Parameters.Add(pre_word_parm);
+                cmd.Parameters.Add(distance_parm);
+                commands.Add(cmd);
+            }
+
+            string delete_sql = @"DELETE FROM PreWords WHERE Priority < 1";
+            SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
+            commands.Add(delete_cmd);
+
+            return commands;
+        }
+
         public static List<ProWord> Get_ProWords(string brainFile)
         {
             List<ProWord> pro_words = new List<ProWord>();
@@ -1189,6 +1270,40 @@ namespace Real_AI.Util
             return commands;
         }
 
+        public static List<SQLiteCommand> Decrease_ProWordPriorities(string[] words, string[] prowords, int[] distances)
+        {
+            List<SQLiteCommand> commands = new List<SQLiteCommand>();
+            for (int i = 0; i < words.Length; i++)
+            {
+                SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
+                word_parm.DbType = DbType.String;
+
+                SQLiteParameter pro_word_parm = new SQLiteParameter("@pro_word", prowords[i]);
+                pro_word_parm.DbType = DbType.String;
+
+                SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
+                distance_parm.DbType = DbType.Int32;
+
+                string sql = @"
+                UPDATE ProWords
+                SET Priority = Priority - 1
+                WHERE Word = @word AND ProWord = @pro_word AND Distance = @distance
+                ";
+
+                SQLiteCommand cmd = new SQLiteCommand(sql);
+                cmd.Parameters.Add(word_parm);
+                cmd.Parameters.Add(pro_word_parm);
+                cmd.Parameters.Add(distance_parm);
+                commands.Add(cmd);
+            }
+
+            string delete_sql = @"DELETE FROM ProWords WHERE Priority < 1";
+            SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
+            commands.Add(delete_cmd);
+
+            return commands;
+        }
+
         public static List<Topic> Get_Topics(string brainFile)
         {
             List<Topic> topics = new List<Topic>();
@@ -1206,6 +1321,38 @@ namespace Real_AI.Util
             }
 
             return topics;
+        }
+
+        public static List<SQLiteCommand> AddTopics(string input, string[] words)
+        {
+            List<SQLiteCommand> commands = new List<SQLiteCommand>();
+
+            if (!string.IsNullOrEmpty(input) &&
+                words.Length > 0)
+            {
+                foreach (string word in words)
+                {
+                    SQLiteParameter input_parm = new SQLiteParameter("@input", input);
+                    input_parm.DbType = DbType.String;
+
+                    SQLiteParameter word_parm = new SQLiteParameter("@word", word);
+                    word_parm.DbType = DbType.String;
+
+                    //Add new topics
+                    string sql = @"
+                    INSERT INTO Topics (Input, Topic) 
+                    SELECT @input, @word 
+                    WHERE NOT EXISTS (SELECT 1 FROM Topics WHERE Input = @input AND Topic = @word)
+                    ";
+
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(input_parm);
+                    cmd.Parameters.Add(word_parm);
+                    commands.Add(cmd);
+                }
+            }
+
+            return commands;
         }
 
         public static List<SQLiteCommand> Increase_TopicPriorities(string input, string[] words)
@@ -1240,7 +1387,7 @@ namespace Real_AI.Util
             return commands;
         }
 
-        public static List<SQLiteCommand> AddTopics(string input, string[] words)
+        public static List<SQLiteCommand> Decrease_TopicPriorities(string input, string[] words)
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
@@ -1255,11 +1402,11 @@ namespace Real_AI.Util
                     SQLiteParameter word_parm = new SQLiteParameter("@word", word);
                     word_parm.DbType = DbType.String;
 
-                    //Add new topics
+                    //Increase priority for existing topics
                     string sql = @"
-                    INSERT INTO Topics (Input, Topic) 
-                    SELECT @input, @word 
-                    WHERE NOT EXISTS (SELECT 1 FROM Topics WHERE Input = @input AND Topic = @word)
+                    UPDATE Topics
+                    SET Priority = Priority - 1
+                    WHERE Input = @input AND Topic = @word
                     ";
 
                     SQLiteCommand cmd = new SQLiteCommand(sql);
@@ -1268,6 +1415,10 @@ namespace Real_AI.Util
                     commands.Add(cmd);
                 }
             }
+
+            string delete_sql = @"DELETE FROM Topics WHERE Priority < 1";
+            SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
+            commands.Add(delete_cmd);
 
             return commands;
         }
@@ -1424,6 +1575,54 @@ namespace Real_AI.Util
                 cmd.Parameters.Add(output_parm);
                 commands.Add(cmd);
             }
+
+            return commands;
+        }
+
+        public static List<SQLiteCommand> Increase_OutputPriorities(string output)
+        {
+            List<SQLiteCommand> commands = new List<SQLiteCommand>();
+
+            if (!string.IsNullOrEmpty(output))
+            {
+                SQLiteParameter output_parm = new SQLiteParameter("@output", output);
+                output_parm.DbType = DbType.String;
+
+                string sql = @"
+                UPDATE Outputs
+                SET Priority = Priority + 1
+                WHERE Output = @output";
+
+                SQLiteCommand cmd = new SQLiteCommand(sql);
+                cmd.Parameters.Add(output_parm);
+                commands.Add(cmd);
+            }
+
+            return commands;
+        }
+
+        public static List<SQLiteCommand> Decrease_OutputPriorities(string output)
+        {
+            List<SQLiteCommand> commands = new List<SQLiteCommand>();
+
+            if (!string.IsNullOrEmpty(output))
+            {
+                SQLiteParameter output_parm = new SQLiteParameter("@output", output);
+                output_parm.DbType = DbType.String;
+
+                string sql = @"
+                UPDATE Outputs
+                SET Priority = Priority - 1
+                WHERE Output = @output";
+
+                SQLiteCommand cmd = new SQLiteCommand(sql);
+                cmd.Parameters.Add(output_parm);
+                commands.Add(cmd);
+            }
+
+            string delete_sql = @"DELETE FROM Outputs WHERE Priority < 1";
+            SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
+            commands.Add(delete_cmd);
 
             return commands;
         }
