@@ -469,47 +469,37 @@ namespace Real_AI
                             {
                                 if (Topics.Length > 0)
                                 {
-                                    string[] inputs = SqlUtil.Get_InputsFromTopics(Topics, false);
-
-                                    if (!MainForm.Crash)
-                                    {
-                                        foreach (string input in inputs)
-                                        {
-                                            outputs.AddRange(SqlUtil.Get_OutputsFromInput(input, false).ToList());
-                                        }
-                                    }
+                                    outputs.AddRange(SqlUtil.Get_OutputsFromTopics(Topics, false));
                                 }
                             }
                             
-                            if (!MainForm.Crash)
+                            if (!MainForm.Crash &&
+                                outputs.Count == 0)
                             {
                                 //Get direct response
-                                if (outputs.Count == 0)
+                                if (!string.IsNullOrEmpty(CleanInput))
                                 {
-                                    if (!string.IsNullOrEmpty(CleanInput))
-                                    {
-                                        outputs.AddRange(SqlUtil.Get_OutputsFromInput(CleanInput, false).ToList());
-                                    }
+                                    outputs.AddRange(SqlUtil.Get_OutputsFromInput(CleanInput, false).ToList());
                                 }
                             }
 
-                            if (!MainForm.Crash)
+                            if (!MainForm.Crash &&
+                                outputs.Count == 0)
                             {
                                 //Get generated response
-                                if (outputs.Count == 0)
-                                {
-                                    string min_word = SqlUtil.Get_MinWord(WordArray);
+                                string min_word = SqlUtil.Get_MinWord(WordArray);
 
-                                    if (!MainForm.Crash)
-                                    {
-                                        outputs.Add(GenerateResponse(min_word, false, false));
-                                    }
+                                if (!MainForm.Crash)
+                                {
+                                    outputs.Add(GenerateResponse(min_word, false, false));
                                 }
                             }
                         }
                     }
 
-                    if (outputs.Count == 0)
+                    //Still got nothing? Say something random.
+                    if (!MainForm.Crash &&
+                        outputs.Count == 0)
                     {
                         string word = SqlUtil.Get_RandomWord();
                         outputs.Add(GenerateResponse(word, false, false));
@@ -522,123 +512,139 @@ namespace Real_AI
                     if (WordArray.Length > 0)
                     {
                         AppUtil.UpdateMain(10);
+                        MainForm.intervals.Clear();
 
                         //Add input as output to last response
                         if (!string.IsNullOrEmpty(LastResponse))
                         {
+                            AppUtil.UpdateMain("Adding input as output...");
+
                             UpdateOutputs(CleanInput, LastResponse, true);
-                            AppUtil.UpdateMain(20);
                         }
+                        AppUtil.UpdateMain(20);
+                        MainForm.intervals.Clear();
 
                         if (!MainForm.Crash)
                         {
-                            AppUtil.UpdateMain("Getting topics from input...");
+                            AppUtil.UpdateMain("Getting topic(s) from input...");
 
                             //Get lowest priority words from input
                             Topics = SqlUtil.Get_MinWords(WordArray, true);
-                            AppUtil.UpdateMain(30);
-                            MainForm.intervals.Clear();
-
-                            if (!MainForm.Crash &&
-                                Topics.Length > 0)
-                            {
-                                //Add words as topics for input
-                                UpdateTopics(CleanInput, Topics, true);
-                                AppUtil.UpdateMain(40);
-                                MainForm.intervals.Clear();
-                            }
-
-                            //Get topic-based response
-                            if (!MainForm.Crash &&
-                                Topics.Length > 0)
-                            {
-                                AppUtil.UpdateMain("Getting inputs with topics...");
-                                
-                                string[] inputs = SqlUtil.Get_InputsFromTopics(Topics, true);
-                                AppUtil.UpdateMain(50);
-                                MainForm.intervals.Clear();
-
-                                if (!MainForm.Crash)
-                                {
-                                    foreach (string input in inputs)
-                                    {
-                                        AppUtil.UpdateMain("Getting topic-based outputs...");
-                                        outputs.AddRange(SqlUtil.Get_OutputsFromInput(input, true).ToList());
-                                    }
-
-                                    AppUtil.UpdateMain(60);
-                                    MainForm.intervals.Clear();
-                                }
-                            }
                         }
+                        AppUtil.UpdateMain(30);
+                        MainForm.intervals.Clear();
 
-                        if (!MainForm.Crash)
+                        if (!MainForm.Crash &&
+                            Topics.Length > 0)
                         {
+                            AppUtil.UpdateMain("Adding new topic(s)...");
+
+                            //Add words as topics for input
+                            UpdateTopics(CleanInput, Topics, true);
+                        }
+                        AppUtil.UpdateMain(40);
+                        MainForm.intervals.Clear();
+
+                        //Get topic-based response
+                        if (!MainForm.Crash &&
+                            Topics.Length > 0)
+                        {
+                            AppUtil.UpdateMain("Getting outputs from topics...");
+
+                            //Get highest priority output(s) from matching topics
+                            outputs.AddRange(SqlUtil.Get_OutputsFromTopics(Topics, true));
+                        }
+                        AppUtil.UpdateMain(50);
+                        MainForm.intervals.Clear();
+
+                        if (!MainForm.Crash &&
+                            outputs.Count == 0)
+                        {
+                            AppUtil.UpdateMain("Getting direct output...");
+
                             //Get direct response
-                            if (outputs.Count == 0)
-                            {
-                                AppUtil.UpdateMain("Getting direct output...");
-                                
-                                outputs.AddRange(SqlUtil.Get_OutputsFromInput(CleanInput, true).ToList());
-                                AppUtil.UpdateMain(70);
-                                MainForm.intervals.Clear();
-                            }
+                            outputs.AddRange(SqlUtil.Get_OutputsFromInput(CleanInput, true).ToList());
                         }
+                        AppUtil.UpdateMain(60);
+                        MainForm.intervals.Clear();
 
-                        if (!MainForm.Crash)
+                        string min_word = "";
+                        if (!MainForm.Crash &&
+                            outputs.Count == 0)
                         {
-                            //Get generated response
-                            if (outputs.Count == 0)
-                            {
-                                AppUtil.UpdateMain("Generating response...");
-                                
-                                string min_word = SqlUtil.Get_MinWord(WordArray);
-                                AppUtil.UpdateMain(80);
-                                MainForm.intervals.Clear();
+                            AppUtil.UpdateMain("Getting best topic...");
 
-                                if (!MainForm.Crash)
-                                {
-                                    outputs.Add(GenerateResponse(min_word, true, false));
-                                    AppUtil.UpdateMain(90);
-                                    MainForm.intervals.Clear();
-                                }
-                            }
+                            //Get lowest priority word
+                            min_word = SqlUtil.Get_MinWord(WordArray);
                         }
+                        AppUtil.UpdateMain(70);
+                        MainForm.intervals.Clear();
 
-                        AppUtil.UpdateDetail(100);
+                        if (!MainForm.Crash &&
+                            outputs.Count == 0 &&
+                            !string.IsNullOrEmpty(min_word))
+                        {
+                            AppUtil.UpdateMain("Generating response...");
+
+                            //Generate response from lowest priority word
+                            outputs.Add(GenerateResponse(min_word, true, false));
+                        }
+                        AppUtil.UpdateMain(80);
+                        MainForm.intervals.Clear();
+
+                        string random_word = "";
+                        if (!MainForm.Crash &&
+                            outputs.Count == 0)
+                        {
+                            AppUtil.UpdateMain("Getting random word...");
+
+                            //Still got nothing? Pick a random word.
+                            random_word = SqlUtil.Get_RandomWord();
+                        }
+                        AppUtil.UpdateMain(90);
+                        MainForm.intervals.Clear();
+
+                        if (!MainForm.Crash &&
+                            outputs.Count == 0 &&
+                            !string.IsNullOrEmpty(random_word))
+                        {
+                            AppUtil.UpdateMain("Generating response...");
+
+                            //Generate response from random word
+                            outputs.Add(GenerateResponse(random_word, false, false));
+                        }
                         AppUtil.UpdateMain(100);
                         MainForm.intervals.Clear();
                     }
                 }
 
-                if (!MainForm.Crash)
+                if (!MainForm.Crash &&
+                    outputs.Count > 0)
                 {
-                    //Choose a response from outputs
-                    if (outputs.Count > 0)
+                    //Choose a response from outputs at random
+                    CryptoRandom random = new CryptoRandom();
+                    int choice = random.Next(0, outputs.Count);
+
+                    Response = outputs[choice];
+
+                    if (!string.IsNullOrEmpty(Response))
                     {
-                        CryptoRandom random = new CryptoRandom();
-                        int choice = random.Next(0, outputs.Count);
+                        //Clean up response
+                        Response = RulesCheck(Response);
 
-                        Response = outputs[choice];
-
-                        if (!MainForm.Crash &&
-                            !string.IsNullOrEmpty(Response))
+                        if (!string.IsNullOrEmpty(Response))
                         {
-                            //Clean up response
-                            Response = RulesCheck(Response);
+                            //Set response as last response
+                            LastResponse = Response;
 
-                            if (!string.IsNullOrEmpty(Response))
-                            {
-                                //Set response as last response
-                                LastResponse = Response;
-
-                                //Interrupt thinking
-                                LastThought = "";
-                                AppUtil.UpdateMain("Responded");
-                            }
+                            //Interrupt thinking
+                            LastThought = "";
+                            AppUtil.UpdateMain("Responded");
                         }
                     }
                 }
+
+                AppUtil.UpdateDetail(100);
             }
             catch (Exception ex)
             {
@@ -911,10 +917,7 @@ namespace Real_AI
             try
             {
                 string respond_to = "";
-
                 List<string> outputs = new List<string>();
-
-                bool okay = false;
 
                 if (!string.IsNullOrEmpty(LastThought))
                 {
@@ -949,85 +952,65 @@ namespace Real_AI
                                 if (!MainForm.Crash &&
                                     topics.Length > 0)
                                 {
-                                    string[] inputs = SqlUtil.Get_InputsFromTopics(topics, false);
-
-                                    if (!MainForm.Crash)
-                                    {
-                                        foreach (string input in inputs)
-                                        {
-                                            outputs.AddRange(SqlUtil.Get_OutputsFromInput(input, false).ToList());
-                                        }
-                                    }
+                                    outputs.AddRange(SqlUtil.Get_OutputsFromTopics(topics, false));
                                 }
                             }
 
-                            if (!MainForm.Crash)
+                            if (!MainForm.Crash &&
+                                outputs.Count == 0)
                             {
                                 //Get direct response
-                                if (outputs.Count == 0)
-                                {
-                                    outputs.AddRange(SqlUtil.Get_OutputsFromInput(respond_to, false).ToList());
-                                }
+                                outputs.AddRange(SqlUtil.Get_OutputsFromInput(respond_to, false).ToList());
                             }
 
-                            if (!MainForm.Crash)
+                            if (!MainForm.Crash &&
+                                outputs.Count == 0)
                             {
                                 //Get generated response
-                                if (outputs.Count == 0)
-                                {
-                                    string min_word = SqlUtil.Get_MinWord(WordArray_Thinking);
+                                string min_word = SqlUtil.Get_MinWord(WordArray_Thinking);
 
-                                    if (!MainForm.Crash)
-                                    {
-                                        outputs.Add(GenerateResponse(min_word, false, true));
-                                    }
+                                if (!MainForm.Crash &&
+                                    !string.IsNullOrEmpty(min_word))
+                                {
+                                    outputs.Add(GenerateResponse(min_word, false, true));
                                 }
                             }
 
-                            if (outputs.Count > 0)
+                            if (!MainForm.Crash &&
+                                outputs.Count == 0)
                             {
-                                if (!string.IsNullOrEmpty(outputs[0]))
-                                {
-                                    okay = true;
-                                }
+                                string word = SqlUtil.Get_RandomWord();
+                                outputs.Add(GenerateResponse(word, false, true));
                             }
                         }
                     }
                 }
-                
-                if (!okay)
-                {
-                    string word = SqlUtil.Get_RandomWord();
-                    outputs.Add(GenerateResponse(word, false, true));
-                }
 
-                if (!MainForm.Crash)
+                if (!MainForm.Crash &&
+                    outputs.Count > 0)
                 {
                     //Choose a response from outputs
-                    if (outputs.Count > 0)
+                    CryptoRandom random = new CryptoRandom();
+                    int choice = random.Next(0, outputs.Count);
+
+                    Thought = outputs[choice];
+
+                    if (!MainForm.Crash &&
+                        !string.IsNullOrEmpty(Thought))
                     {
-                        CryptoRandom random = new CryptoRandom();
-                        int choice = random.Next(0, outputs.Count);
+                        //Clean up response
+                        Thought = RulesCheck(Thought);
 
-                        Thought = outputs[choice];
-
-                        if (!MainForm.Crash &&
-                            !string.IsNullOrEmpty(Thought))
+                        if (!string.IsNullOrEmpty(Thought))
                         {
-                            //Clean up response
-                            Thought = RulesCheck(Thought);
-
-                            if (!string.IsNullOrEmpty(Thought))
+                            if (!string.IsNullOrEmpty(LastThought) &&
+                                LearnFromThinking)
                             {
-                                if (!string.IsNullOrEmpty(LastThought) &&
-                                    LearnFromThinking)
-                                {
-                                    UpdateOutputs(Thought, LastThought, false);
-                                }
-
-                                //Set response as last response
-                                LastThought = Thought;
+                                UpdateOutputs(Thought, LastThought, false);
                             }
+
+                            //Set response as last response
+                            LastThought = Thought;
                         }
                     }
                 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
@@ -560,6 +561,26 @@ namespace Real_AI.Util
             }
 
             return inputs;
+        }
+
+        public static int Get_InputPriority(string input)
+        {
+            if (!string.IsNullOrEmpty(input))
+            {
+                List<SQLiteParameter> parameters = new List<SQLiteParameter>();
+
+                SQLiteParameter parm = new SQLiteParameter("@input", input);
+                parm.DbType = DbType.String;
+                parameters.Add(parm);
+
+                DataTable data = GetData("SELECT Priority FROM Inputs WHERE Input = @input", parameters.ToArray());
+                if (data.Rows.Count > 0)
+                {
+                    return int.Parse(data.Rows[0].ItemArray[0].ToString());
+                }
+            }
+
+            return 0;
         }
 
         public static List<SQLiteCommand> Add_NewInput(string input)
@@ -1465,9 +1486,9 @@ namespace Real_AI.Util
             return commands;
         }
 
-        public static string[] Get_InputsFromTopics(string[] words, bool update_progress)
+        public static string[] Get_OutputsFromTopics(string[] words, bool update_progress)
         {
-            List<string> inputs = new List<string>();
+            List<string> outputs = new List<string>();
 
             if (words.Length > 0)
             {
@@ -1480,18 +1501,32 @@ namespace Real_AI.Util
 
                 string wordSet = WordArray_To_String(words);
 
-                DataTable data = GetData("SELECT Input, COUNT(Input) FROM Topics WHERE Topic IN (" + wordSet + ") GROUP BY Input", null);
+                //Get all the inputs that contain a matching topic from the wordset
+                DataTable inputsData = GetData("SELECT DISTINCT Input FROM Topics WHERE Topic IN (" + wordSet + ")", null);
 
-                int total = data.Rows.Count;
+                int total = inputsData.Rows.Count;
 
-                foreach (DataRow row in data.Rows)
+                Dictionary<string, int> output_priority = new Dictionary<string, int>();
+                foreach (DataRow row in inputsData.Rows)
                 {
-                    int count = int.Parse(row.ItemArray[1].ToString());
-                    int percent_match = (count * 100) / words.Length;
+                    string input = row.ItemArray[0].ToString();
 
-                    if (percent_match >= 60)
+                    List<SQLiteParameter> parameters = new List<SQLiteParameter>();
+                    SQLiteParameter parm = new SQLiteParameter("@input", input);
+                    parm.DbType = DbType.String;
+                    parameters.Add(parm);
+
+                    //Get all the outputs for the given input
+                    DataTable outputData = GetData("SELECT DISTINCT Output FROM Outputs WHERE Input = @input", parameters.ToArray());
+                    if (outputData.Rows.Count > 0)
                     {
-                        inputs.Add(row.ItemArray[0].ToString());
+                        string output = outputData.Rows[0].ItemArray[0].ToString();
+
+                        //Get the priority of the output from the Input table
+                        int priority = Get_InputPriority(output);
+
+                        //Add output/priority pair as a possibility
+                        output_priority.Add(output, priority);
                     }
 
                     value++;
@@ -1501,9 +1536,20 @@ namespace Real_AI.Util
                         AppUtil.UpdateDetail((value * 100) / total);
                     }
                 }
+
+                //Get the highest priority output
+                int max_priority = output_priority.Max().Value;
+                foreach (KeyValuePair<string, int> output_pair in output_priority)
+                {
+                    //Add any output matching the highest priority
+                    if (output_pair.Value >= max_priority)
+                    {
+                        outputs.Add(output_pair.Key);
+                    }
+                }
             }
 
-            return inputs.ToArray();
+            return outputs.ToArray();
         }
 
         public static List<Output> Get_Outputs(string brainFile)
