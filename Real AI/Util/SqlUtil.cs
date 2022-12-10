@@ -1538,13 +1538,16 @@ namespace Real_AI.Util
                 }
 
                 //Get the highest priority output
-                int max_priority = output_priority.Max().Value;
-                foreach (KeyValuePair<string, int> output_pair in output_priority)
+                if (output_priority.Count > 0)
                 {
-                    //Add any output matching the highest priority
-                    if (output_pair.Value >= max_priority)
+                    int max_priority = output_priority.Max().Value;
+                    foreach (KeyValuePair<string, int> output_pair in output_priority)
                     {
-                        outputs.Add(output_pair.Key);
+                        //Add any output matching the highest priority
+                        if (output_pair.Value >= max_priority)
+                        {
+                            outputs.Add(output_pair.Key);
+                        }
                     }
                 }
             }
