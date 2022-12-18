@@ -42,6 +42,10 @@ namespace Real_AI
                 chk_Thinking.Checked = Brain.Thinking;
                 chk_LearnFromThinking.Checked = Brain.LearnFromThinking;
                 chk_Initiate.Checked = Brain.Initiate;
+                chk_InputResponding.Checked = MainForm.InputResponding;
+                chk_TopicResponding.Checked = MainForm.TopicResponding;
+                chk_ProceduralResponding.Checked = MainForm.ProceduralResponding;
+
                 chk_TTS.Checked = MainForm.tts;
                 Voices.SelectedText = MainForm.tts_voice;
 

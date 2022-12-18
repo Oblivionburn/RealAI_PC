@@ -873,6 +873,11 @@ namespace Real_AI
                 Brain.Thinking = bool.Parse(AppUtil.Get_Config("Thinking"));
                 Brain.LearnFromThinking = bool.Parse(AppUtil.Get_Config("LearnFromThinking"));
                 Brain.Initiate = bool.Parse(AppUtil.Get_Config("Initiate"));
+
+                InputResponding = bool.Parse(AppUtil.Get_Config("InputResponding"));
+                TopicResponding = bool.Parse(AppUtil.Get_Config("TopicResponding"));
+                ProceduralResponding = bool.Parse(AppUtil.Get_Config("ProceduralResponding"));
+
                 tts = bool.Parse(AppUtil.Get_Config("TTS"));
                 tts_voice = AppUtil.Get_Config("TTS_Voice");
                 AppUtil.Update_Colors();
