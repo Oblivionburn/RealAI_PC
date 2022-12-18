@@ -174,6 +174,8 @@ namespace Real_AI
                 FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
                 CurrentVersion = Version.Parse(fvi.FileVersion);
 
+                Text = "Real AI - v" + CurrentVersion;
+
                 if (!File.Exists(Config))
                 {
                     string[] lines =
@@ -353,7 +355,7 @@ namespace Real_AI
                     "",
                     "8. For help, check Discord: https://discord.gg/3yJ8rce",
                     "",
-                    "To get started, create a new brain or load an existing one."
+                    "To get started, create a new brain or load an existing one from the Brains menu."
                 };
 
                 StringBuilder sb = new StringBuilder();
