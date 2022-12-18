@@ -829,7 +829,16 @@ namespace Real_AI
                         Directory.CreateDirectory(Current_HistoryDir);
                     }
 
-                    StartNewSession();
+                    History = AppUtil.GetHistory();
+                    if (History.Count > 0)
+                    {
+                        Display();
+                        StartNewSession();
+                    }
+                    else
+                    {
+                        DisplayTips();
+                    }
                 }
                 else
                 {
