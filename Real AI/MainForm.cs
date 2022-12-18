@@ -191,7 +191,7 @@ namespace Real_AI
                         "InputResponding=True",
                         "TopicResponding=True",
                         "ProceduralResponding=True",
-                        "Colors=default.colors"
+                        "Colors=" + Colors
                     };
 
                     File.WriteAllLines(Config, lines);
@@ -252,7 +252,7 @@ namespace Real_AI
 
                     if (string.IsNullOrEmpty(AppUtil.Get_Config("Colors")))
                     {
-                        AppUtil.Set_Config("Colors", Path.GetFileName(Colors));
+                        AppUtil.Set_Config("Colors", Colors);
                     }
                 }
 
@@ -804,17 +804,17 @@ namespace Real_AI
 
                 string colors = AppUtil.Get_Config("Colors");
                 if (!string.IsNullOrEmpty(colors) &&
-                    File.Exists(ColorsDir + @"\" + colors))
+                    File.Exists(colors))
                 {
-                    Colors = ColorsDir + @"\" + colors;
+                    Colors = colors;
                     AppUtil.Update_Colors();
                 }
 
                 string lastBrain = AppUtil.Get_Config("LastBrain");
                 if (!string.IsNullOrEmpty(lastBrain) &&
-                    File.Exists(BrainsDir + @"\" + lastBrain))
+                    File.Exists(lastBrain))
                 {
-                    BrainFile = BrainsDir + @"\" + lastBrain;
+                    BrainFile = lastBrain;
                     string BrainName = Path.GetFileNameWithoutExtension(BrainFile);
 
                     SqlUtil.BrainConn = SqlUtil.GetSqlConnection(BrainFile);
@@ -909,6 +909,7 @@ namespace Real_AI
                 }
 
                 Logger.WriteLog();
+                AppUtil.SaveColors();
             }
             catch (Exception ex)
             {
@@ -1240,6 +1241,8 @@ namespace Real_AI
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     BrainFile = dialog.FileName;
+
+                    AppUtil.Set_Config("LastBrain", BrainFile);
 
                     SqlUtil.BrainConn = SqlUtil.GetSqlConnection(BrainFile);
                     SQLiteConnection.CreateFile(BrainFile);

@@ -465,8 +465,6 @@ namespace Real_AI
                 if (color_Background_Window.ShowDialog() == DialogResult.OK)
                 {
                     Color color = color_Background_Window.Color;
-                    string str_color = AppUtil.ColorToHex(color);
-                    AppUtil.Set_Color("Color_Background_Window", str_color);
 
                     AppUtil.background_window = color;
                     pic_WindowBackground.BackColor = color;
@@ -487,8 +485,6 @@ namespace Real_AI
                 if (color_Text_Window.ShowDialog() == DialogResult.OK)
                 {
                     Color color = color_Text_Window.Color;
-                    string str_color = AppUtil.ColorToHex(color);
-                    AppUtil.Set_Color("Color_Text_Window", str_color);
 
                     AppUtil.text_window = color;
                     pic_WindowText.BackColor = color;
@@ -509,8 +505,6 @@ namespace Real_AI
                 if (color_Background_Control.ShowDialog() == DialogResult.OK)
                 {
                     Color color = color_Background_Control.Color;
-                    string str_color = AppUtil.ColorToHex(color);
-                    AppUtil.Set_Color("Color_Background_Control", str_color);
 
                     AppUtil.background_control = color;
                     pic_ControlBackground.BackColor = color;
@@ -531,8 +525,6 @@ namespace Real_AI
                 if (color_Text_Control.ShowDialog() == DialogResult.OK)
                 {
                     Color color = color_Text_Control.Color;
-                    string str_color = AppUtil.ColorToHex(color);
-                    AppUtil.Set_Color("Color_Text_Control", str_color);
 
                     AppUtil.text_control = color;
                     pic_ControlText.BackColor = color;
@@ -553,8 +545,6 @@ namespace Real_AI
                 if (color_Highlight_Control.ShowDialog() == DialogResult.OK)
                 {
                     Color color = color_Highlight_Control.Color;
-                    string str_color = AppUtil.ColorToHex(color);
-                    AppUtil.Set_Color("Color_Highlight_Control", str_color);
 
                     AppUtil.highlight_control = color;
                     pic_ControlHighlight.BackColor = color;
@@ -575,8 +565,6 @@ namespace Real_AI
                 if (color_Selected_Control.ShowDialog() == DialogResult.OK)
                 {
                     Color color = color_Selected_Control.Color;
-                    string str_color = AppUtil.ColorToHex(color);
-                    AppUtil.Set_Color("Color_Selected_Control", str_color);
 
                     AppUtil.selected_control = color;
                     pic_ControlSelected.BackColor = color;
@@ -597,8 +585,6 @@ namespace Real_AI
                 if (color_Background_Progress.ShowDialog() == DialogResult.OK)
                 {
                     Color color = color_Background_Progress.Color;
-                    string str_color = AppUtil.ColorToHex(color);
-                    AppUtil.Set_Color("Color_Background_Progress", str_color);
 
                     AppUtil.background_progress = color;
                     pic_ProgressBackground.BackColor = color;
@@ -619,8 +605,6 @@ namespace Real_AI
                 if (color_Text_Progress.ShowDialog() == DialogResult.OK)
                 {
                     Color color = color_Text_Progress.Color;
-                    string str_color = AppUtil.ColorToHex(color);
-                    AppUtil.Set_Color("Color_Text_Progress", str_color);
 
                     AppUtil.text_progress = color;
                     pic_ProgressText.BackColor = color;
@@ -642,13 +626,13 @@ namespace Real_AI
                 {
                     Filter = "Colors (*.colors)|*.colors",
                     DefaultExt = "*.colors",
-                    InitialDirectory = Environment.CurrentDirectory + @"\Themes\"
+                    InitialDirectory = MainForm.ColorsDir
                 };
 
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     MainForm.Colors = dialog.FileName;
-                    AppUtil.Set_Config("Colors", Path.GetFileName(MainForm.Colors));
+                    AppUtil.Set_Config("Colors", MainForm.Colors);
                     AppUtil.Update_Colors();
                     SetColors();
                 }
@@ -667,26 +651,14 @@ namespace Real_AI
                 {
                     Filter = "Colors (*.colors)|*.colors",
                     DefaultExt = "*.colors",
-                    InitialDirectory = Path.Combine(Environment.CurrentDirectory, "Themes")
+                    InitialDirectory = MainForm.ColorsDir
                 };
 
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     MainForm.Colors = dialog.FileName;
-
-                    string[] lines =
-                    {
-                        "Color_Background_Window=" + AppUtil.ColorToHex(AppUtil.background_window),
-                        "Color_Background_Control=" + AppUtil.ColorToHex(AppUtil.background_control),
-                        "Color_Background_Progress=" + AppUtil.ColorToHex(AppUtil.background_progress),
-                        "Color_Text_Window=" + AppUtil.ColorToHex(AppUtil.text_window),
-                        "Color_Text_Control=" + AppUtil.ColorToHex(AppUtil.text_control),
-                        "Color_Text_Progress=" + AppUtil.ColorToHex(AppUtil.text_progress),
-                        "Color_Highlight_Control=" + AppUtil.ColorToHex(AppUtil.highlight_control),
-                        "Color_Selected_Control=" + AppUtil.ColorToHex(AppUtil.selected_control)
-                    };
-
-                    File.WriteAllLines(MainForm.Colors, lines);
+                    AppUtil.Set_Config("Colors", MainForm.Colors);
+                    AppUtil.SaveColors();
                 }
             }
             catch (Exception ex)

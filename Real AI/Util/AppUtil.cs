@@ -11,13 +11,13 @@ namespace Real_AI.Util
     public static class AppUtil
     {
         public static Color background_window;
-        public static Color text_window;
         public static Color background_control;
-        public static Color text_control;
-        public static Color highlight_control;
-        public static Color selected_control;
         public static Color background_progress;
+        public static Color text_window;
+        public static Color text_control;
         public static Color text_progress;
+        public static Color highlight_control;
+        public static Color selected_control;        
 
         public static void Set_Config(string name, string value)
         {
@@ -85,7 +85,7 @@ namespace Real_AI.Util
         {
             try
             {
-                List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
+                List<string> lines = File.ReadAllLines(MainForm.Colors).ToList();
 
                 bool found = false;
                 for (int i = 0; i < lines.Count; i++)
@@ -581,6 +581,23 @@ namespace Real_AI.Util
             {
                 Logger.AddLog("AppUtil.Update_Colors", ex.Source, ex.Message, ex.StackTrace);
             }
+        }
+
+        public static void SaveColors()
+        {
+            string[] lines =
+            {
+                "Color_Background_Window=" + ColorToHex(background_window),
+                "Color_Background_Control=" + ColorToHex(background_control),
+                "Color_Background_Progress=" + ColorToHex(background_progress),
+                "Color_Text_Window=" + ColorToHex(text_window),
+                "Color_Text_Control=" + ColorToHex(text_control),
+                "Color_Text_Progress=" + ColorToHex(text_progress),
+                "Color_Highlight_Control=" + ColorToHex(highlight_control),
+                "Color_Selected_Control=" + ColorToHex(selected_control)
+            };
+
+            File.WriteAllLines(MainForm.Colors, lines);
         }
     }
 }
