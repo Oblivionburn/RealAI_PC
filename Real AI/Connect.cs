@@ -30,141 +30,190 @@ namespace Real_AI
 
         private void Connect_Load(object sender, EventArgs e)
         {
-            SetColors();
+            try
+            {
+                SetColors();
 
-            if (MainForm.network == null)
-            {
-                MainForm.network = new Thread(NetUtil.Update);
-                MainForm.network.Start();
-            }
-            
-            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (IPAddress ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                if (MainForm.network == null)
                 {
-                    NetUtil.ConnectedIP = ip.ToString();
-                    break;
+                    MainForm.network = new Thread(NetUtil.Update);
+                    MainForm.network.Start();
                 }
+
+                IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+                foreach (IPAddress ip in host.AddressList)
+                {
+                    if (ip.AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        NetUtil.ConnectedIP = ip.ToString();
+                        break;
+                    }
+                }
+
+                IP_Box.Text = "localhost";
+                PortBox.Text = NetUtil.Port.ToString();
+
+                string externalIP = new WebClient().DownloadString("http://ifconfig.me/ip");
+                ExternalBox.Text = externalIP.Substring(0, externalIP.Length);
             }
-
-            IP_Box.Text = "localhost";
-            PortBox.Text = NetUtil.Port.ToString();
-
-            string externalIP = new WebClient().DownloadString("http://ifconfig.me/ip");
-            ExternalBox.Text = externalIP.Substring(0, externalIP.Length);
+            catch (Exception ex)
+            {
+                Logger.AddLog("Connect.Connect_Load", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private void Connect_FormClosing(object sender, FormClosingEventArgs e)
         {
-            MainForm.ResumeTimers();
+            try
+            {
+                MainForm.ResumeTimers();
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Connect.Connect_FormClosing", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private void SetColors()
         {
-            BackColor = AppUtil.background_window;
+            try
+            {
+                BackColor = AppUtil.background_window;
 
-            lbl_IP.ForeColor = AppUtil.text_window;
-            lbl_Port.ForeColor = AppUtil.text_window;
-            lbl_External_IP.ForeColor = AppUtil.text_window;
+                lbl_IP.ForeColor = AppUtil.text_window;
+                lbl_Port.ForeColor = AppUtil.text_window;
+                lbl_External_IP.ForeColor = AppUtil.text_window;
 
-            IP_Box.BackColor = AppUtil.background_control;
-            IP_Box.ForeColor = AppUtil.text_control;
-            PortBox.BackColor = AppUtil.background_control;
-            PortBox.ForeColor = AppUtil.text_control;
-            TestButton.BackColor = AppUtil.background_control;
-            TestButton.ForeColor = AppUtil.text_control;
-            ConnectButton.BackColor = AppUtil.background_control;
-            ConnectButton.ForeColor = AppUtil.text_control;
-            ExternalBox.BackColor = AppUtil.background_control;
-            ExternalBox.ForeColor = AppUtil.text_control;
+                IP_Box.BackColor = AppUtil.background_control;
+                IP_Box.ForeColor = AppUtil.text_control;
+                PortBox.BackColor = AppUtil.background_control;
+                PortBox.ForeColor = AppUtil.text_control;
+                TestButton.BackColor = AppUtil.background_control;
+                TestButton.ForeColor = AppUtil.text_control;
+                ConnectButton.BackColor = AppUtil.background_control;
+                ConnectButton.ForeColor = AppUtil.text_control;
+                ExternalBox.BackColor = AppUtil.background_control;
+                ExternalBox.ForeColor = AppUtil.text_control;
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Connect.SetColors", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private void ConnectButton_Click(object sender, EventArgs e)
         {
-            if (IP_Box.Text != "localhost")
+            try
             {
-                NetUtil.ConnectedIP = IP_Box.Text;
+                if (IP_Box.Text != "localhost")
+                {
+                    NetUtil.ConnectedIP = IP_Box.Text;
+                }
+
+                NetUtil.Listener = new TcpListener(IPAddress.Parse(NetUtil.ConnectedIP), NetUtil.Port);
+
+                if (IP_Box.Text == "localhost")
+                {
+                    NetUtil.ConnectedIP = IP_Box.Text;
+                }
+
+                NetUtil.Listening = true;
+                NetUtil.Start();
+
+                MainForm.input.Enabled = false;
+                MainForm.enter.Enabled = false;
+                MainForm.input.Text = "[Connected to " + IP_Box.Text + ":" + NetUtil.Port + "]";
+                MainForm.menu_Link.Text = "Disconnect Link";
+                MainForm.Linked = true;
+                MainForm.ListenTimer.Start();
+
+                Close();
             }
-
-            NetUtil.Listener = new TcpListener(IPAddress.Parse(NetUtil.ConnectedIP), NetUtil.Port);
-
-            if (IP_Box.Text == "localhost")
+            catch (Exception ex)
             {
-                NetUtil.ConnectedIP = IP_Box.Text;
+                Logger.AddLog("Connect.ConnectButton_Click", ex.Source, ex.Message, ex.StackTrace);
             }
-
-            NetUtil.Listening = true;
-            NetUtil.Start();
-
-            MainForm.input.Enabled = false;
-            MainForm.enter.Enabled = false;
-            MainForm.input.Text = "[Connected to " + IP_Box.Text + ":" + NetUtil.Port + "]";
-            MainForm.menu_Link.Text = "Disconnect Link";
-            MainForm.Linked = true;
-            MainForm.ListenTimer.Start();
-
-            Close();
         }
 
         private void TestButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(NetUtil.TestConnection());
+            try
+            {
+                MessageBox.Show(NetUtil.TestConnection());
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Connect.TestButton_Click", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private void IP_Box_TextChanged(object sender, EventArgs e)
         {
-            bool okay = true;
-
-            if (IP_Box.Text != "localhost")
+            try
             {
-                string[] array = IP_Box.Text.Split('.');
-                if (array.Length == 4)
+                bool okay = true;
+
+                if (IP_Box.Text != "localhost")
                 {
-                    foreach (string num in array)
+                    string[] array = IP_Box.Text.Split('.');
+                    if (array.Length == 4)
                     {
-                        if (int.TryParse(num, out _))
+                        foreach (string num in array)
                         {
-                            int number = int.Parse(num);
-                            if (number < 0 || number > 255)
+                            if (int.TryParse(num, out _))
+                            {
+                                int number = int.Parse(num);
+                                if (number < 0 || number > 255)
+                                {
+                                    okay = false;
+                                    break;
+                                }
+                            }
+                            else
                             {
                                 okay = false;
                                 break;
                             }
                         }
-                        else
-                        {
-                            okay = false;
-                            break;
-                        }
                     }
+                    else
+                    {
+                        okay = false;
+                    }
+                }
+
+                if (okay)
+                {
+                    IP_Box.ForeColor = AppUtil.text_control;
                 }
                 else
                 {
-                    okay = false;
+                    IP_Box.ForeColor = Color.Red;
                 }
             }
-
-            if (okay)
+            catch (Exception ex)
             {
-                IP_Box.ForeColor = AppUtil.text_control;
-            }
-            else
-            {
-                IP_Box.ForeColor = Color.Red;
+                Logger.AddLog("Connect.IP_Box_TextChanged", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
         private void PortBox_TextChanged(object sender, EventArgs e)
         {
-            if (int.TryParse(PortBox.Text, out _))
+            try
             {
-                PortBox.ForeColor = AppUtil.text_control;
-                NetUtil.Port = int.Parse(PortBox.Text);
+                if (int.TryParse(PortBox.Text, out _))
+                {
+                    PortBox.ForeColor = AppUtil.text_control;
+                    NetUtil.Port = int.Parse(PortBox.Text);
+                }
+                else
+                {
+                    PortBox.ForeColor = Color.Red;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                PortBox.ForeColor = Color.Red;
+                Logger.AddLog("Connect.PortBox_TextChanged", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 

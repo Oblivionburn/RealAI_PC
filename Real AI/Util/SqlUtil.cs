@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.Threading;
-using System.Windows.Forms;
 
 namespace Real_AI.Util
 {
@@ -112,10 +111,7 @@ namespace Real_AI.Util
             }
             catch (Exception ex)
             {
-                List<string> log = new List<string>();
-                log.Add(ex.Message);
-                log.Add(ex.StackTrace);
-                AppUtil.CrashLog(log);
+                Logger.AddLog("SqlUtil.Init", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
@@ -220,16 +216,22 @@ namespace Real_AI.Util
             }
             catch (Exception ex)
             {
-                List<string> log = new List<string>();
-                log.Add(ex.Message);
-                log.Add(ex.StackTrace);
-                AppUtil.CrashLog(log);
+                Logger.AddLog("SqlUtil.Init", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
         public static SQLiteConnection GetSqlConnection(string filePath)
         {
-            return new SQLiteConnection("Data Source=" + filePath + "; Version=3;");
+            try
+            {
+                return new SQLiteConnection("Data Source=" + filePath + "; Version=3;");
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.GetSqlConnection", ex.Source, ex.Message, ex.StackTrace);
+            }
+
+            return null;
         }
 
         public static void ExecuteQuery_Simple(string sql, SQLiteParameter[] parameters)
@@ -267,10 +269,7 @@ namespace Real_AI.Util
             }
             catch (Exception ex)
             {
-                List<string> log = new List<string>();
-                log.Add(ex.Message);
-                log.Add(ex.StackTrace);
-                AppUtil.CrashLog(log);
+                Logger.AddLog("SqlUtil.ExecuteQuery_Simple", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
@@ -281,7 +280,7 @@ namespace Real_AI.Util
 
             if (update_progress)
             {
-                AppUtil.UpdateDetail(0);
+                AppUtil.UpdateProgress(MainForm.progressDetail, 0);
             }
 
             try
@@ -312,7 +311,7 @@ namespace Real_AI.Util
 
                                 if (update_progress)
                                 {
-                                    AppUtil.UpdateDetail((count * 100) / total);
+                                    AppUtil.UpdateProgress(MainForm.progressDetail, (count * 100) / total);
                                 }
                             }
                         }
@@ -325,12 +324,10 @@ namespace Real_AI.Util
             }
             catch (Exception ex)
             {
-                List<string> log = new List<string>();
-                log.Add(ex.Message);
-                log.Add(ex.StackTrace);
-                AppUtil.CrashLog(log);
-                return false;
+                Logger.AddLog("SqlUtil.BulkQuery", ex.Source, ex.Message, ex.StackTrace);
             }
+
+            return false;
         }
 
         public static void BulkQuery(List<SQLiteCommand> commands, string brainFile, TextProgressBar progressBar, CancellationTokenSource TokenSource)
@@ -340,20 +337,8 @@ namespace Real_AI.Util
 
             if (progressBar != null)
             {
-                if (progressBar.InvokeRequired &&
-                    !AppUtil.IsCancelled(TokenSource))
-                {
-                    progressBar.Invoke((MethodInvoker)delegate
-                    {
-                        progressBar.CustomText = "(" + count + "/" + total + ")";
-                        progressBar.Value = 0;
-                    });
-                }
-                else
-                {
-                    progressBar.CustomText = "(" + count + "/" + total + ")";
-                    progressBar.Value = 0;
-                }
+                AppUtil.UpdateProgress(TokenSource, progressBar, "(" + count + "/" + total + ")");
+                AppUtil.UpdateProgress(TokenSource, progressBar, 0);
             }
 
             try
@@ -394,20 +379,8 @@ namespace Real_AI.Util
 
                                 if (progressBar != null)
                                 {
-                                    if (progressBar.InvokeRequired &&
-                                        !AppUtil.IsCancelled(TokenSource))
-                                    {
-                                        progressBar.Invoke((MethodInvoker)delegate
-                                        {
-                                            progressBar.CustomText = "(" + count + "/" + total + ")";
-                                            progressBar.Value = (count * 100) / total;
-                                        });
-                                    }
-                                    else
-                                    {
-                                        progressBar.CustomText = "(" + count + "/" + total + ")";
-                                        progressBar.Value = (count * 100) / total;
-                                    }
+                                    AppUtil.UpdateProgress(TokenSource, progressBar, "(" + count + "/" + total + ")");
+                                    AppUtil.UpdateProgress(TokenSource, progressBar, (count * 100) / total);
                                 }
                             }
                         }
@@ -421,10 +394,7 @@ namespace Real_AI.Util
             }
             catch (Exception ex)
             {
-                List<string> log = new List<string>();
-                log.Add(ex.Message);
-                log.Add(ex.StackTrace);
-                AppUtil.CrashLog(log);
+                Logger.AddLog("SqlUtil.BulkQuery", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
@@ -471,10 +441,7 @@ namespace Real_AI.Util
             }
             catch (Exception ex)
             {
-                List<string> log = new List<string>();
-                log.Add(ex.Message);
-                log.Add(ex.StackTrace);
-                AppUtil.CrashLog(log);
+                Logger.AddLog("SqlUtil.GetData", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return data;
@@ -523,10 +490,7 @@ namespace Real_AI.Util
             }
             catch (Exception ex)
             {
-                List<string> log = new List<string>();
-                log.Add(ex.Message);
-                log.Add(ex.StackTrace);
-                AppUtil.CrashLog(log);
+                Logger.AddLog("SqlUtil.GetData", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return data;
@@ -536,10 +500,17 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            string[] tables = { "Outputs", "Topics", "PreWords", "ProWords", "Inputs", "Words" };
-            foreach (string table in tables)
+            try
             {
-                commands.Add(new SQLiteCommand("DELETE FROM " + table));
+                string[] tables = { "Outputs", "Topics", "PreWords", "ProWords", "Inputs", "Words" };
+                foreach (string table in tables)
+                {
+                    commands.Add(new SQLiteCommand("DELETE FROM " + table));
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Wipe", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -549,15 +520,22 @@ namespace Real_AI.Util
         {
             List<Input> inputs = new List<Input>();
 
-            DataTable data = GetData("SELECT ID, Input, Priority FROM Inputs", null, brainFile);
-
-            foreach (DataRow row in data.Rows)
+            try
             {
-                Input new_input = new Input();
-                new_input.id = int.Parse(row.ItemArray[0].ToString());
-                new_input.input = row.ItemArray[1].ToString();
-                new_input.priority = int.Parse(row.ItemArray[2].ToString());
-                inputs.Add(new_input);
+                DataTable data = GetData("SELECT ID, Input, Priority FROM Inputs", null, brainFile);
+
+                foreach (DataRow row in data.Rows)
+                {
+                    Input new_input = new Input();
+                    new_input.id = int.Parse(row.ItemArray[0].ToString());
+                    new_input.input = row.ItemArray[1].ToString();
+                    new_input.priority = int.Parse(row.ItemArray[2].ToString());
+                    inputs.Add(new_input);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_Inputs", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return inputs;
@@ -565,19 +543,26 @@ namespace Real_AI.Util
 
         public static int Get_InputPriority(string input)
         {
-            if (!string.IsNullOrEmpty(input))
+            try
             {
-                List<SQLiteParameter> parameters = new List<SQLiteParameter>();
-
-                SQLiteParameter parm = new SQLiteParameter("@input", input);
-                parm.DbType = DbType.String;
-                parameters.Add(parm);
-
-                DataTable data = GetData("SELECT Priority FROM Inputs WHERE Input = @input", parameters.ToArray());
-                if (data.Rows.Count > 0)
+                if (!string.IsNullOrEmpty(input))
                 {
-                    return int.Parse(data.Rows[0].ItemArray[0].ToString());
+                    List<SQLiteParameter> parameters = new List<SQLiteParameter>();
+
+                    SQLiteParameter parm = new SQLiteParameter("@input", input);
+                    parm.DbType = DbType.String;
+                    parameters.Add(parm);
+
+                    DataTable data = GetData("SELECT Priority FROM Inputs WHERE Input = @input", parameters.ToArray());
+                    if (data.Rows.Count > 0)
+                    {
+                        return int.Parse(data.Rows[0].ItemArray[0].ToString());
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_InputPriority", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return 0;
@@ -587,16 +572,23 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            if (!string.IsNullOrEmpty(input))
+            try
             {
-                SQLiteParameter parm = new SQLiteParameter("@input", input);
-                parm.DbType = DbType.String;
+                if (!string.IsNullOrEmpty(input))
+                {
+                    SQLiteParameter parm = new SQLiteParameter("@input", input);
+                    parm.DbType = DbType.String;
 
-                string sql = "INSERT INTO Inputs (Input) SELECT @input WHERE NOT EXISTS (SELECT 1 FROM Inputs WHERE Input = @input)";
+                    string sql = "INSERT INTO Inputs (Input) SELECT @input WHERE NOT EXISTS (SELECT 1 FROM Inputs WHERE Input = @input)";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(parm);
+                    commands.Add(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Add_NewInput", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -606,16 +598,23 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            if (!string.IsNullOrEmpty(input))
+            try
             {
-                SQLiteParameter parm = new SQLiteParameter("@input", input);
-                parm.DbType = DbType.String;
+                if (!string.IsNullOrEmpty(input))
+                {
+                    SQLiteParameter parm = new SQLiteParameter("@input", input);
+                    parm.DbType = DbType.String;
 
-                string sql = "UPDATE Inputs SET Priority = Priority + 1 WHERE Input = @input";
+                    string sql = "UPDATE Inputs SET Priority = Priority + 1 WHERE Input = @input";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(parm);
+                    commands.Add(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Increase_InputPriorities", ex.Source, ex.Message, ex.StackTrace);
             }
             
             return commands;
@@ -625,19 +624,26 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            if (!string.IsNullOrEmpty(input))
+            try
             {
-                SQLiteParameter parm = new SQLiteParameter("@input", input);
-                parm.DbType = DbType.String;
+                if (!string.IsNullOrEmpty(input))
+                {
+                    SQLiteParameter parm = new SQLiteParameter("@input", input);
+                    parm.DbType = DbType.String;
 
-                string sql = "UPDATE Inputs SET Priority = Priority - 1 WHERE Input = @input";
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(parm);
-                commands.Add(cmd);
+                    string sql = "UPDATE Inputs SET Priority = Priority - 1 WHERE Input = @input";
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(parm);
+                    commands.Add(cmd);
 
-                string delete_sql = "DELETE FROM Inputs WHERE Priority < 1";
-                SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
-                commands.Add(delete_cmd);
+                    string delete_sql = "DELETE FROM Inputs WHERE Priority < 1";
+                    SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
+                    commands.Add(delete_cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Decrease_InputPriorities", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -647,15 +653,22 @@ namespace Real_AI.Util
         {
             List<Word> words = new List<Word>();
 
-            DataTable data = GetData("SELECT ID, Word, Priority FROM Words", null, brainFile);
-
-            foreach (DataRow row in data.Rows)
+            try
             {
-                Word new_word = new Word();
-                new_word.id = int.Parse(row.ItemArray[0].ToString());
-                new_word.word = row.ItemArray[1].ToString();
-                new_word.priority = int.Parse(row.ItemArray[2].ToString());
-                words.Add(new_word);
+                DataTable data = GetData("SELECT ID, Word, Priority FROM Words", null, brainFile);
+
+                foreach (DataRow row in data.Rows)
+                {
+                    Word new_word = new Word();
+                    new_word.id = int.Parse(row.ItemArray[0].ToString());
+                    new_word.word = row.ItemArray[1].ToString();
+                    new_word.priority = int.Parse(row.ItemArray[2].ToString());
+                    words.Add(new_word);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_Words", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return words;
@@ -665,11 +678,18 @@ namespace Real_AI.Util
         {
             string word = "";
 
-            DataTable data = GetData("SELECT Word FROM Words ORDER BY RANDOM() LIMIT 1", null);
-
-            if (data.Rows.Count > 0)
+            try
             {
-                word = data.Rows[0].ItemArray[0].ToString();
+                DataTable data = GetData("SELECT Word FROM Words ORDER BY RANDOM() LIMIT 1", null);
+
+                if (data.Rows.Count > 0)
+                {
+                    word = data.Rows[0].ItemArray[0].ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_RandomWord", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return word;
@@ -679,32 +699,39 @@ namespace Real_AI.Util
         {
             string word = "";
 
-            if (words.Length > 0)
+            try
             {
-                List<string> min_words = new List<string>();
-
-                int priority = Get_MinPriority_Words(words);
-
-                string wordSet = WordArray_To_String(words);
-
-                SQLiteParameter parm = new SQLiteParameter("@priority", priority);
-                parm.DbType = DbType.Int32;
-
-                SQLiteParameter[] parms = { parm };
-                DataTable data = GetData("SELECT Word FROM Words WHERE Priority = @priority AND Word IN (" + wordSet + ")", parms);
-
-                foreach (DataRow row in data.Rows)
+                if (words.Length > 0)
                 {
-                    string min_word = row.ItemArray[0].ToString();
-                    min_words.Add(min_word);
-                }
+                    List<string> min_words = new List<string>();
 
-                if (min_words.Count > 0)
-                {
-                    CryptoRandom random = new CryptoRandom();
-                    int choice = random.Next(0, min_words.Count);
-                    word = min_words[choice];
+                    int priority = Get_MinPriority_Words(words);
+
+                    string wordSet = WordArray_To_String(words);
+
+                    SQLiteParameter parm = new SQLiteParameter("@priority", priority);
+                    parm.DbType = DbType.Int32;
+
+                    SQLiteParameter[] parms = { parm };
+                    DataTable data = GetData("SELECT Word FROM Words WHERE Priority = @priority AND Word IN (" + wordSet + ")", parms);
+
+                    foreach (DataRow row in data.Rows)
+                    {
+                        string min_word = row.ItemArray[0].ToString();
+                        min_words.Add(min_word);
+                    }
+
+                    if (min_words.Count > 0)
+                    {
+                        CryptoRandom random = new CryptoRandom();
+                        int choice = random.Next(0, min_words.Count);
+                        word = min_words[choice];
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_MinWord", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return word;
@@ -714,39 +741,46 @@ namespace Real_AI.Util
         {
             List<string> min_words = new List<string>();
 
-            if (words.Length > 0)
+            try
             {
-                int count = 0;
-
-                if (update_progress)
+                if (words.Length > 0)
                 {
-                    AppUtil.UpdateDetail(0);
-                }
-
-                int priority = Get_MinPriority_Words(words);
-
-                string wordSet = WordArray_To_String(words);
-
-                SQLiteParameter parm = new SQLiteParameter("@priority", priority);
-                parm.DbType = DbType.Int32;
-
-                SQLiteParameter[] parms = { parm };
-                DataTable data = GetData("SELECT Word FROM Words WHERE Priority = @priority AND Word IN (" + wordSet + ")", parms);
-
-                int total = data.Rows.Count;
-
-                foreach (DataRow row in data.Rows)
-                {
-                    string word = row.ItemArray[0].ToString();
-                    min_words.Add(word);
-
-                    count++;
+                    int count = 0;
 
                     if (update_progress)
                     {
-                        AppUtil.UpdateDetail((count * 100) / total);
+                        AppUtil.UpdateProgress(MainForm.progressDetail, 0);
+                    }
+
+                    int priority = Get_MinPriority_Words(words);
+
+                    string wordSet = WordArray_To_String(words);
+
+                    SQLiteParameter parm = new SQLiteParameter("@priority", priority);
+                    parm.DbType = DbType.Int32;
+
+                    SQLiteParameter[] parms = { parm };
+                    DataTable data = GetData("SELECT Word FROM Words WHERE Priority = @priority AND Word IN (" + wordSet + ")", parms);
+
+                    int total = data.Rows.Count;
+
+                    foreach (DataRow row in data.Rows)
+                    {
+                        string word = row.ItemArray[0].ToString();
+                        min_words.Add(word);
+
+                        count++;
+
+                        if (update_progress)
+                        {
+                            AppUtil.UpdateProgress(MainForm.progressDetail, (count * 100) / total);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_MinWords", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return min_words.ToArray();
@@ -756,21 +790,28 @@ namespace Real_AI.Util
         {
             int min = 0;
 
-            if (words.Length > 0)
+            try
             {
-                string wordSet = WordArray_To_String(words);
-
-                DataTable data = GetData("SELECT MIN(Priority) AS MinPriority FROM Words WHERE Word IN (" + wordSet + ")", null);
-
-                if (data.Rows.Count > 0 &&
-                    data.Rows[0].ItemArray.Length > 0)
+                if (words.Length > 0)
                 {
-                    string result = data.Rows[0].ItemArray[0].ToString();
-                    if (!string.IsNullOrEmpty(result))
+                    string wordSet = WordArray_To_String(words);
+
+                    DataTable data = GetData("SELECT MIN(Priority) AS MinPriority FROM Words WHERE Word IN (" + wordSet + ")", null);
+
+                    if (data.Rows.Count > 0 &&
+                        data.Rows[0].ItemArray.Length > 0)
                     {
-                        min = int.Parse(result);
+                        string result = data.Rows[0].ItemArray[0].ToString();
+                        if (!string.IsNullOrEmpty(result))
+                        {
+                            min = int.Parse(result);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_MinPriority_Words", ex.Source, ex.Message, ex.StackTrace);
             }
             
             return min;
@@ -780,16 +821,23 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            foreach (string word in words)
+            try
             {
-                SQLiteParameter parm = new SQLiteParameter("@word", word);
-                parm.DbType = DbType.String;
+                foreach (string word in words)
+                {
+                    SQLiteParameter parm = new SQLiteParameter("@word", word);
+                    parm.DbType = DbType.String;
 
-                string sql = "INSERT INTO Words (Word) SELECT @word WHERE NOT EXISTS (SELECT 1 FROM Words WHERE Word = @word)";
+                    string sql = "INSERT INTO Words (Word) SELECT @word WHERE NOT EXISTS (SELECT 1 FROM Words WHERE Word = @word)";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(parm);
+                    commands.Add(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Add_Words", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -799,24 +847,31 @@ namespace Real_AI.Util
         {
             int priority = 0;
 
-            if (!string.IsNullOrEmpty(word))
+            try
             {
-                SQLiteParameter parm = new SQLiteParameter("@word", word);
-                parm.DbType = DbType.String;
-
-                SQLiteParameter[] parms = { parm };
-
-                DataTable data = GetData("SELECT Priority FROM Words WHERE Word = @word", parms);
-
-                if (data.Rows.Count > 0 &&
-                    data.Rows[0].ItemArray.Length > 0)
+                if (!string.IsNullOrEmpty(word))
                 {
-                    string result = data.Rows[0].ItemArray[0].ToString();
-                    if (!string.IsNullOrEmpty(result))
+                    SQLiteParameter parm = new SQLiteParameter("@word", word);
+                    parm.DbType = DbType.String;
+
+                    SQLiteParameter[] parms = { parm };
+
+                    DataTable data = GetData("SELECT Priority FROM Words WHERE Word = @word", parms);
+
+                    if (data.Rows.Count > 0 &&
+                        data.Rows[0].ItemArray.Length > 0)
                     {
-                        priority = int.Parse(result);
+                        string result = data.Rows[0].ItemArray[0].ToString();
+                        if (!string.IsNullOrEmpty(result))
+                        {
+                            priority = int.Parse(result);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_Word_Priority", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return priority;
@@ -826,16 +881,23 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            foreach (string word in words)
+            try
             {
-                SQLiteParameter parm = new SQLiteParameter("@word", word);
-                parm.DbType = DbType.String;
+                foreach (string word in words)
+                {
+                    SQLiteParameter parm = new SQLiteParameter("@word", word);
+                    parm.DbType = DbType.String;
 
-                string sql = "UPDATE Words SET Priority = Priority + 1 WHERE Word = @word";
+                    string sql = "UPDATE Words SET Priority = Priority + 1 WHERE Word = @word";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(parm);
+                    commands.Add(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Increase_WordPriorities", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -845,19 +907,26 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            foreach (string word in words)
+            try
             {
-                SQLiteParameter parm = new SQLiteParameter("@word", word);
-                parm.DbType = DbType.String;
+                foreach (string word in words)
+                {
+                    SQLiteParameter parm = new SQLiteParameter("@word", word);
+                    parm.DbType = DbType.String;
 
-                string sql = "UPDATE Words SET Priority = Priority - 1 WHERE Word = @word";
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(parm);
-                commands.Add(cmd);
+                    string sql = "UPDATE Words SET Priority = Priority - 1 WHERE Word = @word";
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(parm);
+                    commands.Add(cmd);
 
-                string delete_sql = "DELETE FROM Words WHERE Priority < 1";
-                SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
-                commands.Add(delete_cmd);
+                    string delete_sql = "DELETE FROM Words WHERE Priority < 1";
+                    SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
+                    commands.Add(delete_cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Decrease_WordPriorities", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -867,17 +936,24 @@ namespace Real_AI.Util
         {
             List<PreWord> pre_words = new List<PreWord>();
 
-            DataTable data = GetData("SELECT ID, Word, PreWord, Priority, Distance FROM PreWords", null, brainFile);
-
-            foreach (DataRow row in data.Rows)
+            try
             {
-                PreWord new_pre_word = new PreWord();
-                new_pre_word.id = int.Parse(row.ItemArray[0].ToString());
-                new_pre_word.word = row.ItemArray[1].ToString();
-                new_pre_word.preWord = row.ItemArray[2].ToString();
-                new_pre_word.priority = int.Parse(row.ItemArray[3].ToString());
-                new_pre_word.distance = int.Parse(row.ItemArray[4].ToString());
-                pre_words.Add(new_pre_word);
+                DataTable data = GetData("SELECT ID, Word, PreWord, Priority, Distance FROM PreWords", null, brainFile);
+
+                foreach (DataRow row in data.Rows)
+                {
+                    PreWord new_pre_word = new PreWord();
+                    new_pre_word.id = int.Parse(row.ItemArray[0].ToString());
+                    new_pre_word.word = row.ItemArray[1].ToString();
+                    new_pre_word.preWord = row.ItemArray[2].ToString();
+                    new_pre_word.priority = int.Parse(row.ItemArray[3].ToString());
+                    new_pre_word.distance = int.Parse(row.ItemArray[4].ToString());
+                    pre_words.Add(new_pre_word);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_PreWords", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return pre_words;
@@ -887,33 +963,16 @@ namespace Real_AI.Util
         {
             string result = "";
 
-            if (words.Count > 0)
+            try
             {
-                Dictionary<string, int> options = new Dictionary<string, int>();
-                List<DataRow> rows = new List<DataRow>();
-
-                int count = 1;
-
-                for (int i = 0; i < words.Count; i++)
+                if (words.Count > 0)
                 {
-                    if (for_thinking &&
-                        !Brain.Thinking)
-                    {
-                        break;
-                    }
+                    Dictionary<string, int> options = new Dictionary<string, int>();
+                    List<DataRow> rows = new List<DataRow>();
 
-                    string word = words[i];
+                    int count = 1;
 
-                    SQLiteParameter word_parm = new SQLiteParameter("@word", word);
-                    word_parm.DbType = DbType.String;
-
-                    SQLiteParameter distance_parm = new SQLiteParameter("@distance", count);
-                    distance_parm.DbType = DbType.String;
-
-                    SQLiteParameter[] parms = { word_parm, distance_parm };
-                    DataTable data = GetData("SELECT * FROM PreWords WHERE Word = @word AND Distance = @distance", parms);
-
-                    foreach (DataRow row in data.Rows)
+                    for (int i = 0; i < words.Count; i++)
                     {
                         if (for_thinking &&
                             !Brain.Thinking)
@@ -921,80 +980,104 @@ namespace Real_AI.Util
                             break;
                         }
 
-                        rows.Add(row);
-                    }
+                        string word = words[i];
 
-                    count++;
-                }
+                        SQLiteParameter word_parm = new SQLiteParameter("@word", word);
+                        word_parm.DbType = DbType.String;
 
-                foreach (DataRow row in rows)
-                {
-                    if (for_thinking &&
-                        !Brain.Thinking)
-                    {
-                        break;
-                    }
+                        SQLiteParameter distance_parm = new SQLiteParameter("@distance", count);
+                        distance_parm.DbType = DbType.String;
 
-                    string pre_word = row.ItemArray[2].ToString();
-                    int priority = int.Parse(row.ItemArray[3].ToString());
-                    int distance = int.Parse(row.ItemArray[4].ToString());
+                        SQLiteParameter[] parms = { word_parm, distance_parm };
+                        DataTable data = GetData("SELECT * FROM PreWords WHERE Word = @word AND Distance = @distance", parms);
 
-                    if (distance == 1)
-                    {
-                        //Get options
-                        if (!options.ContainsKey(pre_word))
+                        foreach (DataRow row in data.Rows)
                         {
-                            options.Add(pre_word, priority);
+                            if (for_thinking &&
+                                !Brain.Thinking)
+                            {
+                                break;
+                            }
+
+                            rows.Add(row);
+                        }
+
+                        count++;
+                    }
+
+                    foreach (DataRow row in rows)
+                    {
+                        if (for_thinking &&
+                            !Brain.Thinking)
+                        {
+                            break;
+                        }
+
+                        string pre_word = row.ItemArray[2].ToString();
+                        int priority = int.Parse(row.ItemArray[3].ToString());
+                        int distance = int.Parse(row.ItemArray[4].ToString());
+
+                        if (distance == 1)
+                        {
+                            //Get options
+                            if (!options.ContainsKey(pre_word))
+                            {
+                                options.Add(pre_word, priority);
+                            }
+                        }
+                        else
+                        {
+                            //Reinforce options that match farther distances
+                            if (options.Count > 0 &&
+                                options.ContainsKey(pre_word))
+                            {
+                                options[pre_word]++;
+                            }
                         }
                     }
-                    else
+
+                    //Get max priority from options
+                    int max = 0;
+                    foreach (var set in options)
                     {
-                        //Reinforce options that match farther distances
-                        if (options.Count > 0 &&
-                            options.ContainsKey(pre_word))
+                        if (for_thinking &&
+                            !Brain.Thinking)
                         {
-                            options[pre_word]++;
+                            break;
+                        }
+
+                        int priority = set.Value;
+                        if (priority > max)
+                        {
+                            max = priority;
+                        }
+                    }
+
+                    //Randomly select one with bias towards max priority
+                    foreach (var set in options)
+                    {
+                        if (for_thinking &&
+                            !Brain.Thinking)
+                        {
+                            break;
+                        }
+
+                        int priority = set.Value;
+
+                        CryptoRandom random = new CryptoRandom();
+                        int choice = random.Next(0, max + 1);
+
+                        if (priority >= choice)
+                        {
+                            result = set.Key;
+                            break;
                         }
                     }
                 }
-
-                //Get max priority from options
-                int max = 0;
-                foreach (var set in options)
-                {
-                    if (for_thinking &&
-                        !Brain.Thinking)
-                    {
-                        break;
-                    }
-
-                    int priority = set.Value;
-                    if (priority > max)
-                    {
-                        max = priority;
-                    }
-                }
-
-                //Randomly select one with bias towards max priority
-                foreach (var set in options)
-                {
-                    if (for_thinking &&
-                        !Brain.Thinking)
-                    {
-                        break;
-                    }
-
-                    int priority = set.Value;
-
-                    CryptoRandom random = new CryptoRandom();
-                    int choice = random.Next(0, max + 1);
-
-                    if (priority >= choice)
-                    {
-                        result = set.Key;
-                        break;
-                    }
-                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_PreWord", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return result;
@@ -1003,28 +1086,36 @@ namespace Real_AI.Util
         public static List<SQLiteCommand> Add_PreWords(string[] words, string[] prewords, int[] distances)
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
-            for (int i = 0; i < words.Length; i++)
+
+            try
             {
-                SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
-                word_parm.DbType = DbType.String;
+                for (int i = 0; i < words.Length; i++)
+                {
+                    SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
+                    word_parm.DbType = DbType.String;
 
-                SQLiteParameter pre_word_parm = new SQLiteParameter("@pre_word", prewords[i]);
-                pre_word_parm.DbType = DbType.String;
+                    SQLiteParameter pre_word_parm = new SQLiteParameter("@pre_word", prewords[i]);
+                    pre_word_parm.DbType = DbType.String;
 
-                SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
-                distance_parm.DbType = DbType.Int32;
+                    SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
+                    distance_parm.DbType = DbType.Int32;
 
-                string sql = @"
-                INSERT INTO PreWords (Word, PreWord, Distance)
-                SELECT @word, @pre_word, @distance
-                WHERE NOT EXISTS (SELECT 1 FROM PreWords WHERE Word = @word AND PreWord = @pre_word AND Distance = @distance)
-                ";
+                    string sql = @"
+                    INSERT INTO PreWords (Word, PreWord, Distance)
+                    SELECT @word, @pre_word, @distance
+                    WHERE NOT EXISTS (SELECT 1 FROM PreWords WHERE Word = @word AND PreWord = @pre_word AND Distance = @distance)
+                    ";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(word_parm);
-                cmd.Parameters.Add(pre_word_parm);
-                cmd.Parameters.Add(distance_parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(word_parm);
+                    cmd.Parameters.Add(pre_word_parm);
+                    cmd.Parameters.Add(distance_parm);
+                    commands.Add(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Add_PreWords", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -1033,28 +1124,36 @@ namespace Real_AI.Util
         public static List<SQLiteCommand> Increase_PreWordPriorities(string[] words, string[] prewords, int[] distances)
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
-            for (int i = 0; i < words.Length; i++)
+
+            try
             {
-                SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
-                word_parm.DbType = DbType.String;
+                for (int i = 0; i < words.Length; i++)
+                {
+                    SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
+                    word_parm.DbType = DbType.String;
 
-                SQLiteParameter pre_word_parm = new SQLiteParameter("@pre_word", prewords[i]);
-                pre_word_parm.DbType = DbType.String;
+                    SQLiteParameter pre_word_parm = new SQLiteParameter("@pre_word", prewords[i]);
+                    pre_word_parm.DbType = DbType.String;
 
-                SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
-                distance_parm.DbType = DbType.Int32;
+                    SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
+                    distance_parm.DbType = DbType.Int32;
 
-                string sql = @"
-                UPDATE PreWords
-                SET Priority = Priority + 1
-                WHERE Word = @word AND PreWord = @pre_word AND Distance = @distance
-                ";
+                    string sql = @"
+                    UPDATE PreWords
+                    SET Priority = Priority + 1
+                    WHERE Word = @word AND PreWord = @pre_word AND Distance = @distance
+                    ";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(word_parm);
-                cmd.Parameters.Add(pre_word_parm);
-                cmd.Parameters.Add(distance_parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(word_parm);
+                    cmd.Parameters.Add(pre_word_parm);
+                    cmd.Parameters.Add(distance_parm);
+                    commands.Add(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Increase_PreWordPriorities", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -1063,33 +1162,41 @@ namespace Real_AI.Util
         public static List<SQLiteCommand> Decrease_PreWordPriorities(string[] words, string[] prewords, int[] distances)
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
-            for (int i = 0; i < words.Length; i++)
+
+            try
             {
-                SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
-                word_parm.DbType = DbType.String;
+                for (int i = 0; i < words.Length; i++)
+                {
+                    SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
+                    word_parm.DbType = DbType.String;
 
-                SQLiteParameter pre_word_parm = new SQLiteParameter("@pre_word", prewords[i]);
-                pre_word_parm.DbType = DbType.String;
+                    SQLiteParameter pre_word_parm = new SQLiteParameter("@pre_word", prewords[i]);
+                    pre_word_parm.DbType = DbType.String;
 
-                SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
-                distance_parm.DbType = DbType.Int32;
+                    SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
+                    distance_parm.DbType = DbType.Int32;
 
-                string sql = @"
-                UPDATE PreWords
-                SET Priority = Priority - 1
-                WHERE Word = @word AND PreWord = @pre_word AND Distance = @distance
-                ";
+                    string sql = @"
+                    UPDATE PreWords
+                    SET Priority = Priority - 1
+                    WHERE Word = @word AND PreWord = @pre_word AND Distance = @distance
+                    ";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(word_parm);
-                cmd.Parameters.Add(pre_word_parm);
-                cmd.Parameters.Add(distance_parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(word_parm);
+                    cmd.Parameters.Add(pre_word_parm);
+                    cmd.Parameters.Add(distance_parm);
+                    commands.Add(cmd);
+                }
+
+                string delete_sql = @"DELETE FROM PreWords WHERE Priority < 1";
+                SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
+                commands.Add(delete_cmd);
             }
-
-            string delete_sql = @"DELETE FROM PreWords WHERE Priority < 1";
-            SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
-            commands.Add(delete_cmd);
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Decrease_PreWordPriorities", ex.Source, ex.Message, ex.StackTrace);
+            }
 
             return commands;
         }
@@ -1098,17 +1205,24 @@ namespace Real_AI.Util
         {
             List<ProWord> pro_words = new List<ProWord>();
 
-            DataTable data = GetData("SELECT ID, Word, ProWord, Priority, Distance FROM ProWords", null, brainFile);
-
-            foreach (DataRow row in data.Rows)
+            try
             {
-                ProWord new_pro_word = new ProWord();
-                new_pro_word.id = int.Parse(row.ItemArray[0].ToString());
-                new_pro_word.word = row.ItemArray[1].ToString();
-                new_pro_word.proWord = row.ItemArray[2].ToString();
-                new_pro_word.priority = int.Parse(row.ItemArray[3].ToString());
-                new_pro_word.distance = int.Parse(row.ItemArray[4].ToString());
-                pro_words.Add(new_pro_word);
+                DataTable data = GetData("SELECT ID, Word, ProWord, Priority, Distance FROM ProWords", null, brainFile);
+
+                foreach (DataRow row in data.Rows)
+                {
+                    ProWord new_pro_word = new ProWord();
+                    new_pro_word.id = int.Parse(row.ItemArray[0].ToString());
+                    new_pro_word.word = row.ItemArray[1].ToString();
+                    new_pro_word.proWord = row.ItemArray[2].ToString();
+                    new_pro_word.priority = int.Parse(row.ItemArray[3].ToString());
+                    new_pro_word.distance = int.Parse(row.ItemArray[4].ToString());
+                    pro_words.Add(new_pro_word);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_ProWords", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return pro_words;
@@ -1118,33 +1232,16 @@ namespace Real_AI.Util
         {
             string result = "";
 
-            if (words.Count > 0)
+            try
             {
-                Dictionary<string, int> options = new Dictionary<string, int>();
-                List<DataRow> rows = new List<DataRow>();
-
-                int count = 1;
-
-                for (int i = words.Count - 1; i >= 0 ; i--)
+                if (words.Count > 0)
                 {
-                    if (for_thinking &&
-                        !Brain.Thinking)
-                    {
-                        break;
-                    }
+                    Dictionary<string, int> options = new Dictionary<string, int>();
+                    List<DataRow> rows = new List<DataRow>();
 
-                    string word = words[i];
+                    int count = 1;
 
-                    SQLiteParameter word_parm = new SQLiteParameter("@word", word);
-                    word_parm.DbType = DbType.String;
-
-                    SQLiteParameter distance_parm = new SQLiteParameter("@distance", count);
-                    distance_parm.DbType = DbType.String;
-
-                    SQLiteParameter[] parms = { word_parm, distance_parm };
-                    DataTable data = GetData("SELECT * FROM ProWords WHERE Word = @word AND Distance = @distance", parms);
-
-                    foreach (DataRow row in data.Rows)
+                    for (int i = words.Count - 1; i >= 0; i--)
                     {
                         if (for_thinking &&
                             !Brain.Thinking)
@@ -1152,80 +1249,104 @@ namespace Real_AI.Util
                             break;
                         }
 
-                        rows.Add(row);
-                    }
+                        string word = words[i];
 
-                    count++;
-                }
+                        SQLiteParameter word_parm = new SQLiteParameter("@word", word);
+                        word_parm.DbType = DbType.String;
 
-                foreach (DataRow row in rows)
-                {
-                    if (for_thinking &&
-                        !Brain.Thinking)
-                    {
-                        break;
-                    }
+                        SQLiteParameter distance_parm = new SQLiteParameter("@distance", count);
+                        distance_parm.DbType = DbType.String;
 
-                    string pro_word = row.ItemArray[2].ToString();
-                    int priority = int.Parse(row.ItemArray[3].ToString());
-                    int distance = int.Parse(row.ItemArray[4].ToString());
+                        SQLiteParameter[] parms = { word_parm, distance_parm };
+                        DataTable data = GetData("SELECT * FROM ProWords WHERE Word = @word AND Distance = @distance", parms);
 
-                    if (distance == 1)
-                    {
-                        //Get options
-                        if (!options.ContainsKey(pro_word))
+                        foreach (DataRow row in data.Rows)
                         {
-                            options.Add(pro_word, priority);
+                            if (for_thinking &&
+                                !Brain.Thinking)
+                            {
+                                break;
+                            }
+
+                            rows.Add(row);
+                        }
+
+                        count++;
+                    }
+
+                    foreach (DataRow row in rows)
+                    {
+                        if (for_thinking &&
+                            !Brain.Thinking)
+                        {
+                            break;
+                        }
+
+                        string pro_word = row.ItemArray[2].ToString();
+                        int priority = int.Parse(row.ItemArray[3].ToString());
+                        int distance = int.Parse(row.ItemArray[4].ToString());
+
+                        if (distance == 1)
+                        {
+                            //Get options
+                            if (!options.ContainsKey(pro_word))
+                            {
+                                options.Add(pro_word, priority);
+                            }
+                        }
+                        else
+                        {
+                            //Reinforce options that match farther distances
+                            if (options.Count > 0 &&
+                                options.ContainsKey(pro_word))
+                            {
+                                options[pro_word]++;
+                            }
                         }
                     }
-                    else
+
+                    //Get max priority from options
+                    int max = 0;
+                    foreach (var set in options)
                     {
-                        //Reinforce options that match farther distances
-                        if (options.Count > 0 &&
-                            options.ContainsKey(pro_word))
+                        if (for_thinking &&
+                            !Brain.Thinking)
                         {
-                            options[pro_word]++;
+                            break;
+                        }
+
+                        int priority = set.Value;
+                        if (priority > max)
+                        {
+                            max = priority;
+                        }
+                    }
+
+                    //Randomly select one with bias towards max priority
+                    foreach (var set in options)
+                    {
+                        if (for_thinking &&
+                            !Brain.Thinking)
+                        {
+                            break;
+                        }
+
+                        int priority = set.Value;
+
+                        CryptoRandom random = new CryptoRandom();
+                        int choice = random.Next(0, max + 1);
+
+                        if (priority >= choice)
+                        {
+                            result = set.Key;
+                            break;
                         }
                     }
                 }
-
-                //Get max priority from options
-                int max = 0;
-                foreach (var set in options)
-                {
-                    if (for_thinking &&
-                        !Brain.Thinking)
-                    {
-                        break;
-                    }
-
-                    int priority = set.Value;
-                    if (priority > max)
-                    {
-                        max = priority;
-                    }
-                }
-
-                //Randomly select one with bias towards max priority
-                foreach (var set in options)
-                {
-                    if (for_thinking &&
-                        !Brain.Thinking)
-                    {
-                        break;
-                    }
-
-                    int priority = set.Value;
-
-                    CryptoRandom random = new CryptoRandom();
-                    int choice = random.Next(0, max + 1);
-
-                    if (priority >= choice)
-                    {
-                        result = set.Key;
-                        break;
-                    }
-                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_ProWord", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return result;
@@ -1234,28 +1355,36 @@ namespace Real_AI.Util
         public static List<SQLiteCommand> Add_ProWords(string[] words, string[] prowords, int[] distances)
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
-            for (int i = 0; i < words.Length; i++)
+
+            try
             {
-                SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
-                word_parm.DbType = DbType.String;
+                for (int i = 0; i < words.Length; i++)
+                {
+                    SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
+                    word_parm.DbType = DbType.String;
 
-                SQLiteParameter pro_word_parm = new SQLiteParameter("@pro_word", prowords[i]);
-                pro_word_parm.DbType = DbType.String;
+                    SQLiteParameter pro_word_parm = new SQLiteParameter("@pro_word", prowords[i]);
+                    pro_word_parm.DbType = DbType.String;
 
-                SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
-                distance_parm.DbType = DbType.Int32;
+                    SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
+                    distance_parm.DbType = DbType.Int32;
 
-                string sql = @"
-                INSERT INTO ProWords (Word, ProWord, Distance)
-                SELECT @word, @pro_word, @distance
-                WHERE NOT EXISTS (SELECT 1 FROM ProWords WHERE Word = @word AND ProWord = @pro_word AND Distance = @distance)
-                ";
+                    string sql = @"
+                    INSERT INTO ProWords (Word, ProWord, Distance)
+                    SELECT @word, @pro_word, @distance
+                    WHERE NOT EXISTS (SELECT 1 FROM ProWords WHERE Word = @word AND ProWord = @pro_word AND Distance = @distance)
+                    ";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(word_parm);
-                cmd.Parameters.Add(pro_word_parm);
-                cmd.Parameters.Add(distance_parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(word_parm);
+                    cmd.Parameters.Add(pro_word_parm);
+                    cmd.Parameters.Add(distance_parm);
+                    commands.Add(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Add_ProWords", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -1264,28 +1393,36 @@ namespace Real_AI.Util
         public static List<SQLiteCommand> Increase_ProWordPriorities(string[] words, string[] prowords, int[] distances)
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
-            for (int i = 0; i < words.Length; i++)
+
+            try
             {
-                SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
-                word_parm.DbType = DbType.String;
+                for (int i = 0; i < words.Length; i++)
+                {
+                    SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
+                    word_parm.DbType = DbType.String;
 
-                SQLiteParameter pro_word_parm = new SQLiteParameter("@pro_word", prowords[i]);
-                pro_word_parm.DbType = DbType.String;
+                    SQLiteParameter pro_word_parm = new SQLiteParameter("@pro_word", prowords[i]);
+                    pro_word_parm.DbType = DbType.String;
 
-                SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
-                distance_parm.DbType = DbType.Int32;
+                    SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
+                    distance_parm.DbType = DbType.Int32;
 
-                string sql = @"
-                UPDATE ProWords
-                SET Priority = Priority + 1
-                WHERE Word = @word AND ProWord = @pro_word AND Distance = @distance
-                ";
+                    string sql = @"
+                    UPDATE ProWords
+                    SET Priority = Priority + 1
+                    WHERE Word = @word AND ProWord = @pro_word AND Distance = @distance
+                    ";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(word_parm);
-                cmd.Parameters.Add(pro_word_parm);
-                cmd.Parameters.Add(distance_parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(word_parm);
+                    cmd.Parameters.Add(pro_word_parm);
+                    cmd.Parameters.Add(distance_parm);
+                    commands.Add(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Increase_ProWordPriorities", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -1294,33 +1431,41 @@ namespace Real_AI.Util
         public static List<SQLiteCommand> Decrease_ProWordPriorities(string[] words, string[] prowords, int[] distances)
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
-            for (int i = 0; i < words.Length; i++)
+
+            try
             {
-                SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
-                word_parm.DbType = DbType.String;
+                for (int i = 0; i < words.Length; i++)
+                {
+                    SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
+                    word_parm.DbType = DbType.String;
 
-                SQLiteParameter pro_word_parm = new SQLiteParameter("@pro_word", prowords[i]);
-                pro_word_parm.DbType = DbType.String;
+                    SQLiteParameter pro_word_parm = new SQLiteParameter("@pro_word", prowords[i]);
+                    pro_word_parm.DbType = DbType.String;
 
-                SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
-                distance_parm.DbType = DbType.Int32;
+                    SQLiteParameter distance_parm = new SQLiteParameter("@distance", distances[i]);
+                    distance_parm.DbType = DbType.Int32;
 
-                string sql = @"
-                UPDATE ProWords
-                SET Priority = Priority - 1
-                WHERE Word = @word AND ProWord = @pro_word AND Distance = @distance
-                ";
+                    string sql = @"
+                    UPDATE ProWords
+                    SET Priority = Priority - 1
+                    WHERE Word = @word AND ProWord = @pro_word AND Distance = @distance
+                    ";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(word_parm);
-                cmd.Parameters.Add(pro_word_parm);
-                cmd.Parameters.Add(distance_parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(word_parm);
+                    cmd.Parameters.Add(pro_word_parm);
+                    cmd.Parameters.Add(distance_parm);
+                    commands.Add(cmd);
+                }
+
+                string delete_sql = @"DELETE FROM ProWords WHERE Priority < 1";
+                SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
+                commands.Add(delete_cmd);
             }
-
-            string delete_sql = @"DELETE FROM ProWords WHERE Priority < 1";
-            SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
-            commands.Add(delete_cmd);
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Decrease_ProWordPriorities", ex.Source, ex.Message, ex.StackTrace);
+            }
 
             return commands;
         }
@@ -1329,16 +1474,23 @@ namespace Real_AI.Util
         {
             List<Topic> topics = new List<Topic>();
 
-            DataTable data = GetData("SELECT ID, Input, Topic, Priority FROM Topics", null, brainFile);
-
-            foreach (DataRow row in data.Rows)
+            try
             {
-                Topic new_topic = new Topic();
-                new_topic.id = int.Parse(row.ItemArray[0].ToString());
-                new_topic.input = row.ItemArray[1].ToString();
-                new_topic.topic = row.ItemArray[2].ToString();
-                new_topic.priority = int.Parse(row.ItemArray[3].ToString());
-                topics.Add(new_topic);
+                DataTable data = GetData("SELECT ID, Input, Topic, Priority FROM Topics", null, brainFile);
+
+                foreach (DataRow row in data.Rows)
+                {
+                    Topic new_topic = new Topic();
+                    new_topic.id = int.Parse(row.ItemArray[0].ToString());
+                    new_topic.input = row.ItemArray[1].ToString();
+                    new_topic.topic = row.ItemArray[2].ToString();
+                    new_topic.priority = int.Parse(row.ItemArray[3].ToString());
+                    topics.Add(new_topic);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_Topics", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return topics;
@@ -1348,29 +1500,36 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            if (!string.IsNullOrEmpty(input) &&
-                words.Length > 0)
+            try
             {
-                foreach (string word in words)
+                if (!string.IsNullOrEmpty(input) &&
+                    words.Length > 0)
                 {
-                    SQLiteParameter input_parm = new SQLiteParameter("@input", input);
-                    input_parm.DbType = DbType.String;
+                    foreach (string word in words)
+                    {
+                        SQLiteParameter input_parm = new SQLiteParameter("@input", input);
+                        input_parm.DbType = DbType.String;
 
-                    SQLiteParameter word_parm = new SQLiteParameter("@word", word);
-                    word_parm.DbType = DbType.String;
+                        SQLiteParameter word_parm = new SQLiteParameter("@word", word);
+                        word_parm.DbType = DbType.String;
 
-                    //Add new topics
-                    string sql = @"
-                    INSERT INTO Topics (Input, Topic) 
-                    SELECT @input, @word 
-                    WHERE NOT EXISTS (SELECT 1 FROM Topics WHERE Input = @input AND Topic = @word)
-                    ";
+                        //Add new topics
+                        string sql = @"
+                        INSERT INTO Topics (Input, Topic) 
+                        SELECT @input, @word 
+                        WHERE NOT EXISTS (SELECT 1 FROM Topics WHERE Input = @input AND Topic = @word)
+                        ";
 
-                    SQLiteCommand cmd = new SQLiteCommand(sql);
-                    cmd.Parameters.Add(input_parm);
-                    cmd.Parameters.Add(word_parm);
-                    commands.Add(cmd);
+                        SQLiteCommand cmd = new SQLiteCommand(sql);
+                        cmd.Parameters.Add(input_parm);
+                        cmd.Parameters.Add(word_parm);
+                        commands.Add(cmd);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.AddTopics", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -1380,29 +1539,36 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            if (!string.IsNullOrEmpty(input) &&
-                words.Length > 0)
+            try
             {
-                foreach (string word in words)
+                if (!string.IsNullOrEmpty(input) &&
+                    words.Length > 0)
                 {
-                    SQLiteParameter input_parm = new SQLiteParameter("@input", input);
-                    input_parm.DbType = DbType.String;
+                    foreach (string word in words)
+                    {
+                        SQLiteParameter input_parm = new SQLiteParameter("@input", input);
+                        input_parm.DbType = DbType.String;
 
-                    SQLiteParameter word_parm = new SQLiteParameter("@word", word);
-                    word_parm.DbType = DbType.String;
+                        SQLiteParameter word_parm = new SQLiteParameter("@word", word);
+                        word_parm.DbType = DbType.String;
 
-                    //Increase priority for existing topics
-                    string sql = @"
-                    UPDATE Topics
-                    SET Priority = Priority + 1
-                    WHERE Input = @input AND Topic = @word
-                    ";
+                        //Increase priority for existing topics
+                        string sql = @"
+                        UPDATE Topics
+                        SET Priority = Priority + 1
+                        WHERE Input = @input AND Topic = @word
+                        ";
 
-                    SQLiteCommand cmd = new SQLiteCommand(sql);
-                    cmd.Parameters.Add(input_parm);
-                    cmd.Parameters.Add(word_parm);
-                    commands.Add(cmd);
+                        SQLiteCommand cmd = new SQLiteCommand(sql);
+                        cmd.Parameters.Add(input_parm);
+                        cmd.Parameters.Add(word_parm);
+                        commands.Add(cmd);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Increase_TopicPriorities", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -1412,34 +1578,41 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            if (!string.IsNullOrEmpty(input) &&
-                words.Length > 0)
+            try
             {
-                foreach (string word in words)
+                if (!string.IsNullOrEmpty(input) &&
+                    words.Length > 0)
                 {
-                    SQLiteParameter input_parm = new SQLiteParameter("@input", input);
-                    input_parm.DbType = DbType.String;
+                    foreach (string word in words)
+                    {
+                        SQLiteParameter input_parm = new SQLiteParameter("@input", input);
+                        input_parm.DbType = DbType.String;
 
-                    SQLiteParameter word_parm = new SQLiteParameter("@word", word);
-                    word_parm.DbType = DbType.String;
+                        SQLiteParameter word_parm = new SQLiteParameter("@word", word);
+                        word_parm.DbType = DbType.String;
 
-                    //Increase priority for existing topics
-                    string sql = @"
-                    UPDATE Topics
-                    SET Priority = Priority - 1
-                    WHERE Input = @input AND Topic = @word
-                    ";
+                        //Increase priority for existing topics
+                        string sql = @"
+                        UPDATE Topics
+                        SET Priority = Priority - 1
+                        WHERE Input = @input AND Topic = @word
+                        ";
 
-                    SQLiteCommand cmd = new SQLiteCommand(sql);
-                    cmd.Parameters.Add(input_parm);
-                    cmd.Parameters.Add(word_parm);
-                    commands.Add(cmd);
+                        SQLiteCommand cmd = new SQLiteCommand(sql);
+                        cmd.Parameters.Add(input_parm);
+                        cmd.Parameters.Add(word_parm);
+                        commands.Add(cmd);
+                    }
                 }
-            }
 
-            string delete_sql = @"DELETE FROM Topics WHERE Priority < 1";
-            SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
-            commands.Add(delete_cmd);
+                string delete_sql = @"DELETE FROM Topics WHERE Priority < 1";
+                SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
+                commands.Add(delete_cmd);
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Decrease_TopicPriorities", ex.Source, ex.Message, ex.StackTrace);
+            }
 
             return commands;
         }
@@ -1448,20 +1621,27 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            if (!string.IsNullOrEmpty(input) &&
-                words.Length > 0)
+            try
             {
-                SQLiteParameter input_parm = new SQLiteParameter("@input", input);
-                input_parm.DbType = DbType.String;
+                if (!string.IsNullOrEmpty(input) &&
+                    words.Length > 0)
+                {
+                    SQLiteParameter input_parm = new SQLiteParameter("@input", input);
+                    input_parm.DbType = DbType.String;
 
-                string sql = @"
-                UPDATE Topics
-                SET Priority = Priority - 1
-                WHERE Input = @input AND Topic NOT IN (" + WordArray_To_String(words) + ")";
+                    string sql = @"
+                    UPDATE Topics
+                    SET Priority = Priority - 1
+                    WHERE Input = @input AND Topic NOT IN (" + WordArray_To_String(words) + ")";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(input_parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(input_parm);
+                    commands.Add(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Decrease_Topics_Unmatched", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -1471,16 +1651,23 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            if (!string.IsNullOrEmpty(input))
+            try
             {
-                SQLiteParameter input_parm = new SQLiteParameter("@input", input);
-                input_parm.DbType = DbType.String;
+                if (!string.IsNullOrEmpty(input))
+                {
+                    SQLiteParameter input_parm = new SQLiteParameter("@input", input);
+                    input_parm.DbType = DbType.String;
 
-                string sql = "DELETE FROM Topics WHERE Input = @input AND Priority < 1";
+                    string sql = "DELETE FROM Topics WHERE Input = @input AND Priority < 1";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(input_parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(input_parm);
+                    commands.Add(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Clean_Topics", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -1490,66 +1677,73 @@ namespace Real_AI.Util
         {
             List<string> outputs = new List<string>();
 
-            if (words.Length > 0)
+            try
             {
-                int value = 0;
-
-                if (update_progress)
+                if (words.Length > 0)
                 {
-                    AppUtil.UpdateDetail(0);
-                }
-
-                string wordSet = WordArray_To_String(words);
-
-                //Get all the inputs that contain a matching topic from the wordset
-                DataTable inputsData = GetData("SELECT DISTINCT Input FROM Topics WHERE Topic IN (" + wordSet + ")", null);
-
-                int total = inputsData.Rows.Count;
-
-                Dictionary<string, int> output_priority = new Dictionary<string, int>();
-                foreach (DataRow row in inputsData.Rows)
-                {
-                    string input = row.ItemArray[0].ToString();
-
-                    List<SQLiteParameter> parameters = new List<SQLiteParameter>();
-                    SQLiteParameter parm = new SQLiteParameter("@input", input);
-                    parm.DbType = DbType.String;
-                    parameters.Add(parm);
-
-                    //Get all the outputs for the given input
-                    DataTable outputData = GetData("SELECT DISTINCT Output FROM Outputs WHERE Input = @input", parameters.ToArray());
-                    if (outputData.Rows.Count > 0)
-                    {
-                        string output = outputData.Rows[0].ItemArray[0].ToString();
-
-                        //Get the priority of the output from the Input table
-                        int priority = Get_InputPriority(output);
-
-                        //Add output/priority pair as a possibility
-                        output_priority.Add(output, priority);
-                    }
-
-                    value++;
+                    int value = 0;
 
                     if (update_progress)
                     {
-                        AppUtil.UpdateDetail((value * 100) / total);
+                        AppUtil.UpdateProgress(MainForm.progressDetail, 0);
                     }
-                }
 
-                //Get the highest priority output
-                if (output_priority.Count > 0)
-                {
-                    int max_priority = output_priority.Max().Value;
-                    foreach (KeyValuePair<string, int> output_pair in output_priority)
+                    string wordSet = WordArray_To_String(words);
+
+                    //Get all the inputs that contain a matching topic from the wordset
+                    DataTable inputsData = GetData("SELECT DISTINCT Input FROM Topics WHERE Topic IN (" + wordSet + ")", null);
+
+                    int total = inputsData.Rows.Count;
+
+                    Dictionary<string, int> output_priority = new Dictionary<string, int>();
+                    foreach (DataRow row in inputsData.Rows)
                     {
-                        //Add any output matching the highest priority
-                        if (output_pair.Value >= max_priority)
+                        string input = row.ItemArray[0].ToString();
+
+                        List<SQLiteParameter> parameters = new List<SQLiteParameter>();
+                        SQLiteParameter parm = new SQLiteParameter("@input", input);
+                        parm.DbType = DbType.String;
+                        parameters.Add(parm);
+
+                        //Get all the outputs for the given input
+                        DataTable outputData = GetData("SELECT DISTINCT Output FROM Outputs WHERE Input = @input", parameters.ToArray());
+                        if (outputData.Rows.Count > 0)
                         {
-                            outputs.Add(output_pair.Key);
+                            string output = outputData.Rows[0].ItemArray[0].ToString();
+
+                            //Get the priority of the output from the Input table
+                            int priority = Get_InputPriority(output);
+
+                            //Add output/priority pair as a possibility
+                            output_priority.Add(output, priority);
+                        }
+
+                        value++;
+
+                        if (update_progress)
+                        {
+                            AppUtil.UpdateProgress(MainForm.progressDetail, (value * 100) / total);
+                        }
+                    }
+
+                    //Get the highest priority output
+                    if (output_priority.Count > 0)
+                    {
+                        int max_priority = output_priority.Max().Value;
+                        foreach (KeyValuePair<string, int> output_pair in output_priority)
+                        {
+                            //Add any output matching the highest priority
+                            if (output_pair.Value >= max_priority)
+                            {
+                                outputs.Add(output_pair.Key);
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_OutputsFromTopics", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return outputs.ToArray();
@@ -1559,16 +1753,23 @@ namespace Real_AI.Util
         {
             List<Output> outputs = new List<Output>();
 
-            DataTable data = GetData("SELECT ID, Input, Output, Priority FROM Outputs", null, brainFile);
-
-            foreach (DataRow row in data.Rows)
+            try
             {
-                Output new_output = new Output();
-                new_output.id = int.Parse(row.ItemArray[0].ToString());
-                new_output.input = row.ItemArray[1].ToString();
-                new_output.output = row.ItemArray[2].ToString();
-                new_output.priority = int.Parse(row.ItemArray[3].ToString());
-                outputs.Add(new_output);
+                DataTable data = GetData("SELECT ID, Input, Output, Priority FROM Outputs", null, brainFile);
+
+                foreach (DataRow row in data.Rows)
+                {
+                    Output new_output = new Output();
+                    new_output.id = int.Parse(row.ItemArray[0].ToString());
+                    new_output.input = row.ItemArray[1].ToString();
+                    new_output.output = row.ItemArray[2].ToString();
+                    new_output.priority = int.Parse(row.ItemArray[3].ToString());
+                    outputs.Add(new_output);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_Outputs", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return outputs;
@@ -1578,24 +1779,31 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            if (!string.IsNullOrEmpty(input) &&
-                !string.IsNullOrEmpty(output))
+            try
             {
-                SQLiteParameter input_parm = new SQLiteParameter("@input", input);
-                input_parm.DbType = DbType.String;
+                if (!string.IsNullOrEmpty(input) &&
+                    !string.IsNullOrEmpty(output))
+                {
+                    SQLiteParameter input_parm = new SQLiteParameter("@input", input);
+                    input_parm.DbType = DbType.String;
 
-                SQLiteParameter output_parm = new SQLiteParameter("@output", output);
-                output_parm.DbType = DbType.String;
+                    SQLiteParameter output_parm = new SQLiteParameter("@output", output);
+                    output_parm.DbType = DbType.String;
 
-                string sql = @"
-                INSERT INTO Outputs (Input, Output)
-                SELECT @input, @output
-                WHERE NOT EXISTS (SELECT 1 FROM Outputs WHERE Input = @input AND Output = @output)";
+                    string sql = @"
+                    INSERT INTO Outputs (Input, Output)
+                    SELECT @input, @output
+                    WHERE NOT EXISTS (SELECT 1 FROM Outputs WHERE Input = @input AND Output = @output)";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(input_parm);
-                cmd.Parameters.Add(output_parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(input_parm);
+                    cmd.Parameters.Add(output_parm);
+                    commands.Add(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Add_Outputs", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -1605,24 +1813,31 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            if (!string.IsNullOrEmpty(input) &&
-                !string.IsNullOrEmpty(output))
+            try
             {
-                SQLiteParameter input_parm = new SQLiteParameter("@input", input);
-                input_parm.DbType = DbType.String;
+                if (!string.IsNullOrEmpty(input) &&
+                    !string.IsNullOrEmpty(output))
+                {
+                    SQLiteParameter input_parm = new SQLiteParameter("@input", input);
+                    input_parm.DbType = DbType.String;
 
-                SQLiteParameter output_parm = new SQLiteParameter("@output", output);
-                output_parm.DbType = DbType.String;
+                    SQLiteParameter output_parm = new SQLiteParameter("@output", output);
+                    output_parm.DbType = DbType.String;
 
-                string sql = @"
-                UPDATE Outputs
-                SET Priority = Priority + 1
-                WHERE Input = @input AND Output = @output";
+                    string sql = @"
+                    UPDATE Outputs
+                    SET Priority = Priority + 1
+                    WHERE Input = @input AND Output = @output";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(input_parm);
-                cmd.Parameters.Add(output_parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(input_parm);
+                    cmd.Parameters.Add(output_parm);
+                    commands.Add(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Increase_OutputPriorities", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -1632,19 +1847,26 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            if (!string.IsNullOrEmpty(output))
+            try
             {
-                SQLiteParameter output_parm = new SQLiteParameter("@output", output);
-                output_parm.DbType = DbType.String;
+                if (!string.IsNullOrEmpty(output))
+                {
+                    SQLiteParameter output_parm = new SQLiteParameter("@output", output);
+                    output_parm.DbType = DbType.String;
 
-                string sql = @"
-                UPDATE Outputs
-                SET Priority = Priority + 1
-                WHERE Output = @output";
+                    string sql = @"
+                    UPDATE Outputs
+                    SET Priority = Priority + 1
+                    WHERE Output = @output";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(output_parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(output_parm);
+                    commands.Add(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Increase_OutputPriorities", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return commands;
@@ -1654,24 +1876,31 @@ namespace Real_AI.Util
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            if (!string.IsNullOrEmpty(output))
+            try
             {
-                SQLiteParameter output_parm = new SQLiteParameter("@output", output);
-                output_parm.DbType = DbType.String;
+                if (!string.IsNullOrEmpty(output))
+                {
+                    SQLiteParameter output_parm = new SQLiteParameter("@output", output);
+                    output_parm.DbType = DbType.String;
 
-                string sql = @"
-                UPDATE Outputs
-                SET Priority = Priority - 1
-                WHERE Output = @output";
+                    string sql = @"
+                    UPDATE Outputs
+                    SET Priority = Priority - 1
+                    WHERE Output = @output";
 
-                SQLiteCommand cmd = new SQLiteCommand(sql);
-                cmd.Parameters.Add(output_parm);
-                commands.Add(cmd);
+                    SQLiteCommand cmd = new SQLiteCommand(sql);
+                    cmd.Parameters.Add(output_parm);
+                    commands.Add(cmd);
+                }
+
+                string delete_sql = @"DELETE FROM Outputs WHERE Priority < 1";
+                SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
+                commands.Add(delete_cmd);
             }
-
-            string delete_sql = @"DELETE FROM Outputs WHERE Priority < 1";
-            SQLiteCommand delete_cmd = new SQLiteCommand(delete_sql);
-            commands.Add(delete_cmd);
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Decrease_OutputPriorities", ex.Source, ex.Message, ex.StackTrace);
+            }
 
             return commands;
         }
@@ -1680,34 +1909,41 @@ namespace Real_AI.Util
         {
             List<string> outputs = new List<string>();
 
-            if (!string.IsNullOrEmpty(input))
+            try
             {
-                int count = 0;
-
-                if (update_progress)
+                if (!string.IsNullOrEmpty(input))
                 {
-                    AppUtil.UpdateDetail(0);
-                }
-
-                SQLiteParameter input_parm = new SQLiteParameter("@input", input);
-                input_parm.DbType = DbType.String;
-
-                SQLiteParameter[] parms = { input_parm };
-                DataTable data = GetData("SELECT Output FROM Outputs WHERE Input = @input", parms);
-
-                int total = data.Rows.Count;
-
-                foreach (DataRow row in data.Rows)
-                {
-                    outputs.Add(row.ItemArray[0].ToString());
-
-                    count++;
+                    int count = 0;
 
                     if (update_progress)
                     {
-                        AppUtil.UpdateDetail((count * 100) / total);
+                        AppUtil.UpdateProgress(MainForm.progressDetail, 0);
+                    }
+
+                    SQLiteParameter input_parm = new SQLiteParameter("@input", input);
+                    input_parm.DbType = DbType.String;
+
+                    SQLiteParameter[] parms = { input_parm };
+                    DataTable data = GetData("SELECT Output FROM Outputs WHERE Input = @input", parms);
+
+                    int total = data.Rows.Count;
+
+                    foreach (DataRow row in data.Rows)
+                    {
+                        outputs.Add(row.ItemArray[0].ToString());
+
+                        count++;
+
+                        if (update_progress)
+                        {
+                            AppUtil.UpdateProgress(MainForm.progressDetail, (count * 100) / total);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.Get_OutputsFromInput", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return outputs.ToArray();
@@ -1716,31 +1952,39 @@ namespace Real_AI.Util
         public static string WordArray_To_String(string[] words)
         {
             string wordSet = "";
-            for (int i = 0; i < words.Length; i++)
+
+            try
             {
-                string word = "";
-
-                //Check word for apostrophe which will break queries
-                string check_word = words[i];
-                for (int j = 0; j < check_word.Length; j++)
+                for (int i = 0; i < words.Length; i++)
                 {
-                    char c = check_word[j];
-                    if (c == '\'')
+                    string word = "";
+
+                    //Check word for apostrophe which will break queries
+                    string check_word = words[i];
+                    for (int j = 0; j < check_word.Length; j++)
                     {
-                        word += c;
-                        word += '\'';
+                        char c = check_word[j];
+                        if (c == '\'')
+                        {
+                            word += c;
+                            word += '\'';
+                        }
+                        else
+                        {
+                            word += c;
+                        }
                     }
-                    else
+
+                    wordSet += "'" + word + "'";
+                    if (i < words.Length - 1)
                     {
-                        word += c;
+                        wordSet += ",";
                     }
                 }
-
-                wordSet += "'" + word + "'";
-                if (i < words.Length - 1)
-                {
-                    wordSet += ",";
-                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("SqlUtil.WordArray_To_String", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return wordSet;

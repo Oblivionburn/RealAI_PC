@@ -28,25 +28,28 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Options));
             this.lbl_ThinkSpeed = new System.Windows.Forms.Label();
             this.ThinkSpeed = new System.Windows.Forms.Label();
             this.ThinkSpeed_Bar = new System.Windows.Forms.ProgressBar();
-            this.lbl_LearnFromThinking = new System.Windows.Forms.Label();
-            this.LearnFromThinking_CheckBox = new System.Windows.Forms.CheckBox();
+            this.chk_LearnFromThinking = new System.Windows.Forms.CheckBox();
             this.lbl_AttentionSpan = new System.Windows.Forms.Label();
             this.AttentionSpan = new System.Windows.Forms.Label();
             this.Attention_Bar = new System.Windows.Forms.ProgressBar();
-            this.lbl_Initiate = new System.Windows.Forms.Label();
-            this.Initiate_CheckBox = new System.Windows.Forms.CheckBox();
-            this.Thinking_CheckBox = new System.Windows.Forms.CheckBox();
-            this.lbl_Thinking = new System.Windows.Forms.Label();
+            this.chk_Initiate = new System.Windows.Forms.CheckBox();
+            this.chk_Thinking = new System.Windows.Forms.CheckBox();
             this.Voices = new System.Windows.Forms.ComboBox();
             this.lbl_Voice = new System.Windows.Forms.Label();
-            this.TTS_CheckBox = new System.Windows.Forms.CheckBox();
-            this.lbl_TTS = new System.Windows.Forms.Label();
+            this.chk_TTS = new System.Windows.Forms.CheckBox();
             this.Tabs = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.chk_ProceduralResponding = new System.Windows.Forms.CheckBox();
+            this.chk_TopicResponding = new System.Windows.Forms.CheckBox();
+            this.chk_InputResponding = new System.Windows.Forms.CheckBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.btn_ImportTheme = new System.Windows.Forms.Button();
+            this.btn_ExportTheme = new System.Windows.Forms.Button();
             this.pic_ControlSelected = new System.Windows.Forms.PictureBox();
             this.lbl_ControlSelected = new System.Windows.Forms.Label();
             this.pic_ControlHighlight = new System.Windows.Forms.PictureBox();
@@ -71,6 +74,7 @@
             this.color_Text_Progress = new System.Windows.Forms.ColorDialog();
             this.color_Highlight_Control = new System.Windows.Forms.ColorDialog();
             this.color_Selected_Control = new System.Windows.Forms.ColorDialog();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.Tabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -93,6 +97,7 @@
             this.lbl_ThinkSpeed.Size = new System.Drawing.Size(216, 17);
             this.lbl_ThinkSpeed.TabIndex = 0;
             this.lbl_ThinkSpeed.Text = "Thinking Speed (in milliseconds):";
+            this.toolTip.SetToolTip(this.lbl_ThinkSpeed, "The rate at which the AI will respond to itself if Thinking is enabled.");
             // 
             // ThinkSpeed
             // 
@@ -107,51 +112,47 @@
             // 
             // ThinkSpeed_Bar
             // 
-            this.ThinkSpeed_Bar.Location = new System.Drawing.Point(6, 23);
+            this.ThinkSpeed_Bar.Location = new System.Drawing.Point(9, 23);
             this.ThinkSpeed_Bar.Maximum = 1000;
             this.ThinkSpeed_Bar.Name = "ThinkSpeed_Bar";
-            this.ThinkSpeed_Bar.Size = new System.Drawing.Size(308, 23);
+            this.ThinkSpeed_Bar.Size = new System.Drawing.Size(305, 23);
             this.ThinkSpeed_Bar.Step = 1;
             this.ThinkSpeed_Bar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.ThinkSpeed_Bar.TabIndex = 3;
             this.ThinkSpeed_Bar.Value = 1000;
             // 
-            // lbl_LearnFromThinking
+            // chk_LearnFromThinking
             // 
-            this.lbl_LearnFromThinking.AutoSize = true;
-            this.lbl_LearnFromThinking.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_LearnFromThinking.Location = new System.Drawing.Point(6, 69);
-            this.lbl_LearnFromThinking.Name = "lbl_LearnFromThinking";
-            this.lbl_LearnFromThinking.Size = new System.Drawing.Size(143, 17);
-            this.lbl_LearnFromThinking.TabIndex = 4;
-            this.lbl_LearnFromThinking.Text = "Learn From Thinking:";
-            // 
-            // LearnFromThinking_CheckBox
-            // 
-            this.LearnFromThinking_CheckBox.AutoSize = true;
-            this.LearnFromThinking_CheckBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.LearnFromThinking_CheckBox.Location = new System.Drawing.Point(155, 72);
-            this.LearnFromThinking_CheckBox.Name = "LearnFromThinking_CheckBox";
-            this.LearnFromThinking_CheckBox.Size = new System.Drawing.Size(12, 11);
-            this.LearnFromThinking_CheckBox.TabIndex = 5;
-            this.LearnFromThinking_CheckBox.UseVisualStyleBackColor = true;
-            this.LearnFromThinking_CheckBox.CheckedChanged += new System.EventHandler(this.LearnFromThinking_CheckBox_CheckedChanged);
+            this.chk_LearnFromThinking.AutoSize = true;
+            this.chk_LearnFromThinking.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chk_LearnFromThinking.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chk_LearnFromThinking.Location = new System.Drawing.Point(9, 79);
+            this.chk_LearnFromThinking.Name = "chk_LearnFromThinking";
+            this.chk_LearnFromThinking.Size = new System.Drawing.Size(155, 21);
+            this.chk_LearnFromThinking.TabIndex = 5;
+            this.chk_LearnFromThinking.Text = "Learn From Thinking";
+            this.toolTip.SetToolTip(this.chk_LearnFromThinking, "Enabling this option will make the AI learn from its thoughts as if they were use" +
+        "r input.");
+            this.chk_LearnFromThinking.UseVisualStyleBackColor = true;
+            this.chk_LearnFromThinking.CheckedChanged += new System.EventHandler(this.Chk_LearnFromThinking_CheckedChanged);
             // 
             // lbl_AttentionSpan
             // 
             this.lbl_AttentionSpan.AutoSize = true;
             this.lbl_AttentionSpan.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_AttentionSpan.Location = new System.Drawing.Point(6, 105);
+            this.lbl_AttentionSpan.Location = new System.Drawing.Point(6, 116);
             this.lbl_AttentionSpan.Name = "lbl_AttentionSpan";
             this.lbl_AttentionSpan.Size = new System.Drawing.Size(187, 17);
             this.lbl_AttentionSpan.TabIndex = 6;
             this.lbl_AttentionSpan.Text = "Attention Span (in seconds):";
+            this.toolTip.SetToolTip(this.lbl_AttentionSpan, "The time the AI will wait before speaking again if Initiate Conversation is enabl" +
+        "ed.");
             // 
             // AttentionSpan
             // 
             this.AttentionSpan.AutoSize = true;
             this.AttentionSpan.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.AttentionSpan.Location = new System.Drawing.Point(199, 105);
+            this.AttentionSpan.Location = new System.Drawing.Point(199, 116);
             this.AttentionSpan.Name = "AttentionSpan";
             this.AttentionSpan.Size = new System.Drawing.Size(16, 17);
             this.AttentionSpan.TabIndex = 7;
@@ -159,61 +160,48 @@
             // 
             // Attention_Bar
             // 
-            this.Attention_Bar.Location = new System.Drawing.Point(6, 125);
+            this.Attention_Bar.Location = new System.Drawing.Point(9, 136);
             this.Attention_Bar.Maximum = 10;
             this.Attention_Bar.Name = "Attention_Bar";
-            this.Attention_Bar.Size = new System.Drawing.Size(308, 23);
+            this.Attention_Bar.Size = new System.Drawing.Size(305, 23);
             this.Attention_Bar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.Attention_Bar.TabIndex = 8;
             this.Attention_Bar.Value = 7;
             // 
-            // lbl_Initiate
+            // chk_Initiate
             // 
-            this.lbl_Initiate.AutoSize = true;
-            this.lbl_Initiate.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_Initiate.Location = new System.Drawing.Point(6, 151);
-            this.lbl_Initiate.Name = "lbl_Initiate";
-            this.lbl_Initiate.Size = new System.Drawing.Size(140, 17);
-            this.lbl_Initiate.TabIndex = 9;
-            this.lbl_Initiate.Text = "Initiate Conversation:";
+            this.chk_Initiate.AutoSize = true;
+            this.chk_Initiate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chk_Initiate.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chk_Initiate.Location = new System.Drawing.Point(9, 165);
+            this.chk_Initiate.Name = "chk_Initiate";
+            this.chk_Initiate.Size = new System.Drawing.Size(152, 21);
+            this.chk_Initiate.TabIndex = 10;
+            this.chk_Initiate.Text = "Initiate Conversation";
+            this.toolTip.SetToolTip(this.chk_Initiate, "Enabling this option makes the AI more real-time and won\'t just wait for user inp" +
+        "ut before speaking.");
+            this.chk_Initiate.UseVisualStyleBackColor = true;
+            this.chk_Initiate.CheckedChanged += new System.EventHandler(this.Chk_Initiate_CheckedChanged);
             // 
-            // Initiate_CheckBox
+            // chk_Thinking
             // 
-            this.Initiate_CheckBox.AutoSize = true;
-            this.Initiate_CheckBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Initiate_CheckBox.Location = new System.Drawing.Point(155, 154);
-            this.Initiate_CheckBox.Name = "Initiate_CheckBox";
-            this.Initiate_CheckBox.Size = new System.Drawing.Size(12, 11);
-            this.Initiate_CheckBox.TabIndex = 10;
-            this.Initiate_CheckBox.UseVisualStyleBackColor = true;
-            this.Initiate_CheckBox.CheckedChanged += new System.EventHandler(this.Initiate_CheckBox_CheckedChanged);
-            // 
-            // Thinking_CheckBox
-            // 
-            this.Thinking_CheckBox.AutoSize = true;
-            this.Thinking_CheckBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Thinking_CheckBox.Location = new System.Drawing.Point(155, 52);
-            this.Thinking_CheckBox.Name = "Thinking_CheckBox";
-            this.Thinking_CheckBox.Size = new System.Drawing.Size(12, 11);
-            this.Thinking_CheckBox.TabIndex = 12;
-            this.Thinking_CheckBox.UseVisualStyleBackColor = true;
-            this.Thinking_CheckBox.CheckedChanged += new System.EventHandler(this.Thinking_CheckBox_CheckedChanged);
-            // 
-            // lbl_Thinking
-            // 
-            this.lbl_Thinking.AutoSize = true;
-            this.lbl_Thinking.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_Thinking.Location = new System.Drawing.Point(6, 49);
-            this.lbl_Thinking.Name = "lbl_Thinking";
-            this.lbl_Thinking.Size = new System.Drawing.Size(66, 17);
-            this.lbl_Thinking.TabIndex = 11;
-            this.lbl_Thinking.Text = "Thinking:";
+            this.chk_Thinking.AutoSize = true;
+            this.chk_Thinking.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chk_Thinking.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chk_Thinking.Location = new System.Drawing.Point(9, 52);
+            this.chk_Thinking.Name = "chk_Thinking";
+            this.chk_Thinking.Size = new System.Drawing.Size(78, 21);
+            this.chk_Thinking.TabIndex = 12;
+            this.chk_Thinking.Text = "Thinking";
+            this.toolTip.SetToolTip(this.chk_Thinking, "Enabling this option will make the AI converse with itself (internal dialogue).");
+            this.chk_Thinking.UseVisualStyleBackColor = true;
+            this.chk_Thinking.CheckedChanged += new System.EventHandler(this.Chk_Thinking_CheckedChanged);
             // 
             // Voices
             // 
             this.Voices.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.Voices.FormattingEnabled = true;
-            this.Voices.Location = new System.Drawing.Point(59, 190);
+            this.Voices.Location = new System.Drawing.Point(59, 309);
             this.Voices.Name = "Voices";
             this.Voices.Size = new System.Drawing.Size(256, 21);
             this.Voices.TabIndex = 13;
@@ -224,32 +212,26 @@
             // 
             this.lbl_Voice.AutoSize = true;
             this.lbl_Voice.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_Voice.Location = new System.Drawing.Point(6, 191);
+            this.lbl_Voice.Location = new System.Drawing.Point(6, 310);
             this.lbl_Voice.Name = "lbl_Voice";
             this.lbl_Voice.Size = new System.Drawing.Size(43, 17);
             this.lbl_Voice.TabIndex = 14;
             this.lbl_Voice.Text = "Voice";
             // 
-            // TTS_CheckBox
+            // chk_TTS
             // 
-            this.TTS_CheckBox.AutoSize = true;
-            this.TTS_CheckBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.TTS_CheckBox.Location = new System.Drawing.Point(155, 217);
-            this.TTS_CheckBox.Name = "TTS_CheckBox";
-            this.TTS_CheckBox.Size = new System.Drawing.Size(12, 11);
-            this.TTS_CheckBox.TabIndex = 16;
-            this.TTS_CheckBox.UseVisualStyleBackColor = true;
-            this.TTS_CheckBox.CheckedChanged += new System.EventHandler(this.TTS_CheckBox_CheckedChanged);
-            // 
-            // lbl_TTS
-            // 
-            this.lbl_TTS.AutoSize = true;
-            this.lbl_TTS.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_TTS.Location = new System.Drawing.Point(6, 214);
-            this.lbl_TTS.Name = "lbl_TTS";
-            this.lbl_TTS.Size = new System.Drawing.Size(109, 17);
-            this.lbl_TTS.TabIndex = 15;
-            this.lbl_TTS.Text = "Text-to-Speech:";
+            this.chk_TTS.AutoSize = true;
+            this.chk_TTS.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chk_TTS.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chk_TTS.Location = new System.Drawing.Point(9, 336);
+            this.chk_TTS.Name = "chk_TTS";
+            this.chk_TTS.Size = new System.Drawing.Size(121, 21);
+            this.chk_TTS.TabIndex = 16;
+            this.chk_TTS.Text = "Text-to-Speech";
+            this.toolTip.SetToolTip(this.chk_TTS, "Enabling this option will make the AI speak audibly using Windows native Text-to-" +
+        "Speech engine.");
+            this.chk_TTS.UseVisualStyleBackColor = true;
+            this.chk_TTS.CheckedChanged += new System.EventHandler(this.Chk_TTS_CheckedChanged);
             // 
             // Tabs
             // 
@@ -268,19 +250,18 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.chk_ProceduralResponding);
+            this.tabPage1.Controls.Add(this.chk_TopicResponding);
+            this.tabPage1.Controls.Add(this.chk_InputResponding);
             this.tabPage1.Controls.Add(this.lbl_ThinkSpeed);
-            this.tabPage1.Controls.Add(this.TTS_CheckBox);
+            this.tabPage1.Controls.Add(this.chk_TTS);
             this.tabPage1.Controls.Add(this.ThinkSpeed);
-            this.tabPage1.Controls.Add(this.lbl_TTS);
             this.tabPage1.Controls.Add(this.ThinkSpeed_Bar);
             this.tabPage1.Controls.Add(this.Voices);
             this.tabPage1.Controls.Add(this.lbl_Voice);
-            this.tabPage1.Controls.Add(this.lbl_Thinking);
-            this.tabPage1.Controls.Add(this.Thinking_CheckBox);
-            this.tabPage1.Controls.Add(this.Initiate_CheckBox);
-            this.tabPage1.Controls.Add(this.lbl_LearnFromThinking);
-            this.tabPage1.Controls.Add(this.lbl_Initiate);
-            this.tabPage1.Controls.Add(this.LearnFromThinking_CheckBox);
+            this.tabPage1.Controls.Add(this.chk_Thinking);
+            this.tabPage1.Controls.Add(this.chk_Initiate);
+            this.tabPage1.Controls.Add(this.chk_LearnFromThinking);
             this.tabPage1.Controls.Add(this.Attention_Bar);
             this.tabPage1.Controls.Add(this.lbl_AttentionSpan);
             this.tabPage1.Controls.Add(this.AttentionSpan);
@@ -292,8 +273,60 @@
             this.tabPage1.Text = "Settings";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // chk_ProceduralResponding
+            // 
+            this.chk_ProceduralResponding.AutoSize = true;
+            this.chk_ProceduralResponding.Checked = true;
+            this.chk_ProceduralResponding.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chk_ProceduralResponding.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chk_ProceduralResponding.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chk_ProceduralResponding.Location = new System.Drawing.Point(9, 261);
+            this.chk_ProceduralResponding.Name = "chk_ProceduralResponding";
+            this.chk_ProceduralResponding.Size = new System.Drawing.Size(173, 21);
+            this.chk_ProceduralResponding.TabIndex = 22;
+            this.chk_ProceduralResponding.Text = "Procedural Responding";
+            this.toolTip.SetToolTip(this.chk_ProceduralResponding, resources.GetString("chk_ProceduralResponding.ToolTip"));
+            this.chk_ProceduralResponding.UseVisualStyleBackColor = true;
+            this.chk_ProceduralResponding.CheckedChanged += new System.EventHandler(this.Chk_ProceduralResponding_CheckedChanged);
+            // 
+            // chk_TopicResponding
+            // 
+            this.chk_TopicResponding.AutoSize = true;
+            this.chk_TopicResponding.Checked = true;
+            this.chk_TopicResponding.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chk_TopicResponding.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chk_TopicResponding.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chk_TopicResponding.Location = new System.Drawing.Point(9, 234);
+            this.chk_TopicResponding.Name = "chk_TopicResponding";
+            this.chk_TopicResponding.Size = new System.Drawing.Size(183, 21);
+            this.chk_TopicResponding.TabIndex = 21;
+            this.chk_TopicResponding.Text = "Topic-based Responding";
+            this.toolTip.SetToolTip(this.chk_TopicResponding, "Enabling this option will allow the AI to respond by looking up learned outputs t" +
+        "o inputs \r\nwith topics that match the topics identified in the received input.");
+            this.chk_TopicResponding.UseVisualStyleBackColor = true;
+            this.chk_TopicResponding.CheckedChanged += new System.EventHandler(this.Chk_TopicResponding_CheckedChanged);
+            // 
+            // chk_InputResponding
+            // 
+            this.chk_InputResponding.AutoSize = true;
+            this.chk_InputResponding.Checked = true;
+            this.chk_InputResponding.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chk_InputResponding.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chk_InputResponding.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chk_InputResponding.Location = new System.Drawing.Point(9, 207);
+            this.chk_InputResponding.Name = "chk_InputResponding";
+            this.chk_InputResponding.Size = new System.Drawing.Size(179, 21);
+            this.chk_InputResponding.TabIndex = 20;
+            this.chk_InputResponding.Text = "Whole Input Responding";
+            this.toolTip.SetToolTip(this.chk_InputResponding, "Enabling this option will allow the AI to respond by looking up learned outputs t" +
+        "o inputs \r\nthat match the received input as a whole.");
+            this.chk_InputResponding.UseVisualStyleBackColor = true;
+            this.chk_InputResponding.CheckedChanged += new System.EventHandler(this.Chk_InputResponding_CheckedChanged);
+            // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.btn_ImportTheme);
+            this.tabPage2.Controls.Add(this.btn_ExportTheme);
             this.tabPage2.Controls.Add(this.pic_ControlSelected);
             this.tabPage2.Controls.Add(this.lbl_ControlSelected);
             this.tabPage2.Controls.Add(this.pic_ControlHighlight);
@@ -318,6 +351,30 @@
             this.tabPage2.Text = "Theme";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // btn_ImportTheme
+            // 
+            this.btn_ImportTheme.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_ImportTheme.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btn_ImportTheme.Location = new System.Drawing.Point(9, 389);
+            this.btn_ImportTheme.Name = "btn_ImportTheme";
+            this.btn_ImportTheme.Size = new System.Drawing.Size(147, 23);
+            this.btn_ImportTheme.TabIndex = 17;
+            this.btn_ImportTheme.Text = "Import";
+            this.btn_ImportTheme.UseVisualStyleBackColor = true;
+            this.btn_ImportTheme.Click += new System.EventHandler(this.Btn_ImportTheme_Click);
+            // 
+            // btn_ExportTheme
+            // 
+            this.btn_ExportTheme.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_ExportTheme.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btn_ExportTheme.Location = new System.Drawing.Point(174, 389);
+            this.btn_ExportTheme.Name = "btn_ExportTheme";
+            this.btn_ExportTheme.Size = new System.Drawing.Size(147, 23);
+            this.btn_ExportTheme.TabIndex = 16;
+            this.btn_ExportTheme.Text = "Export";
+            this.btn_ExportTheme.UseVisualStyleBackColor = true;
+            this.btn_ExportTheme.Click += new System.EventHandler(this.Btn_ExportTheme_Click);
+            // 
             // pic_ControlSelected
             // 
             this.pic_ControlSelected.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -326,7 +383,7 @@
             this.pic_ControlSelected.Size = new System.Drawing.Size(16, 16);
             this.pic_ControlSelected.TabIndex = 15;
             this.pic_ControlSelected.TabStop = false;
-            this.pic_ControlSelected.Click += new System.EventHandler(this.pic_ControlSelected_Click);
+            this.pic_ControlSelected.Click += new System.EventHandler(this.Pic_ControlSelected_Click);
             // 
             // lbl_ControlSelected
             // 
@@ -345,7 +402,7 @@
             this.pic_ControlHighlight.Size = new System.Drawing.Size(16, 16);
             this.pic_ControlHighlight.TabIndex = 13;
             this.pic_ControlHighlight.TabStop = false;
-            this.pic_ControlHighlight.Click += new System.EventHandler(this.pic_ControlHighlight_Click);
+            this.pic_ControlHighlight.Click += new System.EventHandler(this.Pic_ControlHighlight_Click);
             // 
             // lbl_ControlHighlight
             // 
@@ -364,7 +421,7 @@
             this.pic_ProgressText.Size = new System.Drawing.Size(16, 16);
             this.pic_ProgressText.TabIndex = 11;
             this.pic_ProgressText.TabStop = false;
-            this.pic_ProgressText.Click += new System.EventHandler(this.pic_ProgressText_Click);
+            this.pic_ProgressText.Click += new System.EventHandler(this.Pic_ProgressText_Click);
             // 
             // lbl_ProgressText
             // 
@@ -383,7 +440,7 @@
             this.pic_ProgressBackground.Size = new System.Drawing.Size(16, 16);
             this.pic_ProgressBackground.TabIndex = 9;
             this.pic_ProgressBackground.TabStop = false;
-            this.pic_ProgressBackground.Click += new System.EventHandler(this.pic_ProgressBackground_Click);
+            this.pic_ProgressBackground.Click += new System.EventHandler(this.Pic_ProgressBackground_Click);
             // 
             // lbl_ProgressBackground
             // 
@@ -402,7 +459,7 @@
             this.pic_ControlText.Size = new System.Drawing.Size(16, 16);
             this.pic_ControlText.TabIndex = 7;
             this.pic_ControlText.TabStop = false;
-            this.pic_ControlText.Click += new System.EventHandler(this.pic_ControlText_Click);
+            this.pic_ControlText.Click += new System.EventHandler(this.Pic_ControlText_Click);
             // 
             // lbl_ControlText
             // 
@@ -421,7 +478,7 @@
             this.pic_ControlBackground.Size = new System.Drawing.Size(16, 16);
             this.pic_ControlBackground.TabIndex = 5;
             this.pic_ControlBackground.TabStop = false;
-            this.pic_ControlBackground.Click += new System.EventHandler(this.pic_ControlBackground_Click);
+            this.pic_ControlBackground.Click += new System.EventHandler(this.Pic_ControlBackground_Click);
             // 
             // lbl_ControlBackground
             // 
@@ -440,7 +497,7 @@
             this.pic_WindowText.Size = new System.Drawing.Size(16, 16);
             this.pic_WindowText.TabIndex = 3;
             this.pic_WindowText.TabStop = false;
-            this.pic_WindowText.Click += new System.EventHandler(this.pic_WindowText_Click);
+            this.pic_WindowText.Click += new System.EventHandler(this.Pic_WindowText_Click);
             // 
             // lbl_WindowText
             // 
@@ -468,7 +525,16 @@
             this.pic_WindowBackground.Size = new System.Drawing.Size(16, 16);
             this.pic_WindowBackground.TabIndex = 0;
             this.pic_WindowBackground.TabStop = false;
-            this.pic_WindowBackground.Click += new System.EventHandler(this.pic_WindowBackground_Click);
+            this.pic_WindowBackground.Click += new System.EventHandler(this.Pic_WindowBackground_Click);
+            // 
+            // toolTip
+            // 
+            this.toolTip.AutomaticDelay = 0;
+            this.toolTip.AutoPopDelay = 32767;
+            this.toolTip.InitialDelay = 0;
+            this.toolTip.ReshowDelay = 0;
+            this.toolTip.UseAnimation = false;
+            this.toolTip.UseFading = false;
             // 
             // Options
             // 
@@ -507,19 +573,15 @@
         private System.Windows.Forms.Label lbl_ThinkSpeed;
         private System.Windows.Forms.Label ThinkSpeed;
         private System.Windows.Forms.ProgressBar ThinkSpeed_Bar;
-        private System.Windows.Forms.Label lbl_LearnFromThinking;
-        private System.Windows.Forms.CheckBox LearnFromThinking_CheckBox;
+        private System.Windows.Forms.CheckBox chk_LearnFromThinking;
         private System.Windows.Forms.Label lbl_AttentionSpan;
         private System.Windows.Forms.Label AttentionSpan;
         public System.Windows.Forms.ProgressBar Attention_Bar;
-        private System.Windows.Forms.Label lbl_Initiate;
-        private System.Windows.Forms.CheckBox Initiate_CheckBox;
-        private System.Windows.Forms.CheckBox Thinking_CheckBox;
-        private System.Windows.Forms.Label lbl_Thinking;
+        private System.Windows.Forms.CheckBox chk_Initiate;
+        private System.Windows.Forms.CheckBox chk_Thinking;
         private System.Windows.Forms.ComboBox Voices;
         private System.Windows.Forms.Label lbl_Voice;
-        private System.Windows.Forms.CheckBox TTS_CheckBox;
-        private System.Windows.Forms.Label lbl_TTS;
+        private System.Windows.Forms.CheckBox chk_TTS;
         private System.Windows.Forms.TabControl Tabs;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
@@ -547,5 +609,11 @@
         private System.Windows.Forms.Label lbl_ControlHighlight;
         private System.Windows.Forms.ColorDialog color_Highlight_Control;
         private System.Windows.Forms.ColorDialog color_Selected_Control;
+        private System.Windows.Forms.ToolTip toolTip;
+        private System.Windows.Forms.CheckBox chk_ProceduralResponding;
+        private System.Windows.Forms.CheckBox chk_TopicResponding;
+        private System.Windows.Forms.CheckBox chk_InputResponding;
+        private System.Windows.Forms.Button btn_ExportTheme;
+        private System.Windows.Forms.Button btn_ImportTheme;
     }
 }

@@ -1,0 +1,8 @@
+[01:56:26] You: hello
+[new session]
+[01:57:43] You: hello
+[01:57:43] AI: Hello.
+[01:57:46] You: How are you?
+[01:57:46] AI: How are you?
+[01:57:50] You: I am good.
+[01:57:50] AI: I am good.

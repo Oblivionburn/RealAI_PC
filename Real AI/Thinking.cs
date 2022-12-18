@@ -13,30 +13,58 @@ namespace Real_AI
 
         private void Thinking_Load(object sender, EventArgs e)
         {
-            SetColors();
+            try
+            {
+                SetColors();
 
-            ThinkingBox.GotFocus += ThinkingBox_GotFocus;
-            ThinkingBox.LostFocus += ThinkingBox_LostFocus;
+                ThinkingBox.GotFocus += ThinkingBox_GotFocus;
+                ThinkingBox.LostFocus += ThinkingBox_LostFocus;
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Thinking.Thinking_Load", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private void SetColors()
         {
-            BackColor = AppUtil.background_window;
-            ThinkingBox.BackColor = AppUtil.background_control;
-            ThinkingBox.ForeColor = AppUtil.text_control;
+            try
+            {
+                BackColor = AppUtil.background_window;
+                ThinkingBox.BackColor = AppUtil.background_control;
+                ThinkingBox.ForeColor = AppUtil.text_control;
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Thinking.SetColors", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private void ThinkingBox_LostFocus(object sender, EventArgs e)
         {
-            if (Brain.Thinking)
+            try
             {
-                MainForm.ThinkTimer.Start();
+                if (Brain.Thinking)
+                {
+                    MainForm.ThinkTimer.Start();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Thinking.ThinkingBox_LostFocus", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
         private void ThinkingBox_GotFocus(object sender, EventArgs e)
         {
-            MainForm.ThinkTimer.Stop();
+            try
+            {
+                MainForm.ThinkTimer.Stop();
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Thinking.ThinkingBox_GotFocus", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
     }
 }

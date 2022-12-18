@@ -108,9 +108,9 @@ namespace Real_AI.Util
                             }
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
-                        Error = e.Message;
+                        Logger.AddLog("NetUtil.Update", ex.Source, ex.Message, ex.StackTrace);
                     }
                 }
             }
@@ -118,9 +118,17 @@ namespace Real_AI.Util
 
         public static string Get_CurrentMessage()
         {
-            if (Messages_Received.Count > 0)
+            try
             {
-                return Messages_Received[Messages_Received.Count - 1];
+                if (Messages_Received.Count > 0)
+                {
+                    return Messages_Received[Messages_Received.Count - 1];
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("NetUtil.Get_CurrentMessage", ex.Source, ex.Message, ex.StackTrace);
+                return ex.Message;
             }
 
             return null;
@@ -138,9 +146,10 @@ namespace Real_AI.Util
 
                 return "ok";
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                return e.Message;
+                Logger.AddLog("NetUtil.Start", ex.Source, ex.Message, ex.StackTrace);
+                return ex.Message;
             }
         }
 
@@ -157,9 +166,10 @@ namespace Real_AI.Util
                 Listening = false;
                 return "ok";
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                return e.Message;
+                Logger.AddLog("NetUtil.Stop", ex.Source, ex.Message, ex.StackTrace);
+                return ex.Message;
             }
         }
 
@@ -176,9 +186,10 @@ namespace Real_AI.Util
                             return "Test Result: Successful";
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
-                        return e.Message;
+                        Logger.AddLog("NetUtil.TestConnection", ex.Source, ex.Message, ex.StackTrace);
+                        return ex.Message;
                     }
                 }
                 else
@@ -209,10 +220,11 @@ namespace Real_AI.Util
                 Message_Sent = message;
                 return "sent";
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                return e.Message;
-            }
+                Logger.AddLog("NetUtil.SendMessage", ex.Source, ex.Message, ex.StackTrace);
+                return ex.Message;
+            }            
         }
 
         #endregion

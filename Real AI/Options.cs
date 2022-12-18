@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Speech.Synthesis;
 using System.Threading;
 using System.Windows.Forms;
@@ -21,390 +22,676 @@ namespace Real_AI
 
         private void Options_Load(object sender, EventArgs e)
         {
-            SetColors();
-
-            int speed = MainForm.ThinkTimer.Interval;
-
-            ThinkSpeed.Text = speed.ToString();
-
-            ThinkSpeed_Bar.Value = speed;
-            ThinkSpeed_Bar.MouseDown += ThinkSpeed_Bar_MouseDown;
-            ThinkSpeed_Bar.MouseUp += ThinkSpeed_Bar_MouseUp;
-
-            int span = MainForm.AttentionTimer.Interval / 1000;
-            Attention_Bar.Value = span;
-            Attention_Bar.MouseDown += Attention_Bar_MouseDown;
-            Attention_Bar.MouseUp += Attention_Bar_MouseUp;
-
-            Thinking_CheckBox.Checked = Brain.Thinking;
-            LearnFromThinking_CheckBox.Checked = Brain.LearnFromThinking;
-            Initiate_CheckBox.Checked = Brain.Initiate;
-            TTS_CheckBox.Checked = MainForm.tts;
-            Voices.SelectedText = MainForm.tts_voice;
-
-            ThinkTimer.Interval = 100;
-            ThinkTimer.Tick += ThinkTimer_Tick;
-
-            AttentionTimer.Interval = 100;
-            AttentionTimer.Tick += AttentionTimer_Tick;
-
-            Voices.Items.Clear();
-            SpeechSynthesizer synthesizer = new SpeechSynthesizer();
-            foreach (var voice in synthesizer.GetInstalledVoices())
+            try
             {
-                var info = voice.VoiceInfo;
-                Voices.Items.Add(info.Name);
+                SetColors();
+
+                int speed = MainForm.ThinkTimer.Interval;
+
+                ThinkSpeed.Text = speed.ToString();
+
+                ThinkSpeed_Bar.Value = speed;
+                ThinkSpeed_Bar.MouseDown += ThinkSpeed_Bar_MouseDown;
+                ThinkSpeed_Bar.MouseUp += ThinkSpeed_Bar_MouseUp;
+
+                int span = MainForm.AttentionTimer.Interval / 1000;
+                Attention_Bar.Value = span;
+                Attention_Bar.MouseDown += Attention_Bar_MouseDown;
+                Attention_Bar.MouseUp += Attention_Bar_MouseUp;
+
+                chk_Thinking.Checked = Brain.Thinking;
+                chk_LearnFromThinking.Checked = Brain.LearnFromThinking;
+                chk_Initiate.Checked = Brain.Initiate;
+                chk_TTS.Checked = MainForm.tts;
+                Voices.SelectedText = MainForm.tts_voice;
+
+                ThinkTimer.Interval = 100;
+                ThinkTimer.Tick += ThinkTimer_Tick;
+
+                AttentionTimer.Interval = 100;
+                AttentionTimer.Tick += AttentionTimer_Tick;
+
+                Voices.Items.Clear();
+                SpeechSynthesizer synthesizer = new SpeechSynthesizer();
+                foreach (var voice in synthesizer.GetInstalledVoices())
+                {
+                    var info = voice.VoiceInfo;
+                    Voices.Items.Add(info.Name);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Options_Load", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
         private void Options_FormClosing(object sender, FormClosingEventArgs e)
         {
-            MainForm.ResumeTimers();
+            try
+            {
+                MainForm.ResumeTimers();
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Options_FormClosing", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private void Tabs_DrawItem(object sender, DrawItemEventArgs e)
         {
-            TabPage CurrentTab = Tabs.TabPages[e.Index];
-            Rectangle ItemRect = Tabs.GetTabRect(e.Index);
-            SolidBrush FillBrush = new SolidBrush(AppUtil.background_window);
-            SolidBrush TextBrush = new SolidBrush(AppUtil.text_window);
-            StringFormat sf = new StringFormat();
-            sf.Alignment = StringAlignment.Center;
-            sf.LineAlignment = StringAlignment.Center;
+            try
+            {
+                TabPage CurrentTab = Tabs.TabPages[e.Index];
+                Rectangle ItemRect = Tabs.GetTabRect(e.Index);
+                SolidBrush FillBrush = new SolidBrush(AppUtil.background_window);
+                SolidBrush TextBrush = new SolidBrush(AppUtil.text_window);
+                StringFormat sf = new StringFormat();
+                sf.Alignment = StringAlignment.Center;
+                sf.LineAlignment = StringAlignment.Center;
 
-            //Next we'll paint the TabItem with our Fill Brush
-            e.Graphics.FillRectangle(FillBrush, ItemRect);
+                //Next we'll paint the TabItem with our Fill Brush
+                e.Graphics.FillRectangle(FillBrush, ItemRect);
 
-            //Now draw the text.
-            e.Graphics.DrawString(CurrentTab.Text, e.Font, TextBrush, ItemRect, sf);
+                //Now draw the text.
+                e.Graphics.DrawString(CurrentTab.Text, e.Font, TextBrush, ItemRect, sf);
 
-            //Paint the empty space to the right of the tabs
-            Rectangle r = Tabs.GetTabRect(Tabs.TabPages.Count - 1);
-            RectangleF rf = new RectangleF(r.X + r.Width, r.Y - 5, Tabs.Width - (r.X + r.Width), r.Height + 5);
-            e.Graphics.FillRectangle(FillBrush, rf);
+                //Paint the empty space to the right of the tabs
+                Rectangle r = Tabs.GetTabRect(Tabs.TabPages.Count - 1);
+                RectangleF rf = new RectangleF(r.X + r.Width, r.Y - 5, Tabs.Width - (r.X + r.Width), r.Height + 5);
+                e.Graphics.FillRectangle(FillBrush, rf);
 
-            //Paint the border
-            Pen p = new Pen(FillBrush.Color, 8);
-            e.Graphics.DrawRectangle(p, CurrentTab.Bounds);
+                //Paint the border
+                Pen p = new Pen(FillBrush.Color, 8);
+                e.Graphics.DrawRectangle(p, CurrentTab.Bounds);
 
-            //Reset any Graphics rotation
-            e.Graphics.ResetTransform();
+                //Reset any Graphics rotation
+                e.Graphics.ResetTransform();
 
-            //Finally, we should Dispose of our brushes.
-            FillBrush.Dispose();
-            TextBrush.Dispose();
+                //Finally, we should Dispose of our brushes.
+                FillBrush.Dispose();
+                TextBrush.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Tabs_DrawItem", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private void ComboBox_DrawItem(object sender, DrawItemEventArgs e)
         {
-            if (e.Index < 0)
+            try
             {
-                return;
-            }
+                if (e.Index < 0)
+                {
+                    return;
+                }
 
-            ComboBox combo = sender as ComboBox;
-            if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
-            {
-                e.Graphics.FillRectangle(new SolidBrush(AppUtil.highlight_control), e.Bounds);
+                ComboBox combo = sender as ComboBox;
+                if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
+                {
+                    e.Graphics.FillRectangle(new SolidBrush(AppUtil.highlight_control), e.Bounds);
+                }
+                else
+                {
+                    e.Graphics.FillRectangle(new SolidBrush(combo.BackColor), e.Bounds);
+                }
+
+                e.Graphics.DrawString(combo.Items[e.Index].ToString(), e.Font, new SolidBrush(combo.ForeColor), new Point(e.Bounds.X, e.Bounds.Y));
+                e.DrawFocusRectangle();
             }
-            else
+            catch (Exception ex)
             {
-                e.Graphics.FillRectangle(new SolidBrush(combo.BackColor), e.Bounds);
+                Logger.AddLog("Options.ComboBox_DrawItem", ex.Source, ex.Message, ex.StackTrace);
             }
-                
-            e.Graphics.DrawString(combo.Items[e.Index].ToString(), e.Font, new SolidBrush(combo.ForeColor), new Point(e.Bounds.X, e.Bounds.Y));
-            e.DrawFocusRectangle();
         }
 
         private void SetColors()
         {
-            BackColor = AppUtil.background_window;
-            ForeColor = AppUtil.text_window;
-
-            pic_WindowBackground.BackColor = AppUtil.background_window;
-            pic_WindowText.BackColor = AppUtil.text_window;
-            pic_ControlBackground.BackColor = AppUtil.background_control;
-            pic_ControlText.BackColor = AppUtil.text_control;
-            pic_ControlHighlight.BackColor = AppUtil.highlight_control;
-            pic_ControlSelected.BackColor = AppUtil.selected_control;
-            pic_ProgressBackground.BackColor = AppUtil.background_progress;
-            pic_ProgressText.BackColor = AppUtil.text_progress;
-
-            foreach (TabPage tab in Tabs.TabPages)
+            try
             {
-                tab.BackColor = AppUtil.background_window;
-                tab.ForeColor = AppUtil.text_window;
+                color_Background_Window.Color = AppUtil.background_window;
+                color_Text_Window.Color = AppUtil.text_window;
+                color_Background_Control.Color = AppUtil.background_control;
+                color_Text_Control.Color = AppUtil.text_control;
+                color_Highlight_Control.Color = AppUtil.highlight_control;
+                color_Selected_Control.Color = AppUtil.selected_control;
+                color_Background_Progress.Color = AppUtil.background_progress;
+                color_Text_Progress.Color = AppUtil.text_progress;
+
+                BackColor = AppUtil.background_window;
+                ForeColor = AppUtil.text_window;
+
+                btn_ExportTheme.BackColor = AppUtil.background_control;
+                btn_ExportTheme.ForeColor = AppUtil.text_control;
+                btn_ImportTheme.BackColor = AppUtil.background_control;
+                btn_ImportTheme.ForeColor = AppUtil.text_control;
+
+                pic_WindowBackground.BackColor = AppUtil.background_window;
+                pic_WindowText.BackColor = AppUtil.text_window;
+                pic_ControlBackground.BackColor = AppUtil.background_control;
+                pic_ControlText.BackColor = AppUtil.text_control;
+                pic_ControlHighlight.BackColor = AppUtil.highlight_control;
+                pic_ControlSelected.BackColor = AppUtil.selected_control;
+                pic_ProgressBackground.BackColor = AppUtil.background_progress;
+                pic_ProgressText.BackColor = AppUtil.text_progress;
+
+                foreach (TabPage tab in Tabs.TabPages)
+                {
+                    tab.BackColor = AppUtil.background_window;
+                    tab.ForeColor = AppUtil.text_window;
+                }
+
+                ThinkSpeed_Bar.BackColor = AppUtil.background_window;
+                ThinkSpeed_Bar.ForeColor = AppUtil.background_progress;
+
+                Attention_Bar.BackColor = AppUtil.background_window;
+                Attention_Bar.ForeColor = AppUtil.background_progress;
+
+                lbl_ThinkSpeed.ForeColor = AppUtil.text_window;
+                ThinkSpeed.ForeColor = AppUtil.text_window;
+                lbl_AttentionSpan.ForeColor = AppUtil.text_window;
+                AttentionSpan.ForeColor = AppUtil.text_window;
+                lbl_Voice.ForeColor = AppUtil.text_window;
+                lbl_WindowBackground.ForeColor = AppUtil.text_window;
+                lbl_WindowText.ForeColor = AppUtil.text_window;
+
+                chk_Thinking.BackColor = AppUtil.background_window;
+                chk_Thinking.ForeColor = AppUtil.text_control;
+
+                chk_LearnFromThinking.BackColor = AppUtil.background_window;
+                chk_LearnFromThinking.ForeColor = AppUtil.text_control;
+
+                chk_Initiate.BackColor = AppUtil.background_window;
+                chk_Initiate.ForeColor = AppUtil.text_control;
+
+                chk_InputResponding.BackColor = AppUtil.background_window;
+                chk_InputResponding.ForeColor = AppUtil.text_control;
+
+                chk_TopicResponding.BackColor = AppUtil.background_window;
+                chk_TopicResponding.ForeColor = AppUtil.text_control;
+
+                chk_ProceduralResponding.BackColor = AppUtil.background_window;
+                chk_ProceduralResponding.ForeColor = AppUtil.text_control;
+
+                Voices.BackColor = AppUtil.background_control;
+                Voices.ForeColor = AppUtil.text_control;
+
+                chk_TTS.BackColor = AppUtil.background_window;
+                chk_TTS.ForeColor = AppUtil.text_control;
+
+                MainForm.SetColors();
             }
-
-            ThinkSpeed_Bar.BackColor = AppUtil.background_window;
-            ThinkSpeed_Bar.ForeColor = AppUtil.background_progress;
-
-            Attention_Bar.BackColor = AppUtil.background_window;
-            Attention_Bar.ForeColor = AppUtil.background_progress;
-
-            lbl_ThinkSpeed.ForeColor = AppUtil.text_window;
-            ThinkSpeed.ForeColor = AppUtil.text_window;
-            lbl_Thinking.ForeColor = AppUtil.text_window;
-            lbl_LearnFromThinking.ForeColor = AppUtil.text_window;
-            lbl_AttentionSpan.ForeColor = AppUtil.text_window;
-            AttentionSpan.ForeColor = AppUtil.text_window;
-            lbl_Initiate.ForeColor = AppUtil.text_window;
-            lbl_Voice.ForeColor = AppUtil.text_window;
-            lbl_TTS.ForeColor = AppUtil.text_window;
-            lbl_WindowBackground.ForeColor = AppUtil.text_window;
-            lbl_WindowText.ForeColor = AppUtil.text_window;
-
-            Thinking_CheckBox.BackColor = AppUtil.background_control;
-            Thinking_CheckBox.ForeColor = AppUtil.text_control;
-
-            LearnFromThinking_CheckBox.BackColor = AppUtil.background_control;
-            LearnFromThinking_CheckBox.ForeColor = AppUtil.text_control;
-
-            Initiate_CheckBox.BackColor = AppUtil.background_control;
-            Initiate_CheckBox.ForeColor = AppUtil.text_control;
-
-            Voices.BackColor = AppUtil.background_control;
-            Voices.ForeColor = AppUtil.text_control;
-            
-
-            TTS_CheckBox.BackColor = AppUtil.background_control;
-            TTS_CheckBox.ForeColor = AppUtil.text_control;
-
-            MainForm.SetColors();
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.SetColors", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private void ThinkSpeed_Bar_MouseUp(object sender, MouseEventArgs e)
         {
-            ThinkTimer.Stop();
+            try
+            {
+                ThinkTimer.Stop();
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.ThinkSpeed_Bar_MouseUp", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private void ThinkSpeed_Bar_MouseDown(object sender, MouseEventArgs e)
         {
-            ThinkTimer.Start();
+            try
+            {
+                ThinkTimer.Start();
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.ThinkSpeed_Bar_MouseDown", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private void ThinkTimer_Tick(object sender, EventArgs e)
         {
-            Point location = ThinkSpeed_Bar.PointToScreen(Point.Empty);
-            int position = Cursor.Position.X - location.X;
-            int percent = (position * 100) / ThinkSpeed_Bar.Width;
-
-            int value = ((percent * 1000) / 100);
-            if (value > 1000)
+            try
             {
-                value = 1000;
+                Point location = ThinkSpeed_Bar.PointToScreen(Point.Empty);
+                int position = Cursor.Position.X - location.X;
+                int percent = (position * 100) / ThinkSpeed_Bar.Width;
+
+                int value = ((percent * 1000) / 100);
+                if (value > 1000)
+                {
+                    value = 1000;
+                }
+                else if (value < 100)
+                {
+                    value = 100;
+                }
+
+                ThinkSpeed_Bar.Value = value;
+
+                ThinkSpeed.Text = ThinkSpeed_Bar.Value.ToString();
+                MainForm.ThinkTimer.Interval = ThinkSpeed_Bar.Value;
+                AppUtil.Set_Config("ThinkSpeed", ThinkSpeed_Bar.Value.ToString());
             }
-            else if (value < 100)
+            catch (Exception ex)
             {
-                value = 100;
+                Logger.AddLog("Options.ThinkTimer_Tick", ex.Source, ex.Message, ex.StackTrace);
             }
-
-            ThinkSpeed_Bar.Value = value;
-
-            ThinkSpeed.Text = ThinkSpeed_Bar.Value.ToString();
-            MainForm.ThinkTimer.Interval = ThinkSpeed_Bar.Value;
-            AppUtil.Set_ThinkSpeed(ThinkSpeed_Bar.Value);
         }
 
         private void Attention_Bar_MouseUp(object sender, MouseEventArgs e)
         {
-            AttentionTimer.Stop();
+            try
+            {
+                AttentionTimer.Stop();
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Attention_Bar_MouseUp", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private void Attention_Bar_MouseDown(object sender, MouseEventArgs e)
         {
-            AttentionTimer.Start();
+            try
+            {
+                AttentionTimer.Start();
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Attention_Bar_MouseDown", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private void AttentionTimer_Tick(object sender, EventArgs e)
         {
-            Point location = Attention_Bar.PointToScreen(Point.Empty);
-            int position = Cursor.Position.X - location.X;
-            int percent = (position * 100) / Attention_Bar.Width;
-
-            int value = ((percent * 10) / 100) + 1;
-            if (value > 10)
+            try
             {
-                value = 10;
-            }
-            else if (value < 1)
-            {
-                value = 1;
-            }
+                Point location = Attention_Bar.PointToScreen(Point.Empty);
+                int position = Cursor.Position.X - location.X;
+                int percent = (position * 100) / Attention_Bar.Width;
 
-            Attention_Bar.Value = value;
-
-            AttentionSpan.Text = Attention_Bar.Value.ToString();
-            MainForm.AttentionTimer.Interval = Attention_Bar.Value * 1000;
-            AppUtil.Set_AttentionSpan(Attention_Bar.Value);
-        }
-
-        private void LearnFromThinking_CheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            Brain.LearnFromThinking = LearnFromThinking_CheckBox.Checked;
-            AppUtil.Set_LearnFromThinking(LearnFromThinking_CheckBox.Checked.ToString());
-        }
-
-        private void Initiate_CheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            Brain.Initiate = Initiate_CheckBox.Checked;
-            AppUtil.Set_Initiate(Brain.Initiate.ToString());
-
-            if (Brain.Initiate)
-            {
-                MainForm.AttentionTimer.Start();
-            }
-            else
-            {
-                MainForm.AttentionTimer.Stop();
-            }
-        }
-
-        private void Thinking_CheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            Brain.Thinking = Thinking_CheckBox.Checked;
-            AppUtil.Set_Thinking(Brain.Thinking.ToString());
-
-            if (!Brain.Thinking)
-            {
-                foreach (Thread thread in MainForm.threads)
+                int value = ((percent * 10) / 100) + 1;
+                if (value > 10)
                 {
-                    thread.Abort();
+                    value = 10;
                 }
+                else if (value < 1)
+                {
+                    value = 1;
+                }
+
+                Attention_Bar.Value = value;
+
+                AttentionSpan.Text = Attention_Bar.Value.ToString();
+                MainForm.AttentionTimer.Interval = Attention_Bar.Value * 1000;
+                AppUtil.Set_Config("AttentionSpan", Attention_Bar.Value.ToString());
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.AttentionTimer_Tick", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void Chk_LearnFromThinking_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                Brain.LearnFromThinking = chk_LearnFromThinking.Checked;
+                AppUtil.Set_Config("LearnFromThinking", chk_LearnFromThinking.Checked.ToString());
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Chk_LearnFromThinking_CheckedChanged", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void Chk_Initiate_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                Brain.Initiate = chk_Initiate.Checked;
+                AppUtil.Set_Config("Initiate", Brain.Initiate.ToString());
+
+                if (Brain.Initiate)
+                {
+                    MainForm.AttentionTimer.Start();
+                }
+                else
+                {
+                    MainForm.AttentionTimer.Stop();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Chk_Initiate_CheckedChanged", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void Chk_Thinking_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                Brain.Thinking = chk_Thinking.Checked;
+                AppUtil.Set_Config("Thinking", Brain.Thinking.ToString());
+
+                if (!Brain.Thinking)
+                {
+                    foreach (Thread thread in MainForm.threads)
+                    {
+                        thread.Abort();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Chk_Thinking_CheckedChanged", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void Chk_TTS_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                MainForm.tts = chk_TTS.Checked;
+                AppUtil.Set_Config("TTS", MainForm.tts.ToString());
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Chk_TTS_CheckedChanged", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void Chk_InputResponding_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                MainForm.InputResponding = chk_InputResponding.Checked;
+                AppUtil.Set_Config("InputResponding", MainForm.InputResponding.ToString());
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Chk_InputResponding_CheckedChanged", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void Chk_TopicResponding_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                MainForm.TopicResponding = chk_TopicResponding.Checked;
+                AppUtil.Set_Config("TopicResponding", MainForm.TopicResponding.ToString());
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Chk_TopicResponding_CheckedChanged", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void Chk_ProceduralResponding_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                MainForm.ProceduralResponding = chk_ProceduralResponding.Checked;
+                AppUtil.Set_Config("ProceduralResponding", MainForm.ProceduralResponding.ToString());
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Chk_ProceduralResponding_CheckedChanged", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
         private void Voices_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string voice = ((ComboBox)sender).SelectedItem.ToString();
-            MainForm.tts_voice = voice;
-            MainForm.synthesizer.SelectVoice(voice);
-            AppUtil.Set_TTS_Voice(voice);
-        }
-
-        private void TTS_CheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            MainForm.tts = TTS_CheckBox.Checked;
-            AppUtil.Set_TTS(MainForm.tts.ToString());
-        }
-
-        private void pic_WindowBackground_Click(object sender, EventArgs e)
-        {
-            if (color_Background_Window.ShowDialog() == DialogResult.OK)
+            try
             {
-                Color color = color_Background_Window.Color;
-                string str_color = AppUtil.ColorToHex(color);
-                AppUtil.Set_Config_Color("Color_Background_Window", str_color);
-
-                AppUtil.background_window = color;
-                pic_WindowBackground.BackColor = color;
-
-                SetColors();
+                string voice = ((ComboBox)sender).SelectedItem.ToString();
+                MainForm.tts_voice = voice;
+                MainForm.synthesizer.SelectVoice(voice);
+                AppUtil.Set_Config("TTS_Voice", voice);
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Voices_SelectedIndexChanged", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
-        private void pic_WindowText_Click(object sender, EventArgs e)
+        private void Pic_WindowBackground_Click(object sender, EventArgs e)
         {
-            if (color_Text_Window.ShowDialog() == DialogResult.OK)
+            try
             {
-                Color color = color_Text_Window.Color;
-                string str_color = AppUtil.ColorToHex(color);
-                AppUtil.Set_Config_Color("Color_Text_Window", str_color);
+                if (color_Background_Window.ShowDialog() == DialogResult.OK)
+                {
+                    Color color = color_Background_Window.Color;
+                    string str_color = AppUtil.ColorToHex(color);
+                    AppUtil.Set_Color("Color_Background_Window", str_color);
 
-                AppUtil.text_window = color;
-                pic_WindowText.BackColor = color;
+                    AppUtil.background_window = color;
+                    pic_WindowBackground.BackColor = color;
 
-                SetColors();
+                    SetColors();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Pic_WindowBackground_Click", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
-        private void pic_ControlBackground_Click(object sender, EventArgs e)
+        private void Pic_WindowText_Click(object sender, EventArgs e)
         {
-            if (color_Background_Control.ShowDialog() == DialogResult.OK)
+            try
             {
-                Color color = color_Background_Control.Color;
-                string str_color = AppUtil.ColorToHex(color);
-                AppUtil.Set_Config_Color("Color_Background_Control", str_color);
+                if (color_Text_Window.ShowDialog() == DialogResult.OK)
+                {
+                    Color color = color_Text_Window.Color;
+                    string str_color = AppUtil.ColorToHex(color);
+                    AppUtil.Set_Color("Color_Text_Window", str_color);
 
-                AppUtil.background_control = color;
-                pic_ControlBackground.BackColor = color;
+                    AppUtil.text_window = color;
+                    pic_WindowText.BackColor = color;
 
-                SetColors();
+                    SetColors();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Pic_WindowText_Click", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
-        private void pic_ControlText_Click(object sender, EventArgs e)
+        private void Pic_ControlBackground_Click(object sender, EventArgs e)
         {
-            if (color_Text_Control.ShowDialog() == DialogResult.OK)
+            try
             {
-                Color color = color_Text_Control.Color;
-                string str_color = AppUtil.ColorToHex(color);
-                AppUtil.Set_Config_Color("Color_Text_Control", str_color);
+                if (color_Background_Control.ShowDialog() == DialogResult.OK)
+                {
+                    Color color = color_Background_Control.Color;
+                    string str_color = AppUtil.ColorToHex(color);
+                    AppUtil.Set_Color("Color_Background_Control", str_color);
 
-                AppUtil.text_control = color;
-                pic_ControlText.BackColor = color;
+                    AppUtil.background_control = color;
+                    pic_ControlBackground.BackColor = color;
 
-                SetColors();
+                    SetColors();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Pic_ControlBackground_Click", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
-        private void pic_ControlHighlight_Click(object sender, EventArgs e)
+        private void Pic_ControlText_Click(object sender, EventArgs e)
         {
-            if (color_Highlight_Control.ShowDialog() == DialogResult.OK)
+            try
             {
-                Color color = color_Highlight_Control.Color;
-                string str_color = AppUtil.ColorToHex(color);
-                AppUtil.Set_Config_Color("Color_Highlight_Control", str_color);
+                if (color_Text_Control.ShowDialog() == DialogResult.OK)
+                {
+                    Color color = color_Text_Control.Color;
+                    string str_color = AppUtil.ColorToHex(color);
+                    AppUtil.Set_Color("Color_Text_Control", str_color);
 
-                AppUtil.highlight_control = color;
-                pic_ControlHighlight.BackColor = color;
+                    AppUtil.text_control = color;
+                    pic_ControlText.BackColor = color;
 
-                SetColors();
+                    SetColors();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Pic_ControlText_Click", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
-        private void pic_ControlSelected_Click(object sender, EventArgs e)
+        private void Pic_ControlHighlight_Click(object sender, EventArgs e)
         {
-            if (color_Selected_Control.ShowDialog() == DialogResult.OK)
+            try
             {
-                Color color = color_Selected_Control.Color;
-                string str_color = AppUtil.ColorToHex(color);
-                AppUtil.Set_Config_Color("Color_Selected_Control", str_color);
+                if (color_Highlight_Control.ShowDialog() == DialogResult.OK)
+                {
+                    Color color = color_Highlight_Control.Color;
+                    string str_color = AppUtil.ColorToHex(color);
+                    AppUtil.Set_Color("Color_Highlight_Control", str_color);
 
-                AppUtil.selected_control = color;
-                pic_ControlSelected.BackColor = color;
+                    AppUtil.highlight_control = color;
+                    pic_ControlHighlight.BackColor = color;
 
-                SetColors();
+                    SetColors();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Pic_ControlHighlight_Click", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
-        private void pic_ProgressBackground_Click(object sender, EventArgs e)
+        private void Pic_ControlSelected_Click(object sender, EventArgs e)
         {
-            if (color_Background_Progress.ShowDialog() == DialogResult.OK)
+            try
             {
-                Color color = color_Background_Progress.Color;
-                string str_color = AppUtil.ColorToHex(color);
-                AppUtil.Set_Config_Color("Color_Background_Progress", str_color);
+                if (color_Selected_Control.ShowDialog() == DialogResult.OK)
+                {
+                    Color color = color_Selected_Control.Color;
+                    string str_color = AppUtil.ColorToHex(color);
+                    AppUtil.Set_Color("Color_Selected_Control", str_color);
 
-                AppUtil.background_progress = color;
-                pic_ProgressBackground.BackColor = color;
+                    AppUtil.selected_control = color;
+                    pic_ControlSelected.BackColor = color;
 
-                SetColors();
+                    SetColors();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Pic_ControlSelected_Click", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
-        private void pic_ProgressText_Click(object sender, EventArgs e)
+        private void Pic_ProgressBackground_Click(object sender, EventArgs e)
         {
-            if (color_Text_Progress.ShowDialog() == DialogResult.OK)
+            try
             {
-                Color color = color_Text_Progress.Color;
-                string str_color = AppUtil.ColorToHex(color);
-                AppUtil.Set_Config_Color("Color_Text_Progress", str_color);
+                if (color_Background_Progress.ShowDialog() == DialogResult.OK)
+                {
+                    Color color = color_Background_Progress.Color;
+                    string str_color = AppUtil.ColorToHex(color);
+                    AppUtil.Set_Color("Color_Background_Progress", str_color);
 
-                AppUtil.text_progress = color;
-                pic_ProgressText.BackColor = color;
+                    AppUtil.background_progress = color;
+                    pic_ProgressBackground.BackColor = color;
 
-                SetColors();
+                    SetColors();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Pic_ProgressBackground_Click", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void Pic_ProgressText_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (color_Text_Progress.ShowDialog() == DialogResult.OK)
+                {
+                    Color color = color_Text_Progress.Color;
+                    string str_color = AppUtil.ColorToHex(color);
+                    AppUtil.Set_Color("Color_Text_Progress", str_color);
+
+                    AppUtil.text_progress = color;
+                    pic_ProgressText.BackColor = color;
+
+                    SetColors();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Pic_ProgressText_Click", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void Btn_ImportTheme_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                OpenFileDialog dialog = new OpenFileDialog
+                {
+                    Filter = "Colors (*.colors)|*.colors",
+                    DefaultExt = "*.colors",
+                    InitialDirectory = Environment.CurrentDirectory + @"\Themes\"
+                };
+
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    MainForm.Colors = dialog.FileName;
+                    AppUtil.Set_Config("Colors", Path.GetFileName(MainForm.Colors));
+                    AppUtil.Update_Colors();
+                    SetColors();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Btn_ImportTheme_Click", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void Btn_ExportTheme_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                SaveFileDialog dialog = new SaveFileDialog
+                {
+                    Filter = "Colors (*.colors)|*.colors",
+                    DefaultExt = "*.colors",
+                    InitialDirectory = Path.Combine(Environment.CurrentDirectory, "Themes")
+                };
+
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    MainForm.Colors = dialog.FileName;
+
+                    string[] lines =
+                    {
+                        "Color_Background_Window=" + AppUtil.ColorToHex(AppUtil.background_window),
+                        "Color_Background_Control=" + AppUtil.ColorToHex(AppUtil.background_control),
+                        "Color_Background_Progress=" + AppUtil.ColorToHex(AppUtil.background_progress),
+                        "Color_Text_Window=" + AppUtil.ColorToHex(AppUtil.text_window),
+                        "Color_Text_Control=" + AppUtil.ColorToHex(AppUtil.text_control),
+                        "Color_Text_Progress=" + AppUtil.ColorToHex(AppUtil.text_progress),
+                        "Color_Highlight_Control=" + AppUtil.ColorToHex(AppUtil.highlight_control),
+                        "Color_Selected_Control=" + AppUtil.ColorToHex(AppUtil.selected_control)
+                    };
+
+                    File.WriteAllLines(MainForm.Colors, lines);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Options.Btn_ExportTheme_Click", ex.Source, ex.Message, ex.StackTrace);
             }
         }
     }

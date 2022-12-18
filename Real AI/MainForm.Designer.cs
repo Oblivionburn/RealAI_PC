@@ -54,10 +54,10 @@
             this.OutputBox = new System.Windows.Forms.RichTextBox();
             this.lbl_ElapsedTime = new System.Windows.Forms.Label();
             this.lbl_RemainingTime = new System.Windows.Forms.Label();
-            this.ProgressBar_Main = new Real_AI.TextProgressBar();
-            this.ProgressBar_Detail = new Real_AI.TextProgressBar();
             this.EncourageButton = new System.Windows.Forms.Button();
             this.DiscourageButton = new System.Windows.Forms.Button();
+            this.ProgressBar_Main = new Real_AI.TextProgressBar();
+            this.ProgressBar_Detail = new Real_AI.TextProgressBar();
             this.menu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -290,6 +290,36 @@
             this.lbl_RemainingTime.TabIndex = 12;
             this.lbl_RemainingTime.Text = "Remaining Time: 00:00:00.000";
             // 
+            // EncourageButton
+            // 
+            this.EncourageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.EncourageButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.EncourageButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.EncourageButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.EncourageButton.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.EncourageButton.Location = new System.Drawing.Point(12, 344);
+            this.EncourageButton.Name = "EncourageButton";
+            this.EncourageButton.Size = new System.Drawing.Size(140, 23);
+            this.EncourageButton.TabIndex = 13;
+            this.EncourageButton.Text = "Encourage";
+            this.EncourageButton.UseVisualStyleBackColor = true;
+            this.EncourageButton.Click += new System.EventHandler(this.EncourageButton_Click);
+            // 
+            // DiscourageButton
+            // 
+            this.DiscourageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.DiscourageButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.DiscourageButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.DiscourageButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DiscourageButton.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.DiscourageButton.Location = new System.Drawing.Point(192, 344);
+            this.DiscourageButton.Name = "DiscourageButton";
+            this.DiscourageButton.Size = new System.Drawing.Size(148, 23);
+            this.DiscourageButton.TabIndex = 14;
+            this.DiscourageButton.Text = "Discourage";
+            this.DiscourageButton.UseVisualStyleBackColor = true;
+            this.DiscourageButton.Click += new System.EventHandler(this.DiscourageButton_Click);
+            // 
             // ProgressBar_Main
             // 
             this.ProgressBar_Main.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
@@ -321,36 +351,6 @@
             this.ProgressBar_Detail.TextColor = System.Drawing.Color.Black;
             this.ProgressBar_Detail.TextFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
             this.ProgressBar_Detail.VisualMode = Real_AI.ProgressBarDisplayMode.CurrProgress;
-            // 
-            // EncourageButton
-            // 
-            this.EncourageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.EncourageButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.EncourageButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.EncourageButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.EncourageButton.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.EncourageButton.Location = new System.Drawing.Point(12, 344);
-            this.EncourageButton.Name = "EncourageButton";
-            this.EncourageButton.Size = new System.Drawing.Size(140, 23);
-            this.EncourageButton.TabIndex = 13;
-            this.EncourageButton.Text = "Encourage";
-            this.EncourageButton.UseVisualStyleBackColor = true;
-            this.EncourageButton.Click += new System.EventHandler(this.EncourageButton_Click);
-            // 
-            // DiscourageButton
-            // 
-            this.DiscourageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.DiscourageButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.DiscourageButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.DiscourageButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DiscourageButton.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.DiscourageButton.Location = new System.Drawing.Point(192, 344);
-            this.DiscourageButton.Name = "DiscourageButton";
-            this.DiscourageButton.Size = new System.Drawing.Size(148, 23);
-            this.DiscourageButton.TabIndex = 14;
-            this.DiscourageButton.Text = "Discourage";
-            this.DiscourageButton.UseVisualStyleBackColor = true;
-            this.DiscourageButton.Click += new System.EventHandler(this.DiscourageButton_Click);
             // 
             // MainForm
             // 

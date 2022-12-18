@@ -65,7 +65,7 @@
             this.first_Open.TabIndex = 2;
             this.first_Open.Text = "Browse";
             this.first_Open.UseVisualStyleBackColor = true;
-            this.first_Open.Click += new System.EventHandler(this.first_Open_Click);
+            this.first_Open.Click += new System.EventHandler(this.First_Open_Click);
             // 
             // second_Open
             // 
@@ -75,7 +75,7 @@
             this.second_Open.TabIndex = 5;
             this.second_Open.Text = "Browse";
             this.second_Open.UseVisualStyleBackColor = true;
-            this.second_Open.Click += new System.EventHandler(this.second_Open_Click);
+            this.second_Open.Click += new System.EventHandler(this.Second_Open_Click);
             // 
             // lbl_SecondBrain
             // 
@@ -101,7 +101,7 @@
             this.btn_Merge.TabIndex = 6;
             this.btn_Merge.Text = "Merge";
             this.btn_Merge.UseVisualStyleBackColor = true;
-            this.btn_Merge.Click += new System.EventHandler(this.btn_Merge_Click);
+            this.btn_Merge.Click += new System.EventHandler(this.Btn_Merge_Click);
             // 
             // merged_Save
             // 
@@ -111,7 +111,7 @@
             this.merged_Save.TabIndex = 9;
             this.merged_Save.Text = "Browse";
             this.merged_Save.UseVisualStyleBackColor = true;
-            this.merged_Save.Click += new System.EventHandler(this.merged_Save_Click);
+            this.merged_Save.Click += new System.EventHandler(this.Merged_Save_Click);
             // 
             // lbl_MergedBrain
             // 

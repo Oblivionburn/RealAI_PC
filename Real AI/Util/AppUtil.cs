@@ -19,521 +19,150 @@ namespace Real_AI.Util
         public static Color background_progress;
         public static Color text_progress;
 
-        public static void Set_ID(string value)
+        public static void Set_Config(string name, string value)
         {
-            List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
-
-            bool found = false;
-            for (int i = 0; i < lines.Count; i++)
+            try
             {
-                if (lines[i].Contains("ID"))
+                List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
+
+                bool found = false;
+                for (int i = 0; i < lines.Count; i++)
                 {
-                    found = true;
-                    lines[i] = "ID=" + value;
-                    break;
+                    if (lines[i].Contains(name))
+                    {
+                        found = true;
+                        lines[i] = name + "=" + value;
+                        break;
+                    }
                 }
-            }
 
-            if (!found)
+                if (!found)
+                {
+                    lines.Add(name + "=" + value);
+                }
+
+                File.WriteAllLines(MainForm.Config, lines);
+            }
+            catch (Exception ex)
             {
-                lines.Add("ID=" + value);
+                Logger.AddLog("AppUtil.Set_Config", ex.Source, ex.Message, ex.StackTrace);
             }
-
-            File.WriteAllLines(MainForm.Config, lines);
         }
 
-        public static string Get_ID()
+        public static string Get_Config(string name)
         {
-            string[] lines = File.ReadAllLines(MainForm.Config);
-            foreach (string line in lines)
+            try
             {
-                if (line.Contains("ID"))
+                string[] lines = File.ReadAllLines(MainForm.Config);
+                foreach (string line in lines)
                 {
-                    string[] results = line.Split('=');
-                    if (results.Length > 1)
+                    if (line.Contains(name))
                     {
-                        if (!string.IsNullOrEmpty(results[1]))
+                        string[] results = line.Split('=');
+                        if (results.Length > 1)
                         {
-                            return results[1];
+                            string value = results[1];
+                            if (!string.IsNullOrEmpty(value))
+                            {
+                                if (value != "Nothing")
+                                {
+                                    return value;
+                                }
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("AppUtil.Get_Config", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return null;
         }
 
-        public static void Set_ThinkSpeed(int speed)
+        public static void Set_Color(string name, string value)
         {
-            List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
-
-            bool found = false;
-            for (int i = 0; i < lines.Count; i++)
+            try
             {
-                if (lines[i].Contains("ThinkSpeed"))
+                List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
+
+                bool found = false;
+                for (int i = 0; i < lines.Count; i++)
                 {
-                    found = true;
-                    lines[i] = "ThinkSpeed=" + speed.ToString();
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                lines.Add("ThinkSpeed=" + speed.ToString());
-            }
-
-            File.WriteAllLines(MainForm.Config, lines);
-        }
-
-        public static int Get_ThinkSpeed()
-        {
-            string[] lines = File.ReadAllLines(MainForm.Config);
-            foreach (string line in lines)
-            {
-                if (line.Contains("ThinkSpeed"))
-                {
-                    string[] results = line.Split('=');
-                    if (results.Length > 1)
+                    if (lines[i].Contains(name))
                     {
-                        if (!string.IsNullOrEmpty(results[1]))
-                        {
-                            return int.Parse(results[1]);
-                        }
+                        found = true;
+                        lines[i] = name + "=" + value;
+                        break;
                     }
                 }
-            }
 
-            return 1000;
-        }
-
-        public static void Set_Thinking(string value)
-        {
-            List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
-
-            bool found = false;
-            for (int i = 0; i < lines.Count; i++)
-            {
-                if (lines[i].Contains("Thinking"))
+                if (!found)
                 {
-                    found = true;
-                    lines[i] = "Thinking=" + value;
-                    break;
+                    lines.Add(name + "=" + value);
                 }
-            }
 
-            if (!found)
+                File.WriteAllLines(MainForm.Colors, lines);
+            }
+            catch (Exception ex)
             {
-                lines.Add("Thinking=" + value);
+                Logger.AddLog("AppUtil.Set_Color", ex.Source, ex.Message, ex.StackTrace);
             }
-
-            File.WriteAllLines(MainForm.Config, lines);
         }
 
-        public static bool Get_Thinking()
+        public static string Get_Color(string name)
         {
-            string[] lines = File.ReadAllLines(MainForm.Config);
-            foreach (string line in lines)
+            try
             {
-                if (line.Contains("Thinking"))
+                string[] lines = File.ReadAllLines(MainForm.Colors);
+                foreach (string line in lines)
                 {
-                    string[] results = line.Split('=');
-                    if (results.Length > 1)
+                    if (line.Contains(name))
                     {
-                        if (!string.IsNullOrEmpty(results[1]))
+                        string[] results = line.Split('=');
+                        if (results.Length > 1)
                         {
-                            if (results[1] == "True")
+                            string value = results[1];
+                            if (!string.IsNullOrEmpty(value))
                             {
-                                return true;
+                                if (value != "Nothing")
+                                {
+                                    return value;
+                                }
                             }
                         }
                     }
                 }
             }
-
-            return false;
-        }
-
-        public static void Set_LearnFromThinking(string value)
-        {
-            List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
-
-            bool found = false;
-            for (int i = 0; i < lines.Count; i++)
+            catch (Exception ex)
             {
-                if (lines[i].Contains("LearnFromThinking"))
-                {
-                    found = true;
-                    lines[i] = "LearnFromThinking=" + value;
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                lines.Add("LearnFromThinking=" + value);
-            }
-
-            File.WriteAllLines(MainForm.Config, lines);
-        }
-
-        public static bool Get_LearnFromThinking()
-        {
-            string[] lines = File.ReadAllLines(MainForm.Config);
-            foreach (string line in lines)
-            {
-                if (line.Contains("LearnFromThinking"))
-                {
-                    string[] results = line.Split('=');
-                    if (results.Length > 1)
-                    {
-                        if (!string.IsNullOrEmpty(results[1]))
-                        {
-                            if (results[1] == "True")
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        public static void Set_AttentionSpan(int value)
-        {
-            List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
-
-            bool found = false;
-            for (int i = 0; i < lines.Count; i++)
-            {
-                if (lines[i].Contains("AttentionSpan"))
-                {
-                    found = true;
-                    lines[i] = "AttentionSpan=" + value;
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                lines.Add("AttentionSpan=" + value);
-            }
-
-            File.WriteAllLines(MainForm.Config, lines);
-        }
-
-        public static int Get_AttentionSpan()
-        {
-            string[] lines = File.ReadAllLines(MainForm.Config);
-            foreach (string line in lines)
-            {
-                if (line.Contains("AttentionSpan"))
-                {
-                    string[] results = line.Split('=');
-                    if (results.Length > 1)
-                    {
-                        if (!string.IsNullOrEmpty(results[1]))
-                        {
-                            return int.Parse(results[1]);
-                        }
-                    }
-                }
-            }
-
-            return 7;
-        }
-
-        public static void Set_Initiate(string value)
-        {
-            List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
-
-            bool found = false;
-            for (int i = 0; i < lines.Count; i++)
-            {
-                if (lines[i].Contains("Initiate"))
-                {
-                    found = true;
-                    lines[i] = "Initiate=" + value;
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                lines.Add("Initiate=" + value);
-            }
-
-            File.WriteAllLines(MainForm.Config, lines);
-        }
-
-        public static bool Get_Initiate()
-        {
-            string[] lines = File.ReadAllLines(MainForm.Config);
-            foreach (string line in lines)
-            {
-                if (line.Contains("Initiate"))
-                {
-                    string[] results = line.Split('=');
-                    if (results.Length > 1)
-                    {
-                        if (!string.IsNullOrEmpty(results[1]))
-                        {
-                            if (results[1] == "True")
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        public static void Set_TTS(string value)
-        {
-            List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
-
-            bool found = false;
-            for (int i = 0; i < lines.Count; i++)
-            {
-                if (lines[i].Contains("TTS"))
-                {
-                    found = true;
-                    lines[i] = "TTS=" + value;
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                lines.Add("TTS=" + value);
-            }
-
-            File.WriteAllLines(MainForm.Config, lines);
-        }
-
-        public static bool Get_TTS()
-        {
-            string[] lines = File.ReadAllLines(MainForm.Config);
-            foreach (string line in lines)
-            {
-                if (line.Contains("TTS"))
-                {
-                    string[] results = line.Split('=');
-                    if (results.Length > 1)
-                    {
-                        if (!string.IsNullOrEmpty(results[1]))
-                        {
-                            if (results[1] == "True")
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        public static void Set_TTS_Voice(string value)
-        {
-            List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
-
-            bool found = false;
-            for (int i = 0; i < lines.Count; i++)
-            {
-                if (lines[i].Contains("TTS_Voice"))
-                {
-                    found = true;
-                    lines[i] = "TTS_Voice=" + value;
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                lines.Add("TTS_Voice=" + value);
-            }
-
-            File.WriteAllLines(MainForm.Config, lines);
-        }
-
-        public static string Get_TTS_Voice()
-        {
-            string[] lines = File.ReadAllLines(MainForm.Config);
-            foreach (string line in lines)
-            {
-                if (line.Contains("TTS_Voice"))
-                {
-                    string[] results = line.Split('=');
-                    if (results.Length > 1)
-                    {
-                        if (!string.IsNullOrEmpty(results[1]))
-                        {
-                            return results[1];
-                        }
-                    }
-                }
+                Logger.AddLog("AppUtil.Get_Color", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return null;
-        }
-
-        public static void Set_Config_Color(string name, string value)
-        {
-            List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
-
-            bool found = false;
-            for (int i = 0; i < lines.Count; i++)
-            {
-                if (lines[i].Contains(name))
-                {
-                    found = true;
-                    lines[i] = name + "=" + value;
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                lines.Add(name + "=" + value);
-            }
-
-            File.WriteAllLines(MainForm.Config, lines);
-        }
-
-        public static string Get_Config_Color(string name)
-        {
-            string[] lines = File.ReadAllLines(MainForm.Config);
-            foreach (string line in lines)
-            {
-                if (line.Contains(name))
-                {
-                    string[] results = line.Split('=');
-                    if (results.Length > 1)
-                    {
-                        if (!string.IsNullOrEmpty(results[1]))
-                        {
-                            return results[1];
-                        }
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        public static bool CheckForUpdates()
-        {
-            string[] lines = File.ReadAllLines(MainForm.Config);
-            foreach (string line in lines)
-            {
-                if (line.Contains("AutoCheckUpdate"))
-                {
-                    string[] results = line.Split('=');
-                    if (results.Length > 0)
-                    {
-                        if (!string.IsNullOrEmpty(results[1]))
-                        {
-                            if (results[1] == "True")
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        public static void Set_LastBrain(string brainFile)
-        {
-            List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
-
-            bool found = false;
-            for (int i = 0; i < lines.Count; i++)
-            {
-                if (lines[i].Contains("LastBrain"))
-                {
-                    found = true;
-                    lines[i] = "LastBrain=" + brainFile;
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                lines.Add("LastBrain=" + brainFile);
-            }
-
-            File.WriteAllLines(MainForm.Config, lines);
-        }
-
-        public static string Get_LastBrain()
-        {
-            string[] lines = File.ReadAllLines(MainForm.Config);
-            foreach (string line in lines)
-            {
-                if (line.Contains("LastBrain"))
-                {
-                    string[] results = line.Split('=');
-                    if (results.Length > 0)
-                    {
-                        if (!string.IsNullOrEmpty(results[1]))
-                        {
-                            if (results[1] != "Nothing")
-                            {
-                                return results[1];
-                            }
-                        }
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        public static void Set_Version(string version)
-        {
-            List<string> lines = File.ReadAllLines(MainForm.Config).ToList();
-
-            bool found = false;
-            for (int i = 0; i < lines.Count; i++)
-            {
-                if (lines[i].Contains("Version"))
-                {
-                    found = true;
-                    lines[i] = "Version=" + version;
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                lines.Add("Version=" + version);
-            }
-
-            File.WriteAllLines(MainForm.Config, lines);
         }
 
         public static List<string> GetHistory()
         {
             List<string> history = new List<string>();
 
-            if (!string.IsNullOrEmpty(MainForm.Current_HistoryDir))
+            try
             {
-                string date = DateTime.Today.Year.ToString() + "-" + DateTime.Today.Month.ToString() + "-" + DateTime.Today.Day.ToString();
-                string file = Path.Combine(MainForm.Current_HistoryDir, date + ".txt");
-
-                if (File.Exists(file))
+                if (!string.IsNullOrEmpty(MainForm.Current_HistoryDir))
                 {
-                    history = File.ReadAllLines(file).ToList();
+                    string date = DateTime.Today.Year.ToString() + "-" + DateTime.Today.Month.ToString() + "-" + DateTime.Today.Day.ToString();
+                    string file = Path.Combine(MainForm.Current_HistoryDir, date + ".txt");
+
+                    if (File.Exists(file))
+                    {
+                        history = File.ReadAllLines(file).ToList();
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("AppUtil.GetHistory", ex.Source, ex.Message, ex.StackTrace);
             }
             
             return history;
@@ -541,85 +170,225 @@ namespace Real_AI.Util
 
         public static void SaveHistory(List<string> history)
         {
-            if (!string.IsNullOrEmpty(MainForm.Current_HistoryDir))
+            try
             {
-                string date = DateTime.Today.Year.ToString() + "-" + DateTime.Today.Month.ToString() + "-" + DateTime.Today.Day.ToString();
-                string file = Path.Combine(MainForm.Current_HistoryDir, date + ".txt");
-                File.WriteAllLines(file, history);
+                if (!string.IsNullOrEmpty(MainForm.Current_HistoryDir))
+                {
+                    string date = DateTime.Today.Year.ToString() + "-" + DateTime.Today.Month.ToString() + "-" + DateTime.Today.Day.ToString();
+                    string file = Path.Combine(MainForm.Current_HistoryDir, date + ".txt");
+                    File.WriteAllLines(file, history);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("AppUtil.SaveHistory", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
         public static bool IsCancelled(CancellationTokenSource TokenSource)
         {
-            if (TokenSource != null)
+            try
             {
-                if (TokenSource.IsCancellationRequested)
+                if (TokenSource != null)
                 {
-                    return true;
-                }
-                else
-                {
+                    if (TokenSource.IsCancellationRequested)
+                    {
+                        return true;
+                    }
+
                     return false;
                 }
             }
-            else
+            catch (Exception ex)
             {
-                return false;
+                Logger.AddLog("AppUtil.IsCancelled", ex.Source, ex.Message, ex.StackTrace);
             }
+
+            return false;
         }
 
-        public static void UpdateMain(string value)
+        public static void UpdateProgress(TextProgressBar progressMain, string value)
         {
-            if (MainForm.progressMain.InvokeRequired)
+            try
             {
-                MainForm.progressMain.Invoke((MethodInvoker)delegate
+                if (progressMain.InvokeRequired)
                 {
-                    MainForm.progressMain.CustomText = value;
-                });
-            }
-            else
-            {
-                MainForm.progressMain.CustomText = value;
-            }
-        }
-
-        public static void UpdateMain(int value)
-        {
-            if (MainForm.progressMain.InvokeRequired)
-            {
-                MainForm.progressMain.Invoke((MethodInvoker)delegate
+                    progressMain.Invoke((MethodInvoker)delegate
+                    {
+                        progressMain.CustomText = value;
+                    });
+                }
+                else
                 {
-                    MainForm.progressMain.Value = value;
-                });
+                    progressMain.CustomText = value;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MainForm.progressMain.Value = value;
+                Logger.AddLog("AppUtil.UpdateProgress", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
-        public static void UpdateDetail(int value)
+        public static void UpdateProgress(TextProgressBar progressMain, int value)
         {
-            if (MainForm.progressDetail.InvokeRequired)
+            try
             {
-                MainForm.progressDetail.Invoke((MethodInvoker)delegate
+                if (progressMain.InvokeRequired)
                 {
-                    MainForm.progressDetail.Value = value;
-                });
+                    progressMain.Invoke((MethodInvoker)delegate
+                    {
+                        progressMain.Value = value;
+                    });
+                }
+                else
+                {
+                    progressMain.Value = value;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MainForm.progressDetail.Value = value;
+                Logger.AddLog("AppUtil.UpdateProgress", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
-        public static void CrashLog(List<string> Log)
+        public static void UpdateProgress(CancellationTokenSource TokenSource, TextProgressBar progressMain, string value)
         {
-            MainForm.Crash = true;
-
-            foreach (string log in Log)
+            try
             {
-                MainForm.Log.Add(log);
+                if (!IsCancelled(TokenSource))
+                {
+                    if (progressMain.InvokeRequired)
+                    {
+                        progressMain.Invoke((MethodInvoker)delegate
+                        {
+                            progressMain.CustomText = value;
+                        });
+                    }
+                    else
+                    {
+                        progressMain.CustomText = value;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("AppUtil.UpdateProgress", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        public static void UpdateProgress(CancellationTokenSource TokenSource, TextProgressBar progressMain, int value)
+        {
+            try
+            {
+                if (!IsCancelled(TokenSource))
+                {
+                    if (progressMain.InvokeRequired)
+                    {
+                        progressMain.Invoke((MethodInvoker)delegate
+                        {
+                            progressMain.Value = value;
+                        });
+                    }
+                    else
+                    {
+                        progressMain.Value = value;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("AppUtil.UpdateProgress", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        public static void UpdateLabel(Label label, string value)
+        {
+            try
+            {
+                if (label.InvokeRequired)
+                {
+                    label.Invoke((MethodInvoker)delegate
+                    {
+                        label.Text = value;
+                    });
+                }
+                else
+                {
+                    label.Text = value;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("AppUtil.UpdateLabel", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        public static void UpdateTextbox(TextBox textbox, string value)
+        {
+            try
+            {
+                if (textbox.InvokeRequired)
+                {
+                    textbox.Invoke((MethodInvoker)delegate
+                    {
+                        textbox.Text = value;
+                    });
+                }
+                else
+                {
+                    textbox.Text = value;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("AppUtil.UpdateTextbox", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        public static void UpdateButton(Button button, bool enabled)
+        {
+            try
+            {
+                if (button.InvokeRequired)
+                {
+                    button.Invoke((MethodInvoker)delegate
+                    {
+                        button.Enabled = enabled;
+                    });
+                }
+                else
+                {
+                    button.Enabled = enabled;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("AppUtil.UpdateTextbox", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        public static void UpdateLabel(CancellationTokenSource TokenSource, Label label, string value)
+        {
+            try
+            {
+                if (!IsCancelled(TokenSource))
+                {
+                    if (label.InvokeRequired)
+                    {
+                        label.Invoke((MethodInvoker)delegate
+                        {
+                            label.Text = value;
+                        });
+                    }
+                    else
+                    {
+                        label.Text = value;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("AppUtil.UpdateLabel", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
@@ -627,67 +396,74 @@ namespace Real_AI.Util
         {
             string result = "";
 
-            int milliseconds = (int)(DateTime.Now - start).TotalMilliseconds;
+            try
+            {
+                int milliseconds = (int)(DateTime.Now - start).TotalMilliseconds;
 
-            int seconds = 0;
-            for (int i = 1000; i <= milliseconds;)
-            {
-                seconds++;
-                milliseconds -= 1000;
-            }
+                int seconds = 0;
+                for (int i = 1000; i <= milliseconds;)
+                {
+                    seconds++;
+                    milliseconds -= 1000;
+                }
 
-            int minutes = 0;
-            for (int i = 60; i <= seconds;)
-            {
-                minutes++;
-                seconds -= 60;
-            }
+                int minutes = 0;
+                for (int i = 60; i <= seconds;)
+                {
+                    minutes++;
+                    seconds -= 60;
+                }
 
-            int hours = 0;
-            for (int i = 60; i <= minutes;)
-            {
-                hours++;
-                minutes -= 60;
-            }
+                int hours = 0;
+                for (int i = 60; i <= minutes;)
+                {
+                    hours++;
+                    minutes -= 60;
+                }
 
-            if (hours > 9)
-            {
-                result += hours;
-            }
-            else
-            {
-                result += "0" + hours;
-            }
+                if (hours > 9)
+                {
+                    result += hours;
+                }
+                else
+                {
+                    result += "0" + hours;
+                }
 
-            if (minutes > 9)
-            {
-                result += ":" + minutes;
-            }
-            else
-            {
-                result += ":0" + minutes;
-            }
+                if (minutes > 9)
+                {
+                    result += ":" + minutes;
+                }
+                else
+                {
+                    result += ":0" + minutes;
+                }
 
-            if (seconds > 9)
-            {
-                result += ":" + seconds;
-            }
-            else
-            {
-                result += ":0" + seconds;
-            }
+                if (seconds > 9)
+                {
+                    result += ":" + seconds;
+                }
+                else
+                {
+                    result += ":0" + seconds;
+                }
 
-            if (milliseconds > 99)
-            {
-                result += "." + milliseconds;
+                if (milliseconds > 99)
+                {
+                    result += "." + milliseconds;
+                }
+                else if (milliseconds > 9)
+                {
+                    result += ".0" + milliseconds;
+                }
+                else
+                {
+                    result += ".00" + milliseconds;
+                }
             }
-            else if (milliseconds > 9)
+            catch (Exception ex)
             {
-                result += ".0" + milliseconds;
-            }
-            else
-            {
-                result += ".00" + milliseconds;
+                Logger.AddLog("AppUtil.GetTime_Milliseconds", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return result;
@@ -697,89 +473,114 @@ namespace Real_AI.Util
         {
             string result = "";
 
-            int seconds = 0;
-            for (int i = 1000; i <= milliseconds;)
+            try
             {
-                seconds++;
-                milliseconds -= 1000;
-            }
+                int seconds = 0;
+                for (int i = 1000; i <= milliseconds;)
+                {
+                    seconds++;
+                    milliseconds -= 1000;
+                }
 
-            int minutes = 0;
-            for (int i = 60; i <= seconds;)
-            {
-                minutes++;
-                seconds -= 60;
-            }
+                int minutes = 0;
+                for (int i = 60; i <= seconds;)
+                {
+                    minutes++;
+                    seconds -= 60;
+                }
 
-            int hours = 0;
-            for (int i = 60; i <= minutes;)
-            {
-                hours++;
-                minutes -= 60;
-            }
+                int hours = 0;
+                for (int i = 60; i <= minutes;)
+                {
+                    hours++;
+                    minutes -= 60;
+                }
 
-            if (hours > 9)
-            {
-                result += hours;
-            }
-            else
-            {
-                result += "0" + hours;
-            }
+                if (hours > 9)
+                {
+                    result += hours;
+                }
+                else
+                {
+                    result += "0" + hours;
+                }
 
-            if (minutes > 9)
-            {
-                result += ":" + minutes;
-            }
-            else
-            {
-                result += ":0" + minutes;
-            }
+                if (minutes > 9)
+                {
+                    result += ":" + minutes;
+                }
+                else
+                {
+                    result += ":0" + minutes;
+                }
 
-            if (seconds > 9)
-            {
-                result += ":" + seconds;
-            }
-            else
-            {
-                result += ":0" + seconds;
-            }
+                if (seconds > 9)
+                {
+                    result += ":" + seconds;
+                }
+                else
+                {
+                    result += ":0" + seconds;
+                }
 
-            if (milliseconds > 99)
-            {
-                result += "." + milliseconds;
+                if (milliseconds > 99)
+                {
+                    result += "." + milliseconds;
+                }
+                else if (milliseconds > 9)
+                {
+                    result += ".0" + milliseconds;
+                }
+                else
+                {
+                    result += ".00" + milliseconds;
+                }
             }
-            else if (milliseconds > 9)
+            catch (Exception ex)
             {
-                result += ".0" + milliseconds;
+                Logger.AddLog("AppUtil.ConvertTime_Milliseconds", ex.Source, ex.Message, ex.StackTrace);
             }
-            else
-            {
-                result += ".00" + milliseconds;
-            }
-
+            
             return result;
         }
 
         public static string ColorToHex(Color c)
         {
-            return "#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
+            string result = "";
+
+            try
+            { 
+                result = "#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("AppUtil.ColorToHex", ex.Source, ex.Message, ex.StackTrace);
+            }
+
+            return result;
         }
 
         public static void Update_Colors()
         {
-            background_window = ColorTranslator.FromHtml(Get_Config_Color("Color_Background_Window"));
-            text_window = ColorTranslator.FromHtml(Get_Config_Color("Color_Text_Window"));
+            try
+            {
+                background_window = ColorTranslator.FromHtml(Get_Color("Color_Background_Window"));
+                text_window = ColorTranslator.FromHtml(Get_Color("Color_Text_Window"));
 
-            background_control = ColorTranslator.FromHtml(Get_Config_Color("Color_Background_Control"));
-            text_control = ColorTranslator.FromHtml(Get_Config_Color("Color_Text_Control"));
-            highlight_control = ColorTranslator.FromHtml(Get_Config_Color("Color_Highlight_Control"));
-            selected_control = ColorTranslator.FromHtml(Get_Config_Color("Color_Selected_Control"));
+                background_control = ColorTranslator.FromHtml(Get_Color("Color_Background_Control"));
+                text_control = ColorTranslator.FromHtml(Get_Color("Color_Text_Control"));
+                highlight_control = ColorTranslator.FromHtml(Get_Color("Color_Highlight_Control"));
+                selected_control = ColorTranslator.FromHtml(Get_Color("Color_Selected_Control"));
 
-            background_progress = ColorTranslator.FromHtml(Get_Config_Color("Color_Background_Progress"));
-            text_progress = ColorTranslator.FromHtml(Get_Config_Color("Color_Text_Progress"));
+                background_progress = ColorTranslator.FromHtml(Get_Color("Color_Background_Progress"));
+                text_progress = ColorTranslator.FromHtml(Get_Color("Color_Text_Progress"));
 
-            MainForm.SetColors();
+                MainForm.SetColors();
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("AppUtil.Update_Colors", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
     }
 }

@@ -65,7 +65,7 @@ namespace Real_AI
             this.btn_Browse.TabIndex = 2;
             this.btn_Browse.Text = "Browse";
             this.btn_Browse.UseVisualStyleBackColor = true;
-            this.btn_Browse.Click += new System.EventHandler(this.btn_Browse_Click);
+            this.btn_Browse.Click += new System.EventHandler(this.Btn_Browse_Click);
             // 
             // ProgressBar_Main
             // 
@@ -103,7 +103,7 @@ namespace Real_AI
             this.btn_Cancel.TabIndex = 5;
             this.btn_Cancel.Text = "Cancel";
             this.btn_Cancel.UseVisualStyleBackColor = true;
-            this.btn_Cancel.Click += new System.EventHandler(this.btn_Cancel_Click);
+            this.btn_Cancel.Click += new System.EventHandler(this.Btn_Cancel_Click);
             // 
             // btn_Read
             // 
@@ -113,7 +113,7 @@ namespace Real_AI
             this.btn_Read.TabIndex = 6;
             this.btn_Read.Text = "Read";
             this.btn_Read.UseVisualStyleBackColor = true;
-            this.btn_Read.Click += new System.EventHandler(this.btn_Read_Click);
+            this.btn_Read.Click += new System.EventHandler(this.Btn_Read_Click);
             // 
             // lbl_ElapsedTime
             // 

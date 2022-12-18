@@ -37,110 +37,94 @@ namespace Real_AI
 
         public static string GapSpecials(string old_string, TextProgressBar progressMain, TextProgressBar progressDetail, CancellationTokenSource TokenSource, bool update_progress)
         {
-            if (update_progress)
-            {
-                if (progressMain.InvokeRequired &&
-                    !AppUtil.IsCancelled(TokenSource))
-                {
-                    progressMain.Invoke((MethodInvoker)delegate
-                    {
-                        progressMain.CustomText = "Processing data";
-                    });
-                }
-                else
-                {
-                    progressMain.CustomText = "Processing data";
-                }
-            }
-
-            int count = 0;
-            int total = old_string.Length;
-
             StringBuilder sb = new StringBuilder();
 
-            for (var i = 0; i < old_string.Length; i++)
+            try
             {
-                if (AppUtil.IsCancelled(TokenSource))
+                if (update_progress)
                 {
-                    break;
+                    AppUtil.UpdateProgress(TokenSource, progressMain, "Processing data");
                 }
 
-                string value = old_string[i].ToString();
-                if (!string.IsNullOrEmpty(value))
+                int count = 0;
+                int total = old_string.Length;
+
+                for (var i = 0; i < old_string.Length; i++)
                 {
-                    if (!NormalCharacters.IsMatch(value) &&
-                        value != "'" &&
-                        value != "’")
+                    if (AppUtil.IsCancelled(TokenSource))
                     {
-                        if (value == ".")
+                        break;
+                    }
+
+                    string value = old_string[i].ToString();
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        if (!NormalCharacters.IsMatch(value) &&
+                            value != "'" &&
+                            value != "’")
                         {
-                            if (i > 0)
+                            if (value == ".")
                             {
-                                if (old_string[i - 1] != '.')
+                                if (i > 0)
                                 {
-                                    sb.Append(" ");
+                                    if (old_string[i - 1] != '.')
+                                    {
+                                        sb.Append(" ");
+                                    }
+
+                                    sb.Append(value);
                                 }
-                                
-                                sb.Append(value);
+                                else
+                                {
+                                    sb.Append(value);
+                                }
+
+                                if (i < old_string.Length - 1)
+                                {
+                                    if (old_string[i + 1] != ' ' &&
+                                        old_string[i + 1] != '.')
+                                    {
+                                        sb.Append(" ");
+                                    }
+                                }
                             }
                             else
                             {
+                                sb.Append(" ");
                                 sb.Append(value);
-                            }
 
-                            if (i < old_string.Length - 1)
-                            {
-                                if (old_string[i + 1] != ' ' &&
-                                    old_string[i + 1] != '.')
+                                if (i < old_string.Length - 1)
                                 {
-                                    sb.Append(" ");
+                                    if (old_string[i + 1] != ' ')
+                                    {
+                                        sb.Append(" ");
+                                    }
                                 }
                             }
+                        }
+                        else if (value == "\r" ||
+                                 value == "\n")
+                        {
+
                         }
                         else
                         {
-                            sb.Append(" ");
                             sb.Append(value);
-
-                            if (i < old_string.Length - 1)
-                            {
-                                if (old_string[i + 1] != ' ')
-                                {
-                                    sb.Append(" ");
-                                }
-                            }
                         }
                     }
-                    else if (value == "\r" ||
-                             value == "\n")
-                    {
 
-                    }
-                    else
+                    count++;
+
+                    if (update_progress)
                     {
-                        sb.Append(value);
+                        AppUtil.UpdateProgress(TokenSource, progressDetail, "(" + count + "/" + total + ")");
+                        AppUtil.UpdateProgress(TokenSource, progressDetail, (count * 100) / total);
                     }
                 }
-                
-                count++;
-
-                if (update_progress)
-                {
-                    if (progressDetail.InvokeRequired &&
-                        !AppUtil.IsCancelled(TokenSource))
-                    {
-                        progressDetail.Invoke((MethodInvoker)delegate
-                        {
-                            progressDetail.CustomText = "(" + count + "/" + total + ")";
-                            progressDetail.Value = (count * 100) / total;
-                        });
-                    }
-                    else
-                    {
-                        progressDetail.CustomText = "(" + count + "/" + total + ")";
-                        progressDetail.Value = (count * 100) / total;
-                    }
-                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.GapSpecials", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return sb.ToString();
@@ -149,21 +133,29 @@ namespace Real_AI
         public static string UnGapSpecials(string old_string)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(old_string);
 
-            for (var i = 1; i < sb.Length; i++)
+            try
             {
-                if (!NormalCharacters.IsMatch(sb[i].ToString()) &&
-                    sb[i].ToString() != ":" &&
-                    sb[i - 1] == ' ')
-                {
-                    sb.Remove(i - 1, 1);
+                sb.Append(old_string);
 
-                    if (i > 1)
+                for (var i = 1; i < sb.Length; i++)
+                {
+                    if (!NormalCharacters.IsMatch(sb[i].ToString()) &&
+                        sb[i].ToString() != ":" &&
+                        sb[i - 1] == ' ')
                     {
-                        i--;
+                        sb.Remove(i - 1, 1);
+
+                        if (i > 1)
+                        {
+                            i--;
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.UnGapSpecials", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return sb.ToString();
@@ -171,102 +163,96 @@ namespace Real_AI
 
         private static void PrepInput()
         {
-            CleanInput = RulesCheck(Input);
-            WordArray = GapSpecials(CleanInput, MainForm.progressMain, MainForm.progressDetail, null, true).Trim(' ').Split(' ');
-
-            if (WordArray.Length > 0)
+            try
             {
-                if (MainForm.progressMain.InvokeRequired)
-                {
-                    MainForm.progressMain.Invoke((MethodInvoker)delegate
-                    {
-                        MainForm.progressMain.CustomText = "Saving data...";
-                    });
-                }
-                else
-                {
-                    MainForm.progressMain.CustomText = "Saving data...";
-                }
+                CleanInput = RulesCheck(Input);
+                WordArray = GapSpecials(CleanInput, MainForm.progressMain, MainForm.progressDetail, null, true).Trim(' ').Split(' ');
 
-                List<SQLiteCommand> commands = new List<SQLiteCommand>();
-                commands.AddRange(AddInputs(CleanInput));
-                commands.AddRange(AddWords(WordArray));
-                commands.AddRange(AddPreWords(WordArray));
-                commands.AddRange(AddProWords(WordArray));
-                SqlUtil.BulkQuery(commands, true);
+                if (WordArray.Length > 0)
+                {
+                    AppUtil.UpdateProgress(MainForm.progressMain, "Saving data");
+
+                    List<SQLiteCommand> commands = new List<SQLiteCommand>();
+                    commands.AddRange(AddInputs(CleanInput));
+                    commands.AddRange(AddWords(WordArray));
+                    commands.AddRange(AddPreWords(WordArray));
+                    commands.AddRange(AddProWords(WordArray));
+                    SqlUtil.BulkQuery(commands, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.PrepInput", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
         public static bool Encourage(string message)
         {
-            if (!string.IsNullOrEmpty(message))
+            try
             {
-                string[] word_array = GapSpecials(message, MainForm.progressMain, MainForm.progressDetail, null, true).Trim(' ').Split(' ');
-                if (word_array.Length > 1)
+                if (!string.IsNullOrEmpty(message))
                 {
-                    if (MainForm.progressMain.InvokeRequired)
+                    string[] word_array = GapSpecials(message, MainForm.progressMain, MainForm.progressDetail, null, true).Trim(' ').Split(' ');
+                    if (word_array.Length > 1)
                     {
-                        MainForm.progressMain.Invoke((MethodInvoker)delegate
-                        {
-                            MainForm.progressMain.CustomText = "Encouraging...";
-                        });
-                    }
-                    else
-                    {
-                        MainForm.progressMain.CustomText = "Encouraging...";
-                    }
+                        AppUtil.UpdateProgress(MainForm.progressMain, "Encouraging");
 
-                    List<string> words = new List<string>();
-                    List<string> pre_words = new List<string>();
-                    List<string> pro_words = new List<string>();
-                    List<int> distances = new List<int>();
-                    List<SQLiteCommand> commands = new List<SQLiteCommand>();
+                        List<string> words = new List<string>();
+                        List<string> pre_words = new List<string>();
+                        List<string> pro_words = new List<string>();
+                        List<int> distances = new List<int>();
+                        List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-                    for (int i = 1; i < word_array.Length; i++)
-                    {
-                        int count = 1;
-                        for (int j = i - 1; j >= 0; j--)
+                        for (int i = 1; i < word_array.Length; i++)
                         {
-                            if (!string.IsNullOrEmpty(word_array[i]) &&
-                                !string.IsNullOrEmpty(word_array[j]))
+                            int count = 1;
+                            for (int j = i - 1; j >= 0; j--)
                             {
-                                words.Add(word_array[i]);
-                                pre_words.Add(word_array[j]);
-                                distances.Add(count);
-                                count++;
+                                if (!string.IsNullOrEmpty(word_array[i]) &&
+                                    !string.IsNullOrEmpty(word_array[j]))
+                                {
+                                    words.Add(word_array[i]);
+                                    pre_words.Add(word_array[j]);
+                                    distances.Add(count);
+                                    count++;
+                                }
                             }
                         }
-                    }
 
-                    commands.AddRange(SqlUtil.Increase_PreWordPriorities(words.ToArray(), pre_words.ToArray(), distances.ToArray()));
+                        commands.AddRange(SqlUtil.Increase_PreWordPriorities(words.ToArray(), pre_words.ToArray(), distances.ToArray()));
 
-                    words = new List<string>();
-                    distances = new List<int>();
+                        words = new List<string>();
+                        distances = new List<int>();
 
-                    for (int i = 0; i < word_array.Length - 1; i++)
-                    {
-                        var count = 1;
-                        for (int j = i + 1; j <= word_array.Length - 1; j++)
+                        for (int i = 0; i < word_array.Length - 1; i++)
                         {
-                            if (!string.IsNullOrEmpty(word_array[i]) &&
-                                !string.IsNullOrEmpty(word_array[j]))
+                            var count = 1;
+                            for (int j = i + 1; j <= word_array.Length - 1; j++)
                             {
-                                words.Add(word_array[i]);
-                                pro_words.Add(word_array[j]);
-                                distances.Add(count);
-                                count++;
+                                if (!string.IsNullOrEmpty(word_array[i]) &&
+                                    !string.IsNullOrEmpty(word_array[j]))
+                                {
+                                    words.Add(word_array[i]);
+                                    pro_words.Add(word_array[j]);
+                                    distances.Add(count);
+                                    count++;
+                                }
                             }
                         }
+
+                        commands.AddRange(SqlUtil.Increase_ProWordPriorities(words.ToArray(), pro_words.ToArray(), distances.ToArray()));
+
+                        commands.AddRange(SqlUtil.Increase_OutputPriorities(message));
+                        commands.AddRange(SqlUtil.Increase_InputPriorities(message));
+                        commands.AddRange(SqlUtil.Increase_WordPriorities(word_array));
+
+                        return SqlUtil.BulkQuery(commands, true);
                     }
-
-                    commands.AddRange(SqlUtil.Increase_ProWordPriorities(words.ToArray(), pro_words.ToArray(), distances.ToArray()));
-
-                    commands.AddRange(SqlUtil.Increase_OutputPriorities(message));
-                    commands.AddRange(SqlUtil.Increase_InputPriorities(message));
-                    commands.AddRange(SqlUtil.Increase_WordPriorities(word_array));
-
-                    return SqlUtil.BulkQuery(commands, true);
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.Encourage", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return false;
@@ -274,75 +260,72 @@ namespace Real_AI
 
         public static bool Discourage(string message)
         {
-            if (!string.IsNullOrEmpty(message))
+            try
             {
-                string[] word_array = GapSpecials(message, MainForm.progressMain, MainForm.progressDetail, null, true).Trim(' ').Split(' ');
-                if (word_array.Length > 1)
+                if (!string.IsNullOrEmpty(message))
                 {
-                    if (MainForm.progressMain.InvokeRequired)
+                    string[] word_array = GapSpecials(message, MainForm.progressMain, MainForm.progressDetail, null, true).Trim(' ').Split(' ');
+                    if (word_array.Length > 1)
                     {
-                        MainForm.progressMain.Invoke((MethodInvoker)delegate
-                        {
-                            MainForm.progressMain.CustomText = "Discouraging...";
-                        });
-                    }
-                    else
-                    {
-                        MainForm.progressMain.CustomText = "Discouraging...";
-                    }
+                        AppUtil.UpdateProgress(MainForm.progressMain, "Discouraging");
 
-                    List<string> words = new List<string>();
-                    List<string> pre_words = new List<string>();
-                    List<string> pro_words = new List<string>();
-                    List<int> distances = new List<int>();
-                    List<SQLiteCommand> commands = new List<SQLiteCommand>();
+                        List<string> words = new List<string>();
+                        List<string> pre_words = new List<string>();
+                        List<string> pro_words = new List<string>();
+                        List<int> distances = new List<int>();
+                        List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-                    for (int i = 1; i < word_array.Length; i++)
-                    {
-                        int count = 1;
-                        for (int j = i - 1; j >= 0; j--)
+                        for (int i = 1; i < word_array.Length; i++)
                         {
-                            if (!string.IsNullOrEmpty(word_array[i]) &&
-                                !string.IsNullOrEmpty(word_array[j]))
+                            int count = 1;
+                            for (int j = i - 1; j >= 0; j--)
                             {
-                                words.Add(word_array[i]);
-                                pre_words.Add(word_array[j]);
-                                distances.Add(count);
-                                count++;
+                                if (!string.IsNullOrEmpty(word_array[i]) &&
+                                    !string.IsNullOrEmpty(word_array[j]))
+                                {
+                                    words.Add(word_array[i]);
+                                    pre_words.Add(word_array[j]);
+                                    distances.Add(count);
+                                    count++;
+                                }
                             }
                         }
-                    }
 
-                    commands.AddRange(SqlUtil.Decrease_PreWordPriorities(words.ToArray(), pre_words.ToArray(), distances.ToArray()));
+                        commands.AddRange(SqlUtil.Decrease_PreWordPriorities(words.ToArray(), pre_words.ToArray(), distances.ToArray()));
 
-                    words = new List<string>();
-                    distances = new List<int>();
+                        words = new List<string>();
+                        distances = new List<int>();
 
-                    for (int i = 0; i < word_array.Length - 1; i++)
-                    {
-                        var count = 1;
-                        for (int j = i + 1; j <= word_array.Length - 1; j++)
+                        for (int i = 0; i < word_array.Length - 1; i++)
                         {
-                            if (!string.IsNullOrEmpty(word_array[i]) &&
-                                !string.IsNullOrEmpty(word_array[j]))
+                            var count = 1;
+                            for (int j = i + 1; j <= word_array.Length - 1; j++)
                             {
-                                words.Add(word_array[i]);
-                                pro_words.Add(word_array[j]);
-                                distances.Add(count);
-                                count++;
+                                if (!string.IsNullOrEmpty(word_array[i]) &&
+                                    !string.IsNullOrEmpty(word_array[j]))
+                                {
+                                    words.Add(word_array[i]);
+                                    pro_words.Add(word_array[j]);
+                                    distances.Add(count);
+                                    count++;
+                                }
                             }
                         }
+
+                        commands.AddRange(SqlUtil.Decrease_ProWordPriorities(words.ToArray(), pro_words.ToArray(), distances.ToArray()));
+
+                        commands.AddRange(SqlUtil.Decrease_TopicPriorities(message, word_array));
+                        commands.AddRange(SqlUtil.Decrease_OutputPriorities(message));
+                        commands.AddRange(SqlUtil.Decrease_InputPriorities(message));
+                        commands.AddRange(SqlUtil.Decrease_WordPriorities(word_array));
+
+                        return SqlUtil.BulkQuery(commands, true);
                     }
-
-                    commands.AddRange(SqlUtil.Decrease_ProWordPriorities(words.ToArray(), pro_words.ToArray(), distances.ToArray()));
-
-                    commands.AddRange(SqlUtil.Decrease_TopicPriorities(message, word_array));
-                    commands.AddRange(SqlUtil.Decrease_OutputPriorities(message));
-                    commands.AddRange(SqlUtil.Decrease_InputPriorities(message));
-                    commands.AddRange(SqlUtil.Decrease_WordPriorities(word_array));
-
-                    return SqlUtil.BulkQuery(commands, true);
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.Discourage", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return false;
@@ -351,103 +334,148 @@ namespace Real_AI
         public static List<SQLiteCommand> AddInputs(string input)
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
-            commands.AddRange(SqlUtil.Increase_InputPriorities(input));
-            commands.AddRange(SqlUtil.Add_NewInput(input));
+
+            try
+            {
+                commands.AddRange(SqlUtil.Increase_InputPriorities(input));
+                commands.AddRange(SqlUtil.Add_NewInput(input));
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.AddInputs", ex.Source, ex.Message, ex.StackTrace);
+            }
+            
             return commands;
         }
 
         public static List<SQLiteCommand> AddWords(string[] word_array)
         {
             List<SQLiteCommand> commands = new List<SQLiteCommand>();
-            commands.AddRange(SqlUtil.Increase_WordPriorities(word_array));
-            commands.AddRange(SqlUtil.Add_Words(word_array));
+
+            try
+            {
+                commands.AddRange(SqlUtil.Increase_WordPriorities(word_array));
+                commands.AddRange(SqlUtil.Add_Words(word_array));
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.AddWords", ex.Source, ex.Message, ex.StackTrace);
+            }
 
             return commands;
         }
 
         public static List<SQLiteCommand> AddPreWords(string[] word_array)
         {
-            List<string> words = new List<string>();
-            List<string> pre_words = new List<string>();
-            List<int> distances = new List<int>();
+            List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            for (int i = 1; i < word_array.Length; i++)
+            try
             {
-                int count = 1;
-                for (int j = i - 1; j >= 0; j--)
+                List<string> words = new List<string>();
+                List<string> pre_words = new List<string>();
+                List<int> distances = new List<int>();
+
+                for (int i = 1; i < word_array.Length; i++)
                 {
-                    if (!string.IsNullOrEmpty(word_array[i]) &&
-                        !string.IsNullOrEmpty(word_array[j]))
+                    int count = 1;
+                    for (int j = i - 1; j >= 0; j--)
                     {
-                        words.Add(word_array[i]);
-                        pre_words.Add(word_array[j]);
-                        distances.Add(count);
-                        count++;
+                        if (!string.IsNullOrEmpty(word_array[i]) &&
+                            !string.IsNullOrEmpty(word_array[j]))
+                        {
+                            words.Add(word_array[i]);
+                            pre_words.Add(word_array[j]);
+                            distances.Add(count);
+                            count++;
+                        }
                     }
                 }
-            }
 
-            List<SQLiteCommand> commands = new List<SQLiteCommand>();
-            commands.AddRange(SqlUtil.Increase_PreWordPriorities(words.ToArray(), pre_words.ToArray(), distances.ToArray()));
-            commands.AddRange(SqlUtil.Add_PreWords(words.ToArray(), pre_words.ToArray(), distances.ToArray()));
+                commands.AddRange(SqlUtil.Increase_PreWordPriorities(words.ToArray(), pre_words.ToArray(), distances.ToArray()));
+                commands.AddRange(SqlUtil.Add_PreWords(words.ToArray(), pre_words.ToArray(), distances.ToArray()));
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.AddPreWords", ex.Source, ex.Message, ex.StackTrace);
+            }
 
             return commands;
         }
 
         public static List<SQLiteCommand> AddProWords(string[] word_array)
         {
-            List<string> words = new List<string>();
-            List<string> pro_words = new List<string>();
-            List<int> distances = new List<int>();
+            List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
-            for (int i = 0; i < word_array.Length - 1; i++)
+            try
             {
-                var count = 1;
-                for (int j = i + 1; j <= word_array.Length - 1; j++)
+                List<string> words = new List<string>();
+                List<string> pro_words = new List<string>();
+                List<int> distances = new List<int>();
+
+                for (int i = 0; i < word_array.Length - 1; i++)
                 {
-                    if (!string.IsNullOrEmpty(word_array[i]) &&
-                        !string.IsNullOrEmpty(word_array[j]))
+                    var count = 1;
+                    for (int j = i + 1; j <= word_array.Length - 1; j++)
                     {
-                        words.Add(word_array[i]);
-                        pro_words.Add(word_array[j]);
-                        distances.Add(count);
-                        count++;
+                        if (!string.IsNullOrEmpty(word_array[i]) &&
+                            !string.IsNullOrEmpty(word_array[j]))
+                        {
+                            words.Add(word_array[i]);
+                            pro_words.Add(word_array[j]);
+                            distances.Add(count);
+                            count++;
+                        }
                     }
                 }
-            }
 
-            List<SQLiteCommand> commands = new List<SQLiteCommand>();
-            commands.AddRange(SqlUtil.Increase_ProWordPriorities(words.ToArray(), pro_words.ToArray(), distances.ToArray()));
-            commands.AddRange(SqlUtil.Add_ProWords(words.ToArray(), pro_words.ToArray(), distances.ToArray()));
+                commands.AddRange(SqlUtil.Increase_ProWordPriorities(words.ToArray(), pro_words.ToArray(), distances.ToArray()));
+                commands.AddRange(SqlUtil.Add_ProWords(words.ToArray(), pro_words.ToArray(), distances.ToArray()));
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.AddProWords", ex.Source, ex.Message, ex.StackTrace);
+            }
 
             return commands;
         }
 
         private static void UpdateTopics(string input, string[] topics, bool update_progress)
         {
-            MainForm.progressMain.CustomText = "Updating topics...";
+            try
+            {
+                AppUtil.UpdateProgress(MainForm.progressMain, "Updating topics");
 
-            List<SQLiteCommand> commands = new List<SQLiteCommand>();
-            commands.AddRange(SqlUtil.Increase_TopicPriorities(input, topics));
-            commands.AddRange(SqlUtil.AddTopics(input, topics));
-            commands.AddRange(SqlUtil.Decrease_Topics_Unmatched(input, topics));
-            commands.AddRange(SqlUtil.Clean_Topics(input));
-            SqlUtil.BulkQuery(commands, update_progress);
-            commands.Clear();
+                List<SQLiteCommand> commands = new List<SQLiteCommand>();
+                commands.AddRange(SqlUtil.Increase_TopicPriorities(input, topics));
+                commands.AddRange(SqlUtil.AddTopics(input, topics));
+                commands.AddRange(SqlUtil.Decrease_Topics_Unmatched(input, topics));
+                commands.AddRange(SqlUtil.Clean_Topics(input));
+                SqlUtil.BulkQuery(commands, update_progress);
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.UpdateTopics", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         private static void UpdateOutputs(string input, string output, bool update_progress)
         {
-            if (update_progress)
+            try
             {
-                MainForm.progressMain.CustomText = "Adding potential output...";
-            }
+                if (update_progress)
+                {
+                    AppUtil.UpdateProgress(MainForm.progressMain, "Adding potential output");
+                }
 
-            List<SQLiteCommand> commands = new List<SQLiteCommand>();
-            commands.AddRange(SqlUtil.Increase_OutputPriorities(output, input));
-            commands.AddRange(SqlUtil.Add_Outputs(output, input));
-            SqlUtil.BulkQuery(commands, update_progress);
-            commands.Clear();
+                List<SQLiteCommand> commands = new List<SQLiteCommand>();
+                commands.AddRange(SqlUtil.Increase_OutputPriorities(output, input));
+                commands.AddRange(SqlUtil.Add_Outputs(output, input));
+                SqlUtil.BulkQuery(commands, update_progress);
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.UpdateOutputs", ex.Source, ex.Message, ex.StackTrace);
+            }
         }
 
         public static string Respond(bool initiating)
@@ -464,17 +492,18 @@ namespace Real_AI
                     {
                         if (WordArray.Length > 0)
                         {
-                            //Get topic-based response
-                            if (Topics != null)
+                            if (Topics != null &&
+                                MainForm.TopicResponding)
                             {
+                                //Get topic-based response
                                 if (Topics.Length > 0)
                                 {
                                     outputs.AddRange(SqlUtil.Get_OutputsFromTopics(Topics, false));
                                 }
                             }
                             
-                            if (!MainForm.Crash &&
-                                outputs.Count == 0)
+                            if (outputs.Count == 0 &&
+                                MainForm.InputResponding)
                             {
                                 //Get direct response
                                 if (!string.IsNullOrEmpty(CleanInput))
@@ -483,23 +512,19 @@ namespace Real_AI
                                 }
                             }
 
-                            if (!MainForm.Crash &&
-                                outputs.Count == 0)
+                            if (outputs.Count == 0 &&
+                                MainForm.ProceduralResponding)
                             {
                                 //Get generated response
                                 string min_word = SqlUtil.Get_MinWord(WordArray);
-
-                                if (!MainForm.Crash)
-                                {
-                                    outputs.Add(GenerateResponse(min_word, false, false));
-                                }
+                                outputs.Add(GenerateResponse(min_word, false, false));
                             }
                         }
                     }
 
                     //Still got nothing? Say something random.
-                    if (!MainForm.Crash &&
-                        outputs.Count == 0)
+                    if (outputs.Count == 0 &&
+                        MainForm.ProceduralResponding)
                     {
                         string word = SqlUtil.Get_RandomWord();
                         outputs.Add(GenerateResponse(word, false, false));
@@ -511,115 +536,109 @@ namespace Real_AI
 
                     if (WordArray.Length > 0)
                     {
-                        AppUtil.UpdateMain(10);
+                        AppUtil.UpdateProgress(MainForm.progressMain, 10);
                         MainForm.intervals.Clear();
 
                         //Add input as output to last response
                         if (!string.IsNullOrEmpty(LastResponse))
                         {
-                            AppUtil.UpdateMain("Adding input as output...");
+                            AppUtil.UpdateProgress(MainForm.progressMain, "Adding input as output...");
 
                             UpdateOutputs(CleanInput, LastResponse, true);
                         }
-                        AppUtil.UpdateMain(20);
+                        AppUtil.UpdateProgress(MainForm.progressMain, 20);
                         MainForm.intervals.Clear();
 
-                        if (!MainForm.Crash)
-                        {
-                            AppUtil.UpdateMain("Getting topic(s) from input...");
+                        AppUtil.UpdateProgress(MainForm.progressMain, "Getting topic(s) from input...");
 
-                            //Get lowest priority words from input
-                            Topics = SqlUtil.Get_MinWords(WordArray, true);
-                        }
-                        AppUtil.UpdateMain(30);
+                        //Get lowest priority words from input
+                        Topics = SqlUtil.Get_MinWords(WordArray, true);
+
+                        AppUtil.UpdateProgress(MainForm.progressMain, 30);
                         MainForm.intervals.Clear();
 
-                        if (!MainForm.Crash &&
-                            Topics.Length > 0)
+                        if (Topics.Length > 0)
                         {
-                            AppUtil.UpdateMain("Adding new topic(s)...");
+                            AppUtil.UpdateProgress(MainForm.progressMain, "Adding new topic(s)...");
 
                             //Add words as topics for input
                             UpdateTopics(CleanInput, Topics, true);
                         }
-                        AppUtil.UpdateMain(40);
+                        AppUtil.UpdateProgress(MainForm.progressMain, 40);
                         MainForm.intervals.Clear();
 
                         //Get topic-based response
-                        if (!MainForm.Crash &&
-                            Topics.Length > 0)
+                        if (Topics.Length > 0 &&
+                            MainForm.TopicResponding)
                         {
-                            AppUtil.UpdateMain("Getting outputs from topics...");
+                            AppUtil.UpdateProgress(MainForm.progressMain, "Getting outputs from topics...");
 
                             //Get highest priority output(s) from matching topics
                             outputs.AddRange(SqlUtil.Get_OutputsFromTopics(Topics, true));
                         }
-                        AppUtil.UpdateMain(50);
+                        AppUtil.UpdateProgress(MainForm.progressMain, 50);
                         MainForm.intervals.Clear();
 
-                        if (!MainForm.Crash &&
-                            outputs.Count == 0)
+                        if (outputs.Count == 0 &&
+                            MainForm.InputResponding)
                         {
-                            AppUtil.UpdateMain("Getting direct output...");
+                            AppUtil.UpdateProgress(MainForm.progressMain, "Getting direct output...");
 
                             //Get direct response
                             outputs.AddRange(SqlUtil.Get_OutputsFromInput(CleanInput, true).ToList());
                         }
-                        AppUtil.UpdateMain(60);
+                        AppUtil.UpdateProgress(MainForm.progressMain, 60);
                         MainForm.intervals.Clear();
 
                         string min_word = "";
-                        if (!MainForm.Crash &&
-                            outputs.Count == 0)
+                        if (outputs.Count == 0)
                         {
-                            AppUtil.UpdateMain("Getting best topic...");
+                            AppUtil.UpdateProgress(MainForm.progressMain, "Getting best topic...");
 
                             //Get lowest priority word
                             min_word = SqlUtil.Get_MinWord(WordArray);
                         }
-                        AppUtil.UpdateMain(70);
+                        AppUtil.UpdateProgress(MainForm.progressMain, 70);
                         MainForm.intervals.Clear();
 
-                        if (!MainForm.Crash &&
-                            outputs.Count == 0 &&
-                            !string.IsNullOrEmpty(min_word))
+                        if (outputs.Count == 0 &&
+                            !string.IsNullOrEmpty(min_word) &&
+                            MainForm.ProceduralResponding)
                         {
-                            AppUtil.UpdateMain("Generating response...");
+                            AppUtil.UpdateProgress(MainForm.progressMain, "Generating response...");
 
                             //Generate response from lowest priority word
                             outputs.Add(GenerateResponse(min_word, true, false));
                         }
-                        AppUtil.UpdateMain(80);
+                        AppUtil.UpdateProgress(MainForm.progressMain, 80);
                         MainForm.intervals.Clear();
 
                         string random_word = "";
-                        if (!MainForm.Crash &&
-                            outputs.Count == 0)
+                        if (outputs.Count == 0)
                         {
-                            AppUtil.UpdateMain("Getting random word...");
+                            AppUtil.UpdateProgress(MainForm.progressMain, "Getting random word...");
 
                             //Still got nothing? Pick a random word.
                             random_word = SqlUtil.Get_RandomWord();
                         }
-                        AppUtil.UpdateMain(90);
+                        AppUtil.UpdateProgress(MainForm.progressMain, 90);
                         MainForm.intervals.Clear();
 
-                        if (!MainForm.Crash &&
-                            outputs.Count == 0 &&
-                            !string.IsNullOrEmpty(random_word))
+                        if (outputs.Count == 0 &&
+                            !string.IsNullOrEmpty(random_word) &&
+                            MainForm.ProceduralResponding)
                         {
-                            AppUtil.UpdateMain("Generating response...");
+                            AppUtil.UpdateProgress(MainForm.progressMain, "Generating response...");
 
                             //Generate response from random word
                             outputs.Add(GenerateResponse(random_word, false, false));
                         }
-                        AppUtil.UpdateMain(100);
+                        AppUtil.UpdateProgress(MainForm.progressMain, 100);
                         MainForm.intervals.Clear();
                     }
                 }
 
-                if (!MainForm.Crash &&
-                    outputs.Count > 0)
+                if (outputs.Count > 0)
                 {
                     //Choose a response from outputs at random
                     CryptoRandom random = new CryptoRandom();
@@ -639,19 +658,16 @@ namespace Real_AI
 
                             //Interrupt thinking
                             LastThought = "";
-                            AppUtil.UpdateMain("Responded");
+                            AppUtil.UpdateProgress(MainForm.progressMain, "Responded");
                         }
                     }
                 }
 
-                AppUtil.UpdateDetail(100);
+                AppUtil.UpdateProgress(MainForm.progressDetail, 100);
             }
             catch (Exception ex)
             {
-                List<string> log = new List<string>();
-                log.Add(ex.Message);
-                log.Add(ex.StackTrace);
-                AppUtil.CrashLog(log);
+                Logger.AddLog("Brain.Respond", ex.Source, ex.Message, ex.StackTrace);
             }
             
             return Response;
@@ -661,154 +677,161 @@ namespace Real_AI
         {
             string response = "";
 
-            if (!string.IsNullOrEmpty(topic))
+            try
             {
-                int count = 0;
-
-                if (update_progress)
+                if (!string.IsNullOrEmpty(topic))
                 {
-                    AppUtil.UpdateDetail(0);
-                }
+                    int count = 0;
 
-                List<string> response_words = new List<string>();
-                bool words_found = true;
-
-                //Start with topic word
-                response_words.Add(topic);
-
-                //Add pre-words
-                while (words_found)
-                {
-                    if (for_thinking &&
-                        !Thinking)
+                    if (update_progress)
                     {
-                        break;
+                        AppUtil.UpdateProgress(MainForm.progressDetail, 0);
                     }
 
-                    //Get pre-word
-                    string pre_word = SqlUtil.Get_PreWord(response_words, for_thinking);
-                    if (!string.IsNullOrEmpty(pre_word))
-                    {
-                        //Add it
-                        response_words.Insert(0, pre_word);
+                    List<string> response_words = new List<string>();
+                    bool words_found = true;
 
-                        count++;
-                        if (count > 100)
+                    //Start with topic word
+                    response_words.Add(topic);
+
+                    //Add pre-words
+                    while (words_found)
+                    {
+                        if (for_thinking &&
+                            !Thinking)
                         {
-                            count = 100;
+                            break;
                         }
 
-                        if (update_progress)
+                        //Get pre-word
+                        string pre_word = SqlUtil.Get_PreWord(response_words, for_thinking);
+                        if (!string.IsNullOrEmpty(pre_word))
                         {
-                            AppUtil.UpdateDetail(count);
+                            //Add it
+                            response_words.Insert(0, pre_word);
+
+                            count++;
+                            if (count > 100)
+                            {
+                                count = 100;
+                            }
+
+                            if (update_progress)
+                            {
+                                AppUtil.UpdateProgress(MainForm.progressDetail, count);
+                            }
                         }
-                    }
-                    else
-                    {
-                        break;
-                    }
+                        else
+                        {
+                            break;
+                        }
 
-                    if (for_thinking && 
-                        !Thinking)
-                    {
-                        break;
-                    }
+                        if (for_thinking &&
+                            !Thinking)
+                        {
+                            break;
+                        }
 
-                    //Check for duplication
-                    if (response_words.Count > 0)
-                    {
-                        List<string> new_response_words = HandleDuplication(response_words);
-                        if (new_response_words.Count < response_words.Count)
+                        //Check for duplication
+                        if (response_words.Count > 0)
+                        {
+                            List<string> new_response_words = HandleDuplication(response_words);
+                            if (new_response_words.Count < response_words.Count)
+                            {
+                                break;
+                            }
+                        }
+
+                        if (for_thinking &&
+                            !Thinking)
                         {
                             break;
                         }
                     }
 
-                    if (for_thinking &&
-                        !Thinking)
+                    //Add pro-words
+                    while (words_found)
                     {
-                        break;
-                    }
-                }
-
-                //Add pro-words
-                while (words_found)
-                {
-                    if (for_thinking &&
-                        !Thinking)
-                    {
-                        break;
-                    }
-
-                    //Get pro-word
-                    string pro_word = SqlUtil.Get_ProWord(response_words, for_thinking);
-                    if (!string.IsNullOrEmpty(pro_word))
-                    {
-                        //Add it
-                        response_words.Add(pro_word);
-
-                        count++;
-                        if (count > 100)
+                        if (for_thinking &&
+                            !Thinking)
                         {
-                            count = 100;
+                            break;
                         }
 
-                        if (update_progress)
+                        //Get pro-word
+                        string pro_word = SqlUtil.Get_ProWord(response_words, for_thinking);
+                        if (!string.IsNullOrEmpty(pro_word))
                         {
-                            AppUtil.UpdateDetail(count);
+                            //Add it
+                            response_words.Add(pro_word);
+
+                            count++;
+                            if (count > 100)
+                            {
+                                count = 100;
+                            }
+
+                            if (update_progress)
+                            {
+                                AppUtil.UpdateProgress(MainForm.progressDetail, count);
+                            }
                         }
-                    }
-                    else
-                    {
-                        break;
-                    }
+                        else
+                        {
+                            break;
+                        }
 
-                    if (for_thinking &&
-                        !Thinking)
-                    {
-                        break;
-                    }
+                        if (for_thinking &&
+                            !Thinking)
+                        {
+                            break;
+                        }
 
-                    //Check for duplication
-                    if (response_words.Count > 0)
-                    {
-                        List<string> new_response_words = HandleDuplication(response_words);
-                        if (new_response_words.Count < response_words.Count)
+                        //Check for duplication
+                        if (response_words.Count > 0)
+                        {
+                            List<string> new_response_words = HandleDuplication(response_words);
+                            if (new_response_words.Count < response_words.Count)
+                            {
+                                break;
+                            }
+                        }
+
+                        if (for_thinking &&
+                            !Thinking)
                         {
                             break;
                         }
                     }
 
-                    if (for_thinking &&
-                        !Thinking)
+                    //Turn list of words into single string
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < response_words.Count; i++)
                     {
-                        break;
+                        if (for_thinking &&
+                            !Thinking)
+                        {
+                            break;
+                        }
+
+                        sb.Append(response_words[i]);
+
+                        if (i < response_words.Count - 1)
+                        {
+                            sb.Append(" ");
+                        }
+                    }
+
+                    if ((for_thinking && Thinking) ||
+                        !for_thinking)
+                    {
+                        response = sb.ToString();
                     }
                 }
-
-                //Turn list of words into single string
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < response_words.Count; i++)
-                {
-                    if (for_thinking &&
-                        !Thinking)
-                    {
-                        break;
-                    }
-
-                    sb.Append(response_words[i]);
-
-                    if (i < response_words.Count - 1)
-                    {
-                        sb.Append(" ");
-                    }
-                }
-
-                if ((for_thinking && Thinking) ||
-                    !for_thinking)
-                {
-                    response = sb.ToString();
-                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.GenerateResponse", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return response;
@@ -818,46 +841,53 @@ namespace Real_AI
         {
             List<string> results = new List<string>(words);
 
-            bool dup_found = false;
-            int dup_startIndex = 0;
-            int dup_wordCount = 0;
-
-            if (results.Count >= 4)
+            try
             {
-                for (int length = 4; length <= results.Count; length += 2)
+                bool dup_found = false;
+                int dup_startIndex = 0;
+                int dup_wordCount = 0;
+
+                if (results.Count >= 4)
                 {
-                    int count = (int)Math.Floor((decimal)length / 2);
-
-                    for (var i = 0; i <= results.Count - length; i++)
+                    for (int length = 4; length <= results.Count; length += 2)
                     {
-                        var first_chunk = "";
-                        var second_chunk = "";
+                        int count = (int)Math.Floor((decimal)length / 2);
 
-                        for (var c = i; c < count + i; c++)
+                        for (var i = 0; i <= results.Count - length; i++)
                         {
-                            first_chunk += results[c];
-                            second_chunk += results[count + c];
+                            var first_chunk = "";
+                            var second_chunk = "";
+
+                            for (var c = i; c < count + i; c++)
+                            {
+                                first_chunk += results[c];
+                                second_chunk += results[count + c];
+                            }
+
+                            if (first_chunk == second_chunk)
+                            {
+                                dup_found = true;
+                                dup_startIndex = i;
+                                dup_wordCount = count;
+                                break;
+                            }
                         }
 
-                        if (first_chunk == second_chunk)
+                        if (dup_found)
                         {
-                            dup_found = true;
-                            dup_startIndex = i;
-                            dup_wordCount = count;
                             break;
                         }
                     }
 
                     if (dup_found)
                     {
-                        break;
+                        results.RemoveRange(dup_startIndex, dup_wordCount);
                     }
                 }
-
-                if (dup_found)
-                {
-                    results.RemoveRange(dup_startIndex, dup_wordCount);
-                }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.HandleDuplication", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return results;
@@ -867,26 +897,33 @@ namespace Real_AI
         {
             string new_string = "";
 
-            if (old_string.Length > 0)
+            try
             {
-                new_string = old_string;
-
-                //Capitalize first word
-                char first_letter = new_string[0];
-                if (first_letter != char.ToUpper(first_letter))
+                if (old_string.Length > 0)
                 {
-                    new_string = char.ToUpper(first_letter) + new_string.Substring(1);
-                }
+                    new_string = old_string;
 
-                //Remove spaces before special characters
-                new_string = UnGapSpecials(new_string);
+                    //Capitalize first word
+                    char first_letter = new_string[0];
+                    if (first_letter != char.ToUpper(first_letter))
+                    {
+                        new_string = char.ToUpper(first_letter) + new_string.Substring(1);
+                    }
 
-                //Set ending punctuation if missing
-                char last_letter = new_string[new_string.Length - 1];
-                if (NormalCharacters.IsMatch(last_letter.ToString()))
-                {
-                    new_string += ".";
+                    //Remove spaces before special characters
+                    new_string = UnGapSpecials(new_string);
+
+                    //Set ending punctuation if missing
+                    char last_letter = new_string[new_string.Length - 1];
+                    if (NormalCharacters.IsMatch(last_letter.ToString()))
+                    {
+                        new_string += ".";
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.RulesCheck", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return new_string;
@@ -894,19 +931,26 @@ namespace Real_AI
 
         private static void PrepThought(string respond_to)
         {
-            WordArray_Thinking = GapSpecials(respond_to, null, null, null, false).Trim(' ').Split(' ');
-            if (WordArray_Thinking.Length > 0)
+            try
             {
-                if (!string.IsNullOrEmpty(WordArray_Thinking[0]) &&
-                    LearnFromThinking)
+                WordArray_Thinking = GapSpecials(respond_to, null, null, null, false).Trim(' ').Split(' ');
+                if (WordArray_Thinking.Length > 0)
                 {
-                    List<SQLiteCommand> commands = new List<SQLiteCommand>();
-                    commands.AddRange(AddInputs(respond_to));
-                    commands.AddRange(AddWords(WordArray_Thinking));
-                    commands.AddRange(AddPreWords(WordArray_Thinking));
-                    commands.AddRange(AddProWords(WordArray_Thinking));
-                    SqlUtil.BulkQuery(commands, false);
+                    if (!string.IsNullOrEmpty(WordArray_Thinking[0]) &&
+                        LearnFromThinking)
+                    {
+                        List<SQLiteCommand> commands = new List<SQLiteCommand>();
+                        commands.AddRange(AddInputs(respond_to));
+                        commands.AddRange(AddWords(WordArray_Thinking));
+                        commands.AddRange(AddPreWords(WordArray_Thinking));
+                        commands.AddRange(AddProWords(WordArray_Thinking));
+                        SqlUtil.BulkQuery(commands, false);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog("Brain.PrepThought", ex.Source, ex.Message, ex.StackTrace);
             }
         }
 
@@ -935,49 +979,44 @@ namespace Real_AI
                     {
                         if (!string.IsNullOrEmpty(WordArray_Thinking[0]))
                         {
-                            if (!MainForm.Crash)
+                            string[] topics = SqlUtil.Get_MinWords(WordArray_Thinking, false);
+
+                            if (topics.Length > 0)
                             {
-                                string[] topics = SqlUtil.Get_MinWords(WordArray_Thinking, false);
-
-                                if (!MainForm.Crash &&
-                                    topics.Length > 0)
+                                if (LearnFromThinking)
                                 {
-                                    if (LearnFromThinking)
-                                    {
-                                        UpdateTopics(respond_to, topics, false);
-                                    }
-                                }
-
-                                //Get topic-based response
-                                if (!MainForm.Crash &&
-                                    topics.Length > 0)
-                                {
-                                    outputs.AddRange(SqlUtil.Get_OutputsFromTopics(topics, false));
+                                    UpdateTopics(respond_to, topics, false);
                                 }
                             }
 
-                            if (!MainForm.Crash &&
-                                outputs.Count == 0)
+                            if (topics.Length > 0 &&
+                                MainForm.TopicResponding)
+                            {
+                                //Get topic-based response
+                                outputs.AddRange(SqlUtil.Get_OutputsFromTopics(topics, false));
+                            }
+
+                            if (outputs.Count == 0 &&
+                                MainForm.InputResponding)
                             {
                                 //Get direct response
                                 outputs.AddRange(SqlUtil.Get_OutputsFromInput(respond_to, false).ToList());
                             }
 
-                            if (!MainForm.Crash &&
-                                outputs.Count == 0)
+                            if (outputs.Count == 0 &&
+                                MainForm.ProceduralResponding)
                             {
                                 //Get generated response
                                 string min_word = SqlUtil.Get_MinWord(WordArray_Thinking);
 
-                                if (!MainForm.Crash &&
-                                    !string.IsNullOrEmpty(min_word))
+                                if (!string.IsNullOrEmpty(min_word))
                                 {
                                     outputs.Add(GenerateResponse(min_word, false, true));
                                 }
                             }
 
-                            if (!MainForm.Crash &&
-                                outputs.Count == 0)
+                            if (outputs.Count == 0 &&
+                                MainForm.ProceduralResponding)
                             {
                                 string word = SqlUtil.Get_RandomWord();
                                 outputs.Add(GenerateResponse(word, false, true));
@@ -986,8 +1025,7 @@ namespace Real_AI
                     }
                 }
 
-                if (!MainForm.Crash &&
-                    outputs.Count > 0)
+                if (outputs.Count > 0)
                 {
                     //Choose a response from outputs
                     CryptoRandom random = new CryptoRandom();
@@ -995,8 +1033,7 @@ namespace Real_AI
 
                     Thought = outputs[choice];
 
-                    if (!MainForm.Crash &&
-                        !string.IsNullOrEmpty(Thought))
+                    if (!string.IsNullOrEmpty(Thought))
                     {
                         //Clean up response
                         Thought = RulesCheck(Thought);
@@ -1017,10 +1054,7 @@ namespace Real_AI
             }
             catch (Exception ex)
             {
-                List<string> log = new List<string>();
-                log.Add(ex.Message);
-                log.Add(ex.StackTrace);
-                AppUtil.CrashLog(log);
+                Logger.AddLog("Brain.Think", ex.Source, ex.Message, ex.StackTrace);
             }
 
             return Thought;
