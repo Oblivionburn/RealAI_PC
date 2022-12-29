@@ -21,7 +21,7 @@ namespace Real_AI
         Options options = new Options();
         BrainEditor editor = new BrainEditor();
         Merge merge = new Merge();
-        Thinking thinking = new Thinking();
+        public static Thinking thinking = new Thinking();
         Spelling spelling = new Spelling();
         Connect connect = new Connect();
         ReadFile read = new ReadFile();
@@ -93,9 +93,9 @@ namespace Real_AI
         public static string HistoryDir = Environment.CurrentDirectory + @"\History\";
         public static string Current_HistoryDir;
         public static string HistoryFile;
-        public List<string> History = new List<string>();
+        public static List<string> History = new List<string>();
 
-        public List<string> Thoughts = new List<string>();
+        public static List<string> Thoughts = new List<string>();
 
         #endregion
 
@@ -794,6 +794,22 @@ namespace Real_AI
             }
         }
 
+        public static void Clear()
+        {
+            output.Text = "";
+            input.Text = "";
+            thinking.Text = "";
+
+            Brain.LastResponse = "";
+            Brain.LastThought = "";
+            Brain.CleanInput = "";
+            Brain.Topics = null;
+            Brain.WordArray = null;
+            Brain.WordArray_Thinking = null;
+            Thoughts.Clear();
+            History.Clear();
+        }
+
         #region Events
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -1268,6 +1284,8 @@ namespace Real_AI
                     progressMain.CustomText = "Connected to \"" + BrainName + "\" brain";
                     progressMain.Value = 100;
 
+                    Clear();
+
                     Current_HistoryDir = HistoryDir + BrainName;
                     if (!Directory.Exists(Current_HistoryDir))
                     {
@@ -1313,13 +1331,13 @@ namespace Real_AI
 
                     AppUtil.Set_Config("LastBrain", BrainFile);
 
+                    Clear();
+
                     Current_HistoryDir = HistoryDir + BrainName;
                     if (!Directory.Exists(Current_HistoryDir))
                     {
                         Directory.CreateDirectory(Current_HistoryDir);
                     }
-
-                    Thoughts.Clear();
 
                     StartNewSession();
                     ResumeTimers();
@@ -1376,18 +1394,7 @@ namespace Real_AI
                     DialogResult result = MessageBox.Show("Are you sure you wish to delete all the data in the \"" + Path.GetFileNameWithoutExtension(BrainFile) + "\" brain?", "Memory Wipe", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (result == DialogResult.Yes)
                     {
-                        output.Text = "";
-                        input.Text = "";
-                        thinking.Text = "";
-
-                        Brain.LastResponse = "";
-                        Brain.LastThought = "";
-                        Brain.CleanInput = "";
-                        Brain.Topics = null;
-                        Brain.WordArray = null;
-                        Brain.WordArray_Thinking = null;
-                        Thoughts.Clear();
-
+                        Clear();
                         SqlUtil.BulkQuery(SqlUtil.Wipe(), true);
                         AppUtil.SaveHistory(new List<string>());
                         StartNewSession();

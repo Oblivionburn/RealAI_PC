@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
@@ -1715,7 +1714,10 @@ namespace Real_AI.Util
                             int priority = Get_InputPriority(output);
 
                             //Add output/priority pair as a possibility
-                            output_priority.Add(output, priority);
+                            if (!output_priority.ContainsKey(output))
+                            {
+                                output_priority.Add(output, priority);
+                            }
                         }
 
                         value++;
