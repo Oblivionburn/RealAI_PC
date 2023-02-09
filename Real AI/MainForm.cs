@@ -33,6 +33,7 @@ namespace Real_AI
         public static string ID;
         public static bool Linked;
         public static Thread network;
+        public static string LocalLinkDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RealAI");
 
         public static bool InputResponding = true;
         public static bool TopicResponding = true;
@@ -1019,16 +1020,18 @@ namespace Real_AI
 
                             if (NetUtil.ConnectedIP == "localhost")
                             {
-                                string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\RealAI\\link.txt";
-                                if (File.Exists(path))
+                                string path = Path.Combine(LocalLinkDir, "link.txt");
+                                if (!Directory.Exists(LocalLinkDir))
                                 {
-                                    bool written = false;
-                                    while (!written)
-                                    {
-                                        try { File.WriteAllLines(path, lines); }
-                                        catch (IOException) { }
-                                        finally { written = true; }
-                                    }
+                                    Directory.CreateDirectory(LocalLinkDir);
+                                }
+
+                                bool written = false;
+                                while (!written)
+                                {
+                                    try { File.WriteAllLines(path, lines); }
+                                    catch (IOException) { }
+                                    finally { written = true; }
                                 }
                             }
                             else
@@ -1119,7 +1122,11 @@ namespace Real_AI
 
                                             if (NetUtil.ConnectedIP == "localhost")
                                             {
-                                                string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\RealAI\\link.txt";
+                                                string path = Path.Combine(LocalLinkDir, "link.txt");
+                                                if (!Directory.Exists(LocalLinkDir))
+                                                {
+                                                    Directory.CreateDirectory(LocalLinkDir);
+                                                }
 
                                                 bool written = false;
                                                 while (!written)

@@ -1,9 +1,0 @@
-[16:41:46] You: howdy
-[16:41:46] AI: Howdy.
-[16:41:52] You: How's it going?
-[16:41:52] AI: How's it going?
-[16:41:56] You: It's going alright.
-[16:41:56] AI: It's going?
-[16:41:59] You: Always.
-[16:41:59] AI: Always.
-[new session]
