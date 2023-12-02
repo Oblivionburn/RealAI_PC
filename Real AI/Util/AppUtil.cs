@@ -523,17 +523,18 @@ namespace Real_AI.Util
                     result += ":0" + seconds;
                 }
 
-                if (milliseconds > 99)
+                int remaining_milliseconds = (int)milliseconds;
+                if (remaining_milliseconds > 99)
                 {
-                    result += "." + milliseconds;
+                    result += "." + remaining_milliseconds;
                 }
-                else if (milliseconds > 9)
+                else if (remaining_milliseconds > 9)
                 {
-                    result += ".0" + milliseconds;
+                    result += ".0" + remaining_milliseconds;
                 }
                 else
                 {
-                    result += ".00" + milliseconds;
+                    result += ".00" + remaining_milliseconds;
                 }
             }
             catch (Exception ex)

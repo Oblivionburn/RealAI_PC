@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
+using System.Linq;
 using System.Threading;
 
 namespace Real_AI.Util
@@ -248,13 +249,15 @@ namespace Real_AI.Util
                         {
                             if (parameters != null)
                             {
-                                if (parameters.Length > 0)
+                                int parameterCount = parameters.Length;
+                                if (parameterCount > 0)
                                 {
-                                    for (int i = 0; i < parameters.Length; i++)
+                                    for (int i = 0; i < parameterCount; i++)
                                     {
-                                        if (parameters[i] != null)
+                                        SQLiteParameter parameter = parameters[i];
+                                        if (parameter != null)
                                         {
-                                            cmd.Parameters.Add(parameters[i]);
+                                            cmd.Parameters.Add(parameter);
                                         }
                                     }
                                 }
@@ -291,12 +294,17 @@ namespace Real_AI.Util
 
                     using (SQLiteTransaction transaction = con.BeginTransaction())
                     {
-                        foreach (SQLiteCommand command in commands)
+                        for (int c = 0; c < total; c++)
                         {
+                            SQLiteCommand command = commands[c];
+
                             using (SQLiteCommand cmd = new SQLiteCommand(command.CommandText, con))
                             {
-                                foreach (SQLiteParameter existing in command.Parameters)
+                                int parameterCount = command.Parameters.Count;
+                                for (int p = 0; p < parameterCount; p++)
                                 {
+                                    SQLiteParameter existing = command.Parameters[p];
+
                                     SQLiteParameter parm = new SQLiteParameter();
                                     parm.ParameterName = existing.ParameterName;
                                     parm.Value = existing.Value;
@@ -349,21 +357,26 @@ namespace Real_AI.Util
 
                     using (SQLiteTransaction transaction = con.BeginTransaction())
                     {
-                        foreach (SQLiteCommand command in commands)
+                        for (int c = 0; c < total; c++)
                         {
                             if (AppUtil.IsCancelled(TokenSource))
                             {
                                 break;
                             }
 
+                            SQLiteCommand command = commands[c];
+
                             using (SQLiteCommand cmd = new SQLiteCommand(command.CommandText, con))
                             {
-                                foreach (SQLiteParameter existing in command.Parameters)
+                                int parameterCount = command.Parameters.Count;
+                                for (int p = 0; p < parameterCount; p++)
                                 {
                                     if (AppUtil.IsCancelled(TokenSource))
                                     {
                                         break;
                                     }
+
+                                    SQLiteParameter existing = command.Parameters[p];
 
                                     SQLiteParameter parm = new SQLiteParameter();
                                     parm.ParameterName = existing.ParameterName;
@@ -416,13 +429,15 @@ namespace Real_AI.Util
                             {
                                 if (parameters != null)
                                 {
-                                    if (parameters.Length > 0)
+                                    int parameterCount = parameters.Length;
+                                    if (parameterCount > 0)
                                     {
-                                        for (int i = 0; i < parameters.Length; i++)
+                                        for (int i = 0; i < parameterCount; i++)
                                         {
-                                            if (parameters[i] != null)
+                                            SQLiteParameter parameter = parameters[i];
+                                            if (parameter != null)
                                             {
-                                                cmd.Parameters.Add(parameters[i]);
+                                                cmd.Parameters.Add(parameter);
                                             }
                                         }
                                     }
@@ -465,13 +480,15 @@ namespace Real_AI.Util
                             {
                                 if (parameters != null)
                                 {
-                                    if (parameters.Length > 0)
+                                    int parameterCount = parameters.Length;
+                                    if (parameterCount > 0)
                                     {
-                                        for (int i = 0; i < parameters.Length; i++)
+                                        for (int i = 0; i < parameterCount; i++)
                                         {
-                                            if (parameters[i] != null)
+                                            SQLiteParameter parameter = parameters[i];
+                                            if (parameter != null)
                                             {
-                                                cmd.Parameters.Add(parameters[i]);
+                                                cmd.Parameters.Add(parameter);
                                             }
                                         }
                                     }
@@ -502,8 +519,11 @@ namespace Real_AI.Util
             try
             {
                 string[] tables = { "Outputs", "Topics", "PreWords", "ProWords", "Inputs", "Words" };
-                foreach (string table in tables)
+
+                int tablesCount = tables.Length;
+                for (int i = 0; i < tablesCount; i++)
                 {
+                    string table = tables[i];
                     commands.Add(new SQLiteCommand("DELETE FROM " + table));
                 }
             }
@@ -523,8 +543,11 @@ namespace Real_AI.Util
             {
                 DataTable data = GetData("SELECT ID, Input, Priority FROM Inputs", null, brainFile);
 
-                foreach (DataRow row in data.Rows)
+                int rowCount = data.Rows.Count;
+                for (int i = 0; i < rowCount; i++)
                 {
+                    DataRow row = data.Rows[i];
+
                     Input new_input = new Input();
                     new_input.id = int.Parse(row.ItemArray[0].ToString());
                     new_input.input = row.ItemArray[1].ToString();
@@ -656,8 +679,11 @@ namespace Real_AI.Util
             {
                 DataTable data = GetData("SELECT ID, Word, Priority FROM Words", null, brainFile);
 
-                foreach (DataRow row in data.Rows)
+                int rowCount = data.Rows.Count;
+                for (int i = 0; i < rowCount; i++)
                 {
+                    DataRow row = data.Rows[i];
+
                     Word new_word = new Word();
                     new_word.id = int.Parse(row.ItemArray[0].ToString());
                     new_word.word = row.ItemArray[1].ToString();
@@ -714,8 +740,11 @@ namespace Real_AI.Util
                     SQLiteParameter[] parms = { parm };
                     DataTable data = GetData("SELECT Word FROM Words WHERE Priority = @priority AND Word IN (" + wordSet + ")", parms);
 
-                    foreach (DataRow row in data.Rows)
+                    int rowCount = data.Rows.Count;
+                    for (int i = 0; i < rowCount; i++)
                     {
+                        DataRow row = data.Rows[i];
+
                         string min_word = row.ItemArray[0].ToString();
                         min_words.Add(min_word);
                     }
@@ -763,8 +792,11 @@ namespace Real_AI.Util
 
                     int total = data.Rows.Count;
 
-                    foreach (DataRow row in data.Rows)
+                    int rowCount = data.Rows.Count;
+                    for (int i = 0; i < rowCount; i++)
                     {
+                        DataRow row = data.Rows[i];
+
                         string word = row.ItemArray[0].ToString();
                         min_words.Add(word);
 
@@ -822,8 +854,11 @@ namespace Real_AI.Util
 
             try
             {
-                foreach (string word in words)
+                int count = words.Length;
+                for (int i = 0; i < count; i++)
                 {
+                    string word = words[i];
+
                     SQLiteParameter parm = new SQLiteParameter("@word", word);
                     parm.DbType = DbType.String;
 
@@ -882,8 +917,11 @@ namespace Real_AI.Util
 
             try
             {
-                foreach (string word in words)
+                int count = words.Length;
+                for (int i = 0; i < count; i++)
                 {
+                    string word = words[i];
+
                     SQLiteParameter parm = new SQLiteParameter("@word", word);
                     parm.DbType = DbType.String;
 
@@ -908,8 +946,11 @@ namespace Real_AI.Util
 
             try
             {
-                foreach (string word in words)
+                int count = words.Length;
+                for (int i = 0; i < count; i++)
                 {
+                    string word = words[i];
+
                     SQLiteParameter parm = new SQLiteParameter("@word", word);
                     parm.DbType = DbType.String;
 
@@ -939,8 +980,11 @@ namespace Real_AI.Util
             {
                 DataTable data = GetData("SELECT ID, Word, PreWord, Priority, Distance FROM PreWords", null, brainFile);
 
-                foreach (DataRow row in data.Rows)
+                int rowCount = data.Rows.Count;
+                for (int i = 0; i < rowCount; i++)
                 {
+                    DataRow row = data.Rows[i];
+
                     PreWord new_pre_word = new PreWord();
                     new_pre_word.id = int.Parse(row.ItemArray[0].ToString());
                     new_pre_word.word = row.ItemArray[1].ToString();
@@ -964,14 +1008,15 @@ namespace Real_AI.Util
 
             try
             {
-                if (words.Count > 0)
+                if (words.Any())
                 {
                     Dictionary<string, int> options = new Dictionary<string, int>();
                     List<DataRow> rows = new List<DataRow>();
 
                     int count = 1;
+                    int wordCount = words.Count;
 
-                    for (int i = 0; i < words.Count; i++)
+                    for (int i = 0; i < wordCount; i++)
                     {
                         if (for_thinking &&
                             !Brain.Thinking)
@@ -990,8 +1035,11 @@ namespace Real_AI.Util
                         SQLiteParameter[] parms = { word_parm, distance_parm };
                         DataTable data = GetData("SELECT * FROM PreWords WHERE Word = @word AND Distance = @distance", parms);
 
-                        foreach (DataRow row in data.Rows)
+                        int dataRowCount = data.Rows.Count;
+                        for (int r = 0; r < dataRowCount; r++)
                         {
+                            DataRow row = data.Rows[r];
+
                             if (for_thinking &&
                                 !Brain.Thinking)
                             {
@@ -1004,8 +1052,11 @@ namespace Real_AI.Util
                         count++;
                     }
 
-                    foreach (DataRow row in rows)
+                    int rowCount = rows.Count;
+                    for (int i = 0; i < rowCount; i++)
                     {
+                        DataRow row = rows[i];
+
                         if (for_thinking &&
                             !Brain.Thinking)
                         {
@@ -1088,7 +1139,8 @@ namespace Real_AI.Util
 
             try
             {
-                for (int i = 0; i < words.Length; i++)
+                int count = words.Length;
+                for (int i = 0; i < count; i++)
                 {
                     SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
                     word_parm.DbType = DbType.String;
@@ -1126,7 +1178,8 @@ namespace Real_AI.Util
 
             try
             {
-                for (int i = 0; i < words.Length; i++)
+                int count = words.Length;
+                for (int i = 0; i < count; i++)
                 {
                     SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
                     word_parm.DbType = DbType.String;
@@ -1164,7 +1217,8 @@ namespace Real_AI.Util
 
             try
             {
-                for (int i = 0; i < words.Length; i++)
+                int count = words.Length;
+                for (int i = 0; i < count; i++)
                 {
                     SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
                     word_parm.DbType = DbType.String;
@@ -1208,8 +1262,11 @@ namespace Real_AI.Util
             {
                 DataTable data = GetData("SELECT ID, Word, ProWord, Priority, Distance FROM ProWords", null, brainFile);
 
-                foreach (DataRow row in data.Rows)
+                int rowCount = data.Rows.Count;
+                for (int i = 0; i < rowCount; i++)
                 {
+                    DataRow row = data.Rows[i];
+
                     ProWord new_pro_word = new ProWord();
                     new_pro_word.id = int.Parse(row.ItemArray[0].ToString());
                     new_pro_word.word = row.ItemArray[1].ToString();
@@ -1233,14 +1290,15 @@ namespace Real_AI.Util
 
             try
             {
-                if (words.Count > 0)
+                if (words.Any())
                 {
                     Dictionary<string, int> options = new Dictionary<string, int>();
                     List<DataRow> rows = new List<DataRow>();
 
                     int count = 1;
+                    int wordCount = words.Count - 1;
 
-                    for (int i = words.Count - 1; i >= 0; i--)
+                    for (int i = wordCount; i >= 0; i--)
                     {
                         if (for_thinking &&
                             !Brain.Thinking)
@@ -1259,8 +1317,11 @@ namespace Real_AI.Util
                         SQLiteParameter[] parms = { word_parm, distance_parm };
                         DataTable data = GetData("SELECT * FROM ProWords WHERE Word = @word AND Distance = @distance", parms);
 
-                        foreach (DataRow row in data.Rows)
+                        int dataRowCount = data.Rows.Count;
+                        for (int r = 0; r < dataRowCount; r++)
                         {
+                            DataRow row = data.Rows[r];
+
                             if (for_thinking &&
                                 !Brain.Thinking)
                             {
@@ -1273,8 +1334,11 @@ namespace Real_AI.Util
                         count++;
                     }
 
-                    foreach (DataRow row in rows)
+                    int rowCount = rows.Count;
+                    for (int i = 0; i < rowCount; i++)
                     {
+                        DataRow row = rows[i];
+
                         if (for_thinking &&
                             !Brain.Thinking)
                         {
@@ -1357,7 +1421,8 @@ namespace Real_AI.Util
 
             try
             {
-                for (int i = 0; i < words.Length; i++)
+                int count = words.Length;
+                for (int i = 0; i < count; i++)
                 {
                     SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
                     word_parm.DbType = DbType.String;
@@ -1395,7 +1460,8 @@ namespace Real_AI.Util
 
             try
             {
-                for (int i = 0; i < words.Length; i++)
+                int count = words.Length;
+                for (int i = 0; i < count; i++)
                 {
                     SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
                     word_parm.DbType = DbType.String;
@@ -1433,7 +1499,8 @@ namespace Real_AI.Util
 
             try
             {
-                for (int i = 0; i < words.Length; i++)
+                int count = words.Length;
+                for (int i = 0; i < count; i++)
                 {
                     SQLiteParameter word_parm = new SQLiteParameter("@word", words[i]);
                     word_parm.DbType = DbType.String;
@@ -1477,8 +1544,11 @@ namespace Real_AI.Util
             {
                 DataTable data = GetData("SELECT ID, Input, Topic, Priority FROM Topics", null, brainFile);
 
-                foreach (DataRow row in data.Rows)
+                int rowCount = data.Rows.Count;
+                for (int i = 0; i < rowCount; i++)
                 {
+                    DataRow row = data.Rows[i];
+
                     Topic new_topic = new Topic();
                     new_topic.id = int.Parse(row.ItemArray[0].ToString());
                     new_topic.input = row.ItemArray[1].ToString();
@@ -1504,8 +1574,11 @@ namespace Real_AI.Util
                 if (!string.IsNullOrEmpty(input) &&
                     words.Length > 0)
                 {
-                    foreach (string word in words)
+                    int count = words.Length;
+                    for (int i = 0; i < count; i++)
                     {
+                        string word = words[i];
+
                         SQLiteParameter input_parm = new SQLiteParameter("@input", input);
                         input_parm.DbType = DbType.String;
 
@@ -1543,8 +1616,11 @@ namespace Real_AI.Util
                 if (!string.IsNullOrEmpty(input) &&
                     words.Length > 0)
                 {
-                    foreach (string word in words)
+                    int count = words.Length;
+                    for (int i = 0; i < count; i++)
                     {
+                        string word = words[i];
+
                         SQLiteParameter input_parm = new SQLiteParameter("@input", input);
                         input_parm.DbType = DbType.String;
 
@@ -1582,8 +1658,11 @@ namespace Real_AI.Util
                 if (!string.IsNullOrEmpty(input) &&
                     words.Length > 0)
                 {
-                    foreach (string word in words)
+                    int count = words.Length;
+                    for (int i = 0; i < count; i++)
                     {
+                        string word = words[i];
+
                         SQLiteParameter input_parm = new SQLiteParameter("@input", input);
                         input_parm.DbType = DbType.String;
 
@@ -1695,8 +1774,12 @@ namespace Real_AI.Util
                     int total = inputsData.Rows.Count;
 
                     Dictionary<string, int> output_priority = new Dictionary<string, int>();
-                    foreach (DataRow row in inputsData.Rows)
+
+                    int rowCount = inputsData.Rows.Count;
+                    for (int i = 0; i < rowCount; i++)
                     {
+                        DataRow row = inputsData.Rows[i];
+
                         string input = row.ItemArray[0].ToString();
 
                         List<SQLiteParameter> parameters = new List<SQLiteParameter>();
@@ -1767,8 +1850,11 @@ namespace Real_AI.Util
             {
                 DataTable data = GetData("SELECT ID, Input, Output, Priority FROM Outputs", null, brainFile);
 
-                foreach (DataRow row in data.Rows)
+                int rowCount = data.Rows.Count;
+                for (int i = 0; i < rowCount; i++)
                 {
+                    DataRow row = data.Rows[i];
+
                     Output new_output = new Output();
                     new_output.id = int.Parse(row.ItemArray[0].ToString());
                     new_output.input = row.ItemArray[1].ToString();
@@ -1938,8 +2024,11 @@ namespace Real_AI.Util
 
                     int total = data.Rows.Count;
 
-                    foreach (DataRow row in data.Rows)
+                    int rowCount = data.Rows.Count;
+                    for (int i = 0; i < rowCount; i++)
                     {
+                        DataRow row = data.Rows[i];
+
                         outputs.Add(row.ItemArray[0].ToString());
 
                         count++;
@@ -1965,13 +2054,16 @@ namespace Real_AI.Util
 
             try
             {
-                for (int i = 0; i < words.Length; i++)
+                int wordCount = words.Length;
+                for (int i = 0; i < wordCount; i++)
                 {
                     string word = "";
 
                     //Check word for apostrophe which will break queries
                     string check_word = words[i];
-                    for (int j = 0; j < check_word.Length; j++)
+
+                    int checkWordLength = check_word.Length;
+                    for (int j = 0; j < checkWordLength; j++)
                     {
                         char c = check_word[j];
                         if (c == '\'')

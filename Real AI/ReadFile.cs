@@ -6,6 +6,7 @@ using System.Data.SQLite;
 using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Real_AI.Util;
 
 namespace Real_AI
@@ -19,12 +20,13 @@ namespace Real_AI
         CancellationTokenSource ElapsedTokenSource;
         Task ElapsedTask;
 
-        int previous_progress;
-        DateTime StartTime_Remaining;
         CancellationTokenSource RemainingTokenSource;
         Task RemainingTask;
-        HashSet<float> intervals = new HashSet<float>();
-
+        private static int intervalIndex = 0;
+        private static List<int> intervals = new List<int>();
+        private static int previous_progress;
+        private static DateTime StartTime_Remaining;
+        private static bool timeMain;
         private static TextProgressBar progressBar_Main;
         private static TextProgressBar progressBar_Detail;
 
@@ -137,6 +139,8 @@ namespace Real_AI
                     {
                         AppUtil.UpdateLabel(ElapsedTokenSource, lbl_ElapsedTime, "");
                     }
+
+                    Block(0.00001);
                 }
 
                 AppUtil.UpdateLabel(lbl_ElapsedTime, "");
@@ -156,14 +160,34 @@ namespace Real_AI
                     int count = 0;
                     int total = 0;
 
-                    string[] text = progressBar_Detail.CustomText.Replace("(", "").Replace(")", "").Split('/');
-                    if (text[0] != "Ready!")
+                    if (timeMain)
                     {
-                        count = int.Parse(text[0]);
-                        total = int.Parse(text[1]);
-                    }
+                        int index = progressBar_Main.CustomText.IndexOf("(");
+                        if (index > -1)
+                        {
+                            string mainText = progressBar_Main.CustomText.Substring(index);
+                            string[] text = mainText.Replace("Batch: ", "").Replace("(", "").Replace(")", "").Split('/');
 
-                    int progress = count - previous_progress;
+                            if (text.Length > 1 &&
+                                text[0] != "Ready!" &&
+                                text[0] != "Done!")
+                            {
+                                count = int.Parse(text[0]);
+                                total = int.Parse(text[1]);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string[] text = progressBar_Detail.CustomText.Replace("(", "").Replace(")", "").Split('/');
+                        if (text.Length > 1 &&
+                            text[0] != "Ready!" &&
+                            text[0] != "Done!")
+                        {
+                            count = int.Parse(text[0]);
+                            total = int.Parse(text[1]);
+                        }
+                    }
 
                     int milliseconds = 0;
                     if (previous_progress != count)
@@ -172,43 +196,59 @@ namespace Real_AI
                         StartTime_Remaining = DateTime.Now;
                     }
 
-                    float time_per_process = 0;
+                    int progress = count - previous_progress;
+                    int time_per_process = 0;
                     if (progress > 0)
                     {
-                        time_per_process = (float)milliseconds / progress;
+                        time_per_process = milliseconds / progress;
                     }
 
-                    previous_progress = count;
-                    int remaining_progress = total - count;
+                    int intervalCount = intervals.Count;
 
                     if (time_per_process > 0)
                     {
-                        intervals.Add(time_per_process);
+                        if (intervalCount >= 1000)
+                        {
+                            intervals[intervalIndex] = time_per_process;
+
+                            intervalIndex++;
+                            if (intervalIndex > intervalCount - 1)
+                            {
+                                intervalIndex = 0;
+                            }
+                        }
+                        else
+                        {
+                            intervals.Add(time_per_process);
+                        }
                     }
 
                     int sum = 0;
-                    int average = 0;
-                    if (intervals.Count > 0)
+                    float average = 0;
+
+                    intervalCount = intervals.Count;
+                    if (intervalCount > 0)
                     {
-                        foreach (int i in intervals)
+                        for (int i = 0; i < intervalCount; i++)
                         {
-                            sum += i;
+                            sum += intervals[i];
                         }
 
-                        average = sum / intervals.Count;
+                        average = sum / intervalCount;
                     }
 
+                    int remaining_progress = total - count;
                     int remaining = 0;
                     if (average > 0)
                     {
-                        remaining = average * remaining_progress;
+                        remaining = (int)((average * remaining_progress) / 5);
                     }
-                    else
+                    else if (time_per_process > 0)
                     {
-                        remaining = (int)time_per_process * remaining_progress;
+                        remaining = (int)((time_per_process * remaining_progress) / 5);
                     }
 
-                    string time = AppUtil.ConvertTime_Milliseconds(remaining / 100);
+                    string time = AppUtil.ConvertTime_Milliseconds(remaining);
 
                     if (time != "00:00:00.000")
                     {
@@ -218,6 +258,10 @@ namespace Real_AI
                     {
                         AppUtil.UpdateLabel(RemainingTokenSource, lbl_RemainingTime, "");
                     }
+
+                    previous_progress = count;
+
+                    Block(0.000001);
                 }
 
                 AppUtil.UpdateLabel(lbl_RemainingTime, "");
@@ -225,6 +269,17 @@ namespace Real_AI
             catch (Exception ex)
             {
                 Logger.AddLog("ReadFile.Remaining", ex.Source, ex.Message, ex.StackTrace);
+            }
+        }
+
+        private static void Block(double durationSeconds)
+        {
+            var durationTicks = Math.Round(durationSeconds * Stopwatch.Frequency);
+            var sw = Stopwatch.StartNew();
+
+            while (sw.ElapsedTicks < durationTicks)
+            {
+
             }
         }
 
@@ -265,6 +320,12 @@ namespace Real_AI
                     if (!string.IsNullOrEmpty(FileBox.Text))
                     {
                         btn_Read.Enabled = true;
+
+                        AppUtil.UpdateProgress(progressBar_Main, "Ready!");
+                        AppUtil.UpdateProgress(progressBar_Main, 0);
+
+                        AppUtil.UpdateProgress(progressBar_Detail, "Ready!");
+                        AppUtil.UpdateProgress(progressBar_Detail, 0);
                     }
                     else
                     {
@@ -290,6 +351,7 @@ namespace Real_AI
                 ElapsedTokenSource = new CancellationTokenSource();
                 ElapsedTask = Task.Factory.StartNew(() => Elapsed(), ElapsedTokenSource.Token);
 
+                timeMain = false;
                 intervals.Clear();
                 lbl_RemainingTime.Text = "";
                 StartTime_Remaining = DateTime.Now;
@@ -461,7 +523,6 @@ namespace Real_AI
 
                 StringBuilder sb = new StringBuilder();
 
-                List<string> words = new List<string>();
                 List<string> inputs = new List<string>();
                 List<SQLiteCommand> commands = new List<SQLiteCommand>();
 
@@ -473,6 +534,7 @@ namespace Real_AI
                     {
                         progressBar_Main.CustomText = "Reading file";
                         progressBar_Main.Value = 25;
+                        previous_progress = 0;
                         intervals.Clear();
                     });
                 }
@@ -484,56 +546,100 @@ namespace Real_AI
                 AppUtil.UpdateProgress(ReadingTokenSource, progressBar_Detail, "(" + count + "/" + total + ")");
                 AppUtil.UpdateProgress(ReadingTokenSource, progressBar_Detail, 0);
 
-                foreach (string line in lines)
+                for (int l = 0; l < total; l++)
                 {
                     if (ReadingTokenSource.IsCancellationRequested)
                     {
                         break;
                     }
 
+                    string line = lines[l];
+
                     string new_line = line.Trim();
                     if (new_line.Length > 0)
                     {
                         bool replaced_semicolon = false;
 
-                        for (var i = 0; i < line.Length; i++)
+                        int lineLength = new_line.Length;
+                        for (int i = 0; i < lineLength; i++)
                         {
                             if (ReadingTokenSource.IsCancellationRequested)
                             {
                                 break;
                             }
 
-                            string value = line[i].ToString();
-                            if (Brain.NormalCharacters.IsMatch(value) &&
-                                value != " ")
-                            {
-                                if (replaced_semicolon)
-                                {
-                                    replaced_semicolon = false;
-                                    sb.Append(value.ToUpper());
-                                }
-                                else
-                                {
-                                    sb.Append(value);
-                                }
-                            }
-                            else if (value == "." ||
-                                     value == "!" ||
-                                     value == "?" ||
-                                     value == "," ||
-                                     value == "'" ||
-                                     value == "’" ||
-                                     value == ":" ||
-                                     value == ";" ||
-                                     value == " ")
-                            {
-                                if (value == ";")
-                                {
-                                    replaced_semicolon = true;
-                                    value = ".";
-                                }
+                            string value = new_line[i].ToString();
 
-                                sb.Append(value);
+                            if (!string.IsNullOrEmpty(value))
+                            {
+                                if (value == "\r" ||
+                                    value == "\n" ||
+                                    value == Environment.NewLine)
+                                {
+
+                                }
+                                else if (Brain.NormalCharacters.IsMatch(value) &&
+                                         value != " ")
+                                {
+                                    if (replaced_semicolon)
+                                    {
+                                        replaced_semicolon = false;
+                                        sb.Append(value.ToUpper());
+                                    }
+                                    else
+                                    {
+                                        sb.Append(value);
+                                    }
+                                }
+                                else if (!Brain.NormalCharacters.IsMatch(value) &&
+                                         value != "'" &&
+                                         value != "’")
+                                {
+                                    if (value == ".")
+                                    {
+                                        if (i > 0)
+                                        {
+                                            if (new_line[i - 1] != '.')
+                                            {
+                                                sb.Append(" ");
+                                            }
+
+                                            sb.Append(value);
+                                        }
+                                        else
+                                        {
+                                            sb.Append(value);
+                                        }
+
+                                        if (i < lineLength - 1)
+                                        {
+                                            if (new_line[i + 1] != ' ' &&
+                                                new_line[i + 1] != '.')
+                                            {
+                                                sb.Append(" ");
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (value == ";")
+                                        {
+                                            replaced_semicolon = true;
+                                            value = ".";
+                                        }
+
+                                        sb.Append(" ");
+                                        sb.Append(value);
+
+                                        if (i < lineLength - 1)
+                                        {
+                                            if (new_line[i + 1] != ' ')
+                                            {
+                                                sb.Append(" ");
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
 
@@ -548,29 +654,10 @@ namespace Real_AI
 
                 if (!ReadingTokenSource.IsCancellationRequested)
                 {
-                    AppUtil.UpdateProgress(ReadingTokenSource, progressBar_Detail, "(0/" + sb.ToString().Length + ")");
-                    AppUtil.UpdateProgress(ReadingTokenSource, progressBar_Detail, 0);
-
-                    string[] gap_array = Brain.GapSpecials(sb.ToString(), progressBar_Main, progressBar_Detail, ReadingTokenSource, true).Split(' ');
-                    foreach (string word in gap_array)
-                    {
-                        if (ReadingTokenSource.IsCancellationRequested)
-                        {
-                            break;
-                        }
-
-                        if (!string.IsNullOrEmpty(word))
-                        {
-                            words.Add(word);
-                        }
-                    }
-                }
-
-                if (!ReadingTokenSource.IsCancellationRequested)
-                {
-                    string[] words_array = words.ToArray();
+                    string[] words_array = sb.ToString().Split(' ');
                     if (words_array.Length > 0)
                     {
+                        StartTime_Remaining = DateTime.Now;
                         if (progressBar_Main.InvokeRequired &&
                             !ReadingTokenSource.IsCancellationRequested)
                         {
@@ -578,6 +665,7 @@ namespace Real_AI
                             {
                                 progressBar_Main.CustomText = "Identifying sentences";
                                 progressBar_Main.Value = 50;
+                                previous_progress = 0;
                                 intervals.Clear();
                             });
                         }
@@ -589,25 +677,26 @@ namespace Real_AI
                         AppUtil.UpdateProgress(ReadingTokenSource, progressBar_Detail, 0);
 
                         StringBuilder input = new StringBuilder();
-                        for (int i = 0; i < words_array.Length; i++)
+                        for (int i = 0; i < total; i++)
                         {
                             if (ReadingTokenSource.IsCancellationRequested)
                             {
                                 break;
                             }
 
-                            input.Append(words_array[i]);
-                            input.Append(" ");
+                            string word = words_array[i];
 
-                            if (words_array[i] == "?" ||
-                                words_array[i] == "!")
+                            input.Append(word);
+
+                            if (word == "?" ||
+                                word == "!")
                             {
                                 inputs.Add(input.ToString().Trim());
                                 input = new StringBuilder();
                             }
-                            else if (words_array[i] == ".")
+                            else if (word == ".")
                             {
-                                if (i < words_array.Length - 1 &&
+                                if (i < total - 1 &&
                                     i > 0)
                                 {
                                     if (words_array[i + 1] != "." &&
@@ -617,6 +706,14 @@ namespace Real_AI
                                         input = new StringBuilder();
                                     }
                                 }
+                                else if (i == total - 1)
+                                {
+                                    inputs.Add(input.ToString().Trim());
+                                }
+                            }
+                            else if (word != " ")
+                            {
+                                input.Append(" ");
                             }
 
                             count++;
@@ -625,80 +722,67 @@ namespace Real_AI
                             AppUtil.UpdateProgress(ReadingTokenSource, progressBar_Detail, (count * 100) / total);
                         }
                     }
-
-                    words.Clear();
                 }
 
                 if (!ReadingTokenSource.IsCancellationRequested)
                 {
                     if (inputs.Count > 0)
                     {
-                        if (progressBar_Main.InvokeRequired &&
-                            !ReadingTokenSource.IsCancellationRequested)
-                        {
-                            progressBar_Main.Invoke((MethodInvoker)delegate
-                            {
-                                progressBar_Main.CustomText = "Prepping data";
-                                progressBar_Main.Value = 75;
-                                intervals.Clear();
-                            });
-                        }
-
-                        count = 0;
                         total = inputs.Count;
 
-                        AppUtil.UpdateProgress(ReadingTokenSource, progressBar_Detail, "(" + count + "/" + total + ")");
-                        AppUtil.UpdateProgress(ReadingTokenSource, progressBar_Detail, 0);
+                        StartTime_Remaining = DateTime.Now;
+                        previous_progress = 0;
+                        intervals.Clear();
 
-                        foreach (string existing in inputs)
+                        for (int i = 0; i < total; i++)
                         {
                             if (ReadingTokenSource.IsCancellationRequested)
                             {
                                 break;
                             }
 
-                            string[] WordArray = existing.Split(' ');
-                            if (WordArray.Length > 0)
+                            if (progressBar_Main.InvokeRequired &&
+                                !ReadingTokenSource.IsCancellationRequested)
                             {
-                                commands.AddRange(Brain.AddInputs(Brain.RulesCheck(existing)));
-                                commands.AddRange(Brain.AddWords(WordArray));
-                                commands.AddRange(Brain.AddPreWords(WordArray));
-                                commands.AddRange(Brain.AddProWords(WordArray));
+                                progressBar_Main.Invoke((MethodInvoker)delegate
+                                {
+                                    progressBar_Main.CustomText = "Saving data (Batch: " + (i + 1).ToString() + "/" + total + ")";
+                                    progressBar_Main.Value = 75;
+                                });
+                            }
+                            timeMain = true;
 
-                                count++;
+                            string input = inputs[i];
+                            if (input.Length > 0)
+                            {
+                                string cleanInput = Brain.RulesCheck(input);
+                                if (!string.IsNullOrEmpty(cleanInput))
+                                {
+                                    commands.AddRange(Brain.AddInputs(cleanInput));
+                                }
 
-                                AppUtil.UpdateProgress(ReadingTokenSource, progressBar_Detail, "(" + count + "/" + total + ")");
-                                AppUtil.UpdateProgress(ReadingTokenSource, progressBar_Detail, (count * 100) / total);
+                                string[] word_array = input.Split(' ');
+                                if (word_array.Length > 0)
+                                {
+                                    commands.AddRange(Brain.AddWords(word_array));
+                                    commands.AddRange(Brain.AddPreWords(word_array));
+                                    commands.AddRange(Brain.AddProWords(word_array));
+                                }
+
+                                SqlUtil.BulkQuery(commands, MainForm.BrainFile, progressBar_Detail, ReadingTokenSource);
+                                commands.Clear();
                             }
                         }
-                    }
 
-                    inputs.Clear();
+                        inputs.Clear();
+                    }
                 }
 
-                if (!ReadingTokenSource.IsCancellationRequested)
-                {
-                    if (progressBar_Main.InvokeRequired &&
-                        !ReadingTokenSource.IsCancellationRequested)
-                    {
-                        progressBar_Main.Invoke((MethodInvoker)delegate
-                        {
-                            progressBar_Main.CustomText = "Saving data";
-                            progressBar_Main.Value = 100;
-                            intervals.Clear();
-                        });
-                    }
+                AppUtil.UpdateProgress(progressBar_Main, "Done!");
+                AppUtil.UpdateProgress(progressBar_Main, 100);
 
-                    SqlUtil.BulkQuery(commands, MainForm.BrainFile, progressBar_Detail, ReadingTokenSource);
-                }
-
-                commands.Clear();
-
-                AppUtil.UpdateProgress(progressBar_Main, "Ready!");
-                AppUtil.UpdateProgress(progressBar_Main, 0);
-
-                AppUtil.UpdateProgress(progressBar_Detail, "Ready!");
-                AppUtil.UpdateProgress(progressBar_Detail, 0);
+                AppUtil.UpdateProgress(progressBar_Detail, "Done!");
+                AppUtil.UpdateProgress(progressBar_Detail, 100);
 
                 GC.Collect();
             }
