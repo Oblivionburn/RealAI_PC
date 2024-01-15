@@ -136,17 +136,24 @@ namespace Real_AI
 
             try
             {
-                int length = old_string.Length - 1;
+                int length = old_string.Length;
                 for (int i = 0; i < length; i++)
                 {
                     string value = old_string[i].ToString();
-                    string next_value = old_string[i + 1].ToString();
 
-                    if (!NormalCharacters.IsMatch(next_value) &&
-                        next_value != ":" &&
-                        value == " ")
+                    if (i < length - 1)
                     {
-                        //Skip spaces before special characters
+                        string next_value = old_string[i + 1].ToString();
+                        if (!NormalCharacters.IsMatch(next_value) &&
+                            next_value != ":" &&
+                            value == " ")
+                        {
+                            //Skip spaces before special characters
+                        }
+                        else
+                        {
+                            sb.Append(value);
+                        }
                     }
                     else
                     {
