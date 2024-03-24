@@ -578,8 +578,7 @@ namespace Real_AI
                                 {
 
                                 }
-                                else if (Brain.NormalCharacters.IsMatch(value) &&
-                                         value != " ")
+                                else if (Brain.NormalCharacters.IsMatch(value))
                                 {
                                     if (replaced_semicolon)
                                     {
@@ -591,8 +590,7 @@ namespace Real_AI
                                         sb.Append(value);
                                     }
                                 }
-                                else if (!Brain.NormalCharacters.IsMatch(value) &&
-                                         value != "'" &&
+                                else if (value != "'" &&
                                          value != "’")
                                 {
                                     if (value == ".")
@@ -628,17 +626,18 @@ namespace Real_AI
                                             value = ".";
                                         }
 
-                                        sb.Append(" ");
-                                        sb.Append(value);
+                                        sb.Append(" " + value);
 
-                                        if (i < lineLength - 1)
+                                        if (i < lineLength - 1 &&
+                                            new_line[i + 1] != ' ')
                                         {
-                                            if (new_line[i + 1] != ' ')
-                                            {
-                                                sb.Append(" ");
-                                            }
+                                            sb.Append(" ");
                                         }
                                     }
+                                }
+                                else
+                                {
+                                    sb.Append(value);
                                 }
                             }
                         }
